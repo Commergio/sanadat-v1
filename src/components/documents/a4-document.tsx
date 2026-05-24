@@ -2,7 +2,8 @@
 
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import { APP_NAME, PAYMENT_METHODS } from "@/lib/constants";
-import type { ReceiptVoucher, PaymentVoucher, Invoice } from "@/lib/types";
+import type { ReceiptVoucher, PaymentVoucher, Invoice, Company } from "@/lib/types";
+import { useCompany } from "@/hooks/use-company";
 import { mockCompany } from "@/lib/mock-data";
 
 type DocumentData = ReceiptVoucher | PaymentVoucher | Invoice;
@@ -11,10 +12,12 @@ interface A4DocumentProps {
   document: DocumentData;
   title: string;
   className?: string;
+  company?: Company;
 }
 
-export function A4Document({ document, title, className }: A4DocumentProps) {
-  const company = mockCompany;
+export function A4Document({ document, title, className, company: companyProp }: A4DocumentProps) {
+  const { company: storeCompany } = useCompany();
+  const company = companyProp ?? storeCompany ?? (mockCompany as unknown as Company);
   const isInvoice = document.type === "invoice";
   const invoice = isInvoice ? (document as Invoice) : null;
 
