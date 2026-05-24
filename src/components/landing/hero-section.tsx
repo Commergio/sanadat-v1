@@ -48,7 +48,7 @@ export function HeroSection() {
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/ar/dashboard">
+                <Link href="/ar/register">
                   <Button variant="outline" size="lg">
                     جرّب النظام
                   </Button>

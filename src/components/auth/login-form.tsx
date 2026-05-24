@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -10,10 +10,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, type LoginInput } from "@/lib/validations";
+import {
+  getAuthErrorMessage,
+  getAuthRedirectUrl,
+  getSupabaseBrowserClient,
+} from "@/lib/auth/client";
+import { isSupabaseConfigured } from "@/lib/auth/errors";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("error") === "auth_callback") {
+      toast.error("فشل تأكيد الحساب — حاول تسجيل الدخول مجدداً");
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -24,14 +37,26 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginInput) => {
+    if (!isSupabaseConfigured()) {
+      toast.error("نظام المصادقة غير مُعدّ — تواصل مع الدعم");
+      return;
+    }
+
     setLoading(true);
     try {
-      // Supabase auth integration point
-      await new Promise((r) => setTimeout(r, 800));
+      const supabase = getSupabaseBrowserClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+      });
+
+      if (error) throw error;
+
       toast.success("تم تسجيل الدخول بنجاح");
-      router.push("/ar/dashboard");
-    } catch {
-      toast.error("فشل تسجيل الدخول");
+      router.push(getAuthRedirectUrl("/ar/dashboard"));
+      router.refresh();
+    } catch (err) {
+      toast.error(getAuthErrorMessage(err as Error));
     } finally {
       setLoading(false);
     }
@@ -44,9 +69,11 @@ export function LoginForm() {
         <Input
           id="email"
           type="email"
+          autoComplete="email"
           placeholder="name@company.com"
           dir="ltr"
           className="text-left"
+          disabled={loading}
           {...register("email")}
         />
         {errors.email && (
@@ -67,8 +94,10 @@ export function LoginForm() {
         <Input
           id="password"
           type="password"
+          autoComplete="current-password"
           dir="ltr"
           className="text-left"
+          disabled={loading}
           {...register("password")}
         />
         {errors.password && (

@@ -3,6 +3,7 @@
 import { Menu, Bell, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { useAppStore } from "@/stores/app-store";
 import { mockCompany } from "@/lib/mock-data";
 
@@ -37,6 +38,7 @@ export function DashboardHeader({ title }: { title: string }) {
           <Bell className="h-4 w-4" />
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary" />
         </Button>
+        <SignOutButton />
         <div className="hidden sm:flex items-center gap-2 mr-2">
           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
             {mockCompany.name.charAt(0)}
