@@ -1,3 +1,6 @@
+/** معاينة بدون تسجيل — عطّلها بـ NEXT_PUBLIC_DEMO_MODE=false قبل الإطلاق */
+export const IS_DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
+
 export const APP_NAME = "نظام السندات";
 export const APP_DESCRIPTION =
   "منصة سعودية لرقمنة سندات القبض والصرف والفواتير غير الضريبية للمنشآت الصغيرة";

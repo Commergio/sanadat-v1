@@ -40,6 +40,11 @@ export function MarketingHeader() {
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
+          <Link href="/ar/dashboard" className="hidden sm:block">
+            <Button variant="outline" size="sm">
+              معاينة المنصة
+            </Button>
+          </Link>
           <Link href="/ar/login" className="hidden sm:block">
             <Button variant="ghost" size="sm">
               تسجيل الدخول
@@ -68,6 +73,13 @@ export function MarketingHeader() {
             className="border-t border-border md:hidden"
           >
             <nav className="flex flex-col gap-1 p-4">
+              <Link
+                href="/ar/dashboard"
+                className="rounded-lg px-4 py-3 text-sm font-medium text-primary hover:bg-muted"
+                onClick={() => setMobileOpen(false)}
+              >
+                معاينة المنصة
+              </Link>
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.href}

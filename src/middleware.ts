@@ -2,6 +2,8 @@ import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 
+const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
+
 const intlMiddleware = createMiddleware(routing);
 
 const protectedPrefixes = ["/dashboard", "/admin"];
@@ -20,13 +22,13 @@ export async function middleware(request: NextRequest) {
 
   const sessionCookie = request.cookies.get("sb-access-token")?.value;
 
-  if (isProtected && !sessionCookie) {
+  if (isProtected && !sessionCookie && !isDemoMode) {
     const loginUrl = new URL(`/${locale}/login`, request.url);
     loginUrl.searchParams.set("redirect", pathWithoutLocale);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthRoute && sessionCookie) {
+  if (isAuthRoute && sessionCookie && !isDemoMode) {
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
   }
 
