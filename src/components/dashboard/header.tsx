@@ -1,10 +1,12 @@
 "use client";
 
 import { Menu, Bell, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { useCompany } from "@/hooks/use-company";
 import { useAppStore } from "@/stores/app-store";
 
@@ -12,7 +14,8 @@ export function DashboardHeader({ title }: { title: string }) {
   const { setSidebarOpen } = useAppStore();
   const { company } = useCompany();
   const { theme, setTheme } = useTheme();
-  const companyName = company?.name ?? "منشأتي";
+  const t = useTranslations("nav");
+  const companyName = company?.name ?? "—";
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-4 lg:px-8">
@@ -29,20 +32,22 @@ export function DashboardHeader({ title }: { title: string }) {
       </div>
 
       <div className="flex items-center gap-2">
+        <LocaleSwitcher variant="compact" className="hidden md:flex" />
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          aria-label={t("toggleTheme")}
         >
           <Sun className="h-4 w-4 dark:hidden" />
           <Moon className="h-4 w-4 hidden dark:block" />
         </Button>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary" />
+          <span className="absolute top-1.5 end-1.5 h-2 w-2 rounded-full bg-primary" />
         </Button>
         <SignOutButton />
-        <div className="hidden sm:flex items-center gap-2 mr-2">
+        <div className="hidden sm:flex items-center gap-2 ms-2">
           {company?.logo_url ? (
             <div className="relative h-8 w-8 overflow-hidden rounded-lg border border-border bg-white">
               <Image

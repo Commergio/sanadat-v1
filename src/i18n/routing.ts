@@ -1,7 +1,14 @@
 import { defineRouting } from "next-intl/routing";
 
+export const locales = ["ar", "en"] as const;
+export type Locale = (typeof locales)[number];
+
 export const routing = defineRouting({
-  locales: ["ar"],
+  locales,
   defaultLocale: "ar",
   localePrefix: "always",
 });
+
+export function isRtlLocale(locale: string): boolean {
+  return locale === "ar";
+}

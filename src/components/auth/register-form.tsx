@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { registerSchema, type RegisterInput } from "@/lib/validations";
+import { Link, useRouter } from "@/i18n/navigation";
+import { createRegisterSchema, type RegisterInput } from "@/lib/validations";
 import {
   getAuthErrorMessage,
   getSupabaseBrowserClient,
@@ -17,6 +17,9 @@ import {
 import { isSupabaseConfigured } from "@/lib/auth/errors";
 
 export function RegisterForm() {
+  const t = useTranslations("auth");
+  const tVal = useTranslations("validation");
+  const locale = useLocale();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -25,12 +28,12 @@ export function RegisterForm() {
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(createRegisterSchema(tVal)),
   });
 
   const onSubmit = async (data: RegisterInput) => {
     if (!isSupabaseConfigured()) {
-      toast.error("نظام المصادقة غير مُعدّ — تواصل مع الدعم");
+      toast.error(t("authNotConfigured"));
       return;
     }
 
@@ -47,26 +50,26 @@ export function RegisterForm() {
             company_name: data.companyName.trim(),
             phone: data.phone.trim(),
           },
-          emailRedirectTo: `${origin}/auth/callback?next=/ar/onboarding`,
+          emailRedirectTo: `${origin}/auth/callback?next=/${locale}/onboarding`,
         },
       });
 
       if (error) throw error;
 
       if (signUpData.session) {
-        toast.success("تم إنشاء الحساب بنجاح");
-        router.push("/ar/onboarding");
+        toast.success(t("registerSuccess"));
+        router.push("/onboarding");
         router.refresh();
         return;
       }
 
-      toast.success("تم إرسال رابط التأكيد إلى بريدك الإلكتروني", {
-        description: "افتح البريد واضغط على الرابط لتفعيل حسابك",
+      toast.success(t("emailConfirmSent"), {
+        description: t("emailConfirmHint"),
         duration: 8000,
       });
-      router.push("/ar/login");
+      router.push("/login");
     } catch (err) {
-      toast.error(getAuthErrorMessage(err as Error));
+      toast.error(getAuthErrorMessage(err as Error, t));
     } finally {
       setLoading(false);
     }
@@ -75,26 +78,21 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="companyName">اسم المنشأة</Label>
-        <Input
-          id="companyName"
-          placeholder="مؤسسة النخبة التجارية"
-          disabled={loading}
-          {...register("companyName")}
-        />
+        <Label htmlFor="companyName">{t("companyName")}</Label>
+        <Input id="companyName" disabled={loading} {...register("companyName")} />
         {errors.companyName && (
           <p className="text-xs text-destructive">{errors.companyName.message}</p>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email">البريد الإلكتروني</Label>
+        <Label htmlFor="email">{t("email")}</Label>
         <Input
           id="email"
           type="email"
           autoComplete="email"
           dir="ltr"
-          className="text-left"
+          className="text-start"
           disabled={loading}
           {...register("email")}
         />
@@ -104,13 +102,13 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone">رقم الجوال</Label>
+        <Label htmlFor="phone">{t("phone")}</Label>
         <Input
           id="phone"
           placeholder="05xxxxxxxx"
           autoComplete="tel"
           dir="ltr"
-          className="text-left"
+          className="text-start"
           disabled={loading}
           {...register("phone")}
         />
@@ -120,13 +118,13 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">كلمة المرور</Label>
+        <Label htmlFor="password">{t("password")}</Label>
         <Input
           id="password"
           type="password"
           autoComplete="new-password"
           dir="ltr"
-          className="text-left"
+          className="text-start"
           disabled={loading}
           {...register("password")}
         />
@@ -136,13 +134,13 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
+        <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
         <Input
           id="confirmPassword"
           type="password"
           autoComplete="new-password"
           dir="ltr"
-          className="text-left"
+          className="text-start"
           disabled={loading}
           {...register("confirmPassword")}
         />
@@ -152,17 +150,15 @@ export function RegisterForm() {
       </div>
 
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
-        {loading ? "جاري الإنشاء..." : "إنشاء حساب"}
+        {loading ? t("creating") : t("createAccount")}
       </Button>
 
-      <p className="text-center text-xs text-muted-foreground">
-        بالتسجيل أنت توافق على شروط الاستخدام وسياسة الخصوصية
-      </p>
+      <p className="text-center text-xs text-muted-foreground">{t("terms")}</p>
 
       <p className="text-center text-sm text-muted-foreground">
-        لديك حساب بالفعل؟{" "}
-        <Link href="/ar/login" className="text-primary font-medium hover:underline">
-          تسجيل الدخول
+        {t("hasAccount")}{" "}
+        <Link href="/login" className="text-primary font-medium hover:underline">
+          {t("login")}
         </Link>
       </p>
     </form>

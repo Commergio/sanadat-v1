@@ -72,13 +72,24 @@ export const mockDashboardStats: DashboardStats = {
   ],
 };
 
-export const mockChartData = [
-  { month: "يناير", receipts: 12, payments: 8, invoices: 5 },
-  { month: "فبراير", receipts: 18, payments: 10, invoices: 7 },
-  { month: "مارس", receipts: 15, payments: 12, invoices: 9 },
-  { month: "أبريل", receipts: 22, payments: 14, invoices: 11 },
-  { month: "مايو", receipts: 28, payments: 16, invoices: 10 },
-];
+export function getChartData(locale: string) {
+  if (locale === "en") {
+    return [
+      { month: "Jan", receipts: 12, payments: 8, invoices: 5 },
+      { month: "Feb", receipts: 18, payments: 10, invoices: 7 },
+      { month: "Mar", receipts: 15, payments: 12, invoices: 9 },
+      { month: "Apr", receipts: 22, payments: 14, invoices: 11 },
+      { month: "May", receipts: 28, payments: 16, invoices: 10 },
+    ];
+  }
+  return [
+    { month: "يناير", receipts: 12, payments: 8, invoices: 5 },
+    { month: "فبراير", receipts: 18, payments: 10, invoices: 7 },
+    { month: "مارس", receipts: 15, payments: 12, invoices: 9 },
+    { month: "أبريل", receipts: 22, payments: 14, invoices: 11 },
+    { month: "مايو", receipts: 28, payments: 16, invoices: 10 },
+  ];
+}
 
 export const mockReceipt: ReceiptVoucher = {
   id: "r-128",

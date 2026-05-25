@@ -1,12 +1,15 @@
+import { getTranslations } from "next-intl/server";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { VoucherForm } from "@/components/documents/voucher-form";
 
-export default function NewReceiptPage() {
+export default async function NewReceiptPage() {
+  const t = await getTranslations("documents");
+
   return (
     <>
-      <DashboardHeader title="سند قبض جديد" />
+      <DashboardHeader title={t("newReceipt")} />
       <main className="flex-1 p-4 lg:p-8">
-        <VoucherForm type="receipt" redirectPath="/ar/dashboard/receipts" />
+        <VoucherForm type="receipt" redirectPath="/dashboard/receipts" />
       </main>
     </>
   );

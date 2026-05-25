@@ -1,23 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
 import { getSupabaseBrowserClient } from "@/lib/auth/client";
 
 export function SignOutButton() {
+  const t = useTranslations("auth");
   const router = useRouter();
 
   const handleSignOut = async () => {
     try {
       const supabase = getSupabaseBrowserClient();
       await supabase.auth.signOut();
-      toast.success("تم تسجيل الخروج");
-      router.push("/ar/login");
+      toast.success(t("logoutSuccess"));
+      router.push("/login");
       router.refresh();
     } catch {
-      toast.error("فشل تسجيل الخروج");
+      toast.error(t("logoutFailed"));
     }
   };
 
@@ -29,7 +31,7 @@ export function SignOutButton() {
       onClick={handleSignOut}
     >
       <LogOut className="h-4 w-4" />
-      <span className="hidden sm:inline">خروج</span>
+      <span className="hidden sm:inline">{t("logout")}</span>
     </Button>
   );
 }

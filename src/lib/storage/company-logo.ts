@@ -10,12 +10,14 @@ const ALLOWED_TYPES = [
   "image/svg+xml",
 ];
 
-export function validateLogoFile(file: File): string | null {
+export type LogoValidationKey = "invalidFormat" | "maxSize";
+
+export function validateLogoFile(file: File): LogoValidationKey | null {
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return "الصيغ المدعومة: PNG, JPG, WebP, SVG";
+    return "invalidFormat";
   }
   if (file.size > MAX_SIZE_BYTES) {
-    return "الحد الأقصى لحجم الشعار: 2 ميجابايت";
+    return "maxSize";
   }
   return null;
 }
@@ -45,8 +47,8 @@ export async function uploadCompanyLogo(
   companyId: string,
   file: File
 ): Promise<{ publicUrl: string }> {
-  const validationError = validateLogoFile(file);
-  if (validationError) throw new Error(validationError);
+  const validationKey = validateLogoFile(file);
+  if (validationKey) throw new Error(validationKey);
 
   const ext = getExtension(file);
   const path = `${userId}/logo.${ext}`;

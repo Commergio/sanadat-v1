@@ -1,19 +1,23 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatNumber } from "@/lib/utils";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { Users, CreditCard, TrendingUp, AlertTriangle } from "lucide-react";
 
-const stats = [
-  { label: "إجمالي الإيرادات", value: formatCurrency(159600), icon: CreditCard },
-  { label: "العملاء النشطون", value: formatNumber(387), icon: Users },
-  { label: "اشتراكات منتهية", value: formatNumber(23), icon: AlertTriangle },
-  { label: "نمو شهري", value: "+12%", icon: TrendingUp },
-];
+export default async function AdminDashboardPage() {
+  const t = await getTranslations("admin");
+  const locale = await getLocale();
 
-export default function AdminDashboardPage() {
+  const stats = [
+    { label: t("totalRevenue"), value: formatCurrency(159600, locale), icon: CreditCard },
+    { label: t("activeClients"), value: formatNumber(387, locale), icon: Users },
+    { label: t("expiredSubs"), value: formatNumber(23, locale), icon: AlertTriangle },
+    { label: t("monthlyGrowth"), value: "+12%", icon: TrendingUp },
+  ];
+
   return (
     <>
-      <DashboardHeader title="لوحة الإدارة" />
+      <DashboardHeader title={t("overview")} />
       <main className="p-4 lg:p-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           {stats.map((stat) => (
@@ -33,11 +37,9 @@ export default function AdminDashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">ملاحظة مهمة</CardTitle>
+            <CardTitle className="text-base">{t("importantNoteTitle")}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            المسؤول لا يمكنه تعديل مستندات العملاء — فقط إدارة الحسابات والاشتراكات والمدفوعات.
-          </CardContent>
+          <CardContent className="text-sm text-muted-foreground">{t("note")}</CardContent>
         </Card>
       </main>
     </>

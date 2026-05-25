@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useRouter } from "@/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,11 +17,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { documentBaseSchema } from "@/lib/validations";
-import { PAYMENT_METHODS } from "@/lib/constants";
+import { createDocumentBaseSchema } from "@/lib/validations";
+import { usePaymentMethods } from "@/hooks/use-translated-constants";
 import type { z } from "zod";
-
-type VoucherFormData = z.infer<typeof documentBaseSchema>;
 
 interface VoucherFormProps {
   type: "receipt" | "payment";
@@ -29,31 +28,37 @@ interface VoucherFormProps {
 
 export function VoucherForm({ type, redirectPath }: VoucherFormProps) {
   const router = useRouter();
+  const t = useTranslations("documents");
+  const tv = useTranslations("validation");
+  const paymentMethods = usePaymentMethods();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
+
+  const schema = useMemo(() => createDocumentBaseSchema(tv), [tv]);
+  type VoucherFormData = z.infer<typeof schema>;
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<VoucherFormData>({
-    resolver: zodResolver(documentBaseSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       date: new Date().toISOString().split("T")[0],
       payment_method: "cash",
     },
   });
 
-  const title = type === "receipt" ? "سند قبض جديد" : "سند صرف جديد";
+  const title = type === "receipt" ? t("newReceipt") : t("newPayment");
 
   const onSubmit = async (_data: VoucherFormData) => {
     setLoading(true);
     try {
       await new Promise((r) => setTimeout(r, 1000));
-      toast.success(`تم إنشاء ${title} بنجاح — غير قابل للتعديل`);
+      toast.success(t("createSuccess"));
       router.push(redirectPath);
     } catch {
-      toast.error("فشل إنشاء المستند");
+      toast.error(t("createFailed"));
     } finally {
       setLoading(false);
     }
@@ -68,30 +73,30 @@ export function VoucherForm({ type, redirectPath }: VoucherFormProps) {
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>التاريخ</Label>
+              <Label>{t("date")}</Label>
               <Input type="date" {...register("date")} />
               {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label>المبلغ (ر.س)</Label>
-              <Input type="number" step="0.01" {...register("amount")} />
+              <Label>{t("amount")}</Label>
+              <Input type="number" step="0.01" {...register("amount", { valueAsNumber: true })} />
               {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>اسم الطرف</Label>
-            <Input placeholder="اسم العميل أو المورد" {...register("party_name")} />
+            <Label>{t("party")}</Label>
+            <Input placeholder={t("partyPlaceholder")} {...register("party_name")} />
             {errors.party_name && <p className="text-xs text-destructive">{errors.party_name.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label>البيان / الوصف</Label>
-            <Input placeholder="وصف اختياري للمستند" {...register("description")} />
+            <Label>{t("description")}</Label>
+            <Input placeholder={t("descriptionPlaceholder")} {...register("description")} />
           </div>
 
           <div className="space-y-2">
-            <Label>طريقة الدفع</Label>
+            <Label>{t("paymentMethod")}</Label>
             <Select
               value={paymentMethod}
               onValueChange={(v) => {
@@ -102,7 +107,7 @@ export function VoucherForm({ type, redirectPath }: VoucherFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(PAYMENT_METHODS).map(([key, label]) => (
+                {Object.entries(paymentMethods).map(([key, label]) => (
                   <SelectItem key={key} value={key}>
                     {label}
                   </SelectItem>
@@ -115,11 +120,11 @@ export function VoucherForm({ type, redirectPath }: VoucherFormProps) {
           {paymentMethod === "bank_transfer" && (
             <div className="grid gap-4 sm:grid-cols-2 p-4 rounded-lg bg-muted/50">
               <div className="space-y-2">
-                <Label>اسم البنك</Label>
+                <Label>{t("bankName")}</Label>
                 <Input {...register("bank_name")} />
               </div>
               <div className="space-y-2">
-                <Label>رقم التحويل</Label>
+                <Label>{t("transferNumber")}</Label>
                 <Input {...register("transfer_number")} dir="ltr" className="text-left" />
               </div>
             </div>
@@ -127,7 +132,7 @@ export function VoucherForm({ type, redirectPath }: VoucherFormProps) {
 
           {paymentMethod === "pos" && (
             <div className="space-y-2 p-4 rounded-lg bg-muted/50">
-              <Label>رقم المرجع</Label>
+              <Label>{t("referenceNumber")}</Label>
               <Input {...register("reference_number")} dir="ltr" className="text-left" />
             </div>
           )}
@@ -136,16 +141,14 @@ export function VoucherForm({ type, redirectPath }: VoucherFormProps) {
 
       <div className="flex gap-3">
         <Button type="submit" disabled={loading}>
-          {loading ? "جاري الإنشاء..." : "إنشاء المستند"}
+          {loading ? t("creating") : t("create")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
-          إلغاء
+          {t("cancel")}
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        ⚠️ المستندات غير قابلة للتعديل بعد الإنشاء. يمكن الإلغاء فقط مع ذكر السبب.
-      </p>
+      <p className="text-xs text-muted-foreground">⚠️ {t("immutableNote")}</p>
     </form>
   );
 }

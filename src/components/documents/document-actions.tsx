@@ -1,6 +1,7 @@
 "use client";
 
 import { Printer, Download, MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { exportToPdf } from "@/lib/pdf-export";
@@ -19,19 +20,25 @@ export function DocumentActions({
   partyName,
   amount,
 }: DocumentActionsProps) {
+  const t = useTranslations("documents");
+
   const handlePrint = () => window.print();
 
   const handlePdf = async () => {
     try {
       await exportToPdf("document-preview", `sanadat-${documentNumber}`);
-      toast.success("تم تصدير PDF بنجاح");
+      toast.success(t("pdfSuccess"));
     } catch {
-      toast.error("فشل تصدير PDF");
+      toast.error(t("pdfFailed"));
     }
   };
 
   const handleWhatsApp = () => {
-    const message = `مستند ${documentNumber}\nالطرف: ${partyName}\nالمبلغ: ${amount}\n— نظام السندات`;
+    const message = t("whatsappMessage", {
+      number: documentNumber,
+      party: partyName,
+      amount,
+    });
     window.open(generateWhatsAppLink("966500000000", message), "_blank");
   };
 
@@ -39,15 +46,15 @@ export function DocumentActions({
     <div className="flex flex-wrap gap-2">
       <Button variant="outline" size="sm" className="gap-2" onClick={handlePrint}>
         <Printer className="h-4 w-4" />
-        طباعة
+        {t("print")}
       </Button>
       <Button variant="outline" size="sm" className="gap-2" onClick={handlePdf}>
         <Download className="h-4 w-4" />
-        تصدير PDF
+        {t("exportPdf")}
       </Button>
       <Button variant="outline" size="sm" className="gap-2" onClick={handleWhatsApp}>
         <MessageCircle className="h-4 w-4" />
-        واتساب
+        {t("whatsapp")}
       </Button>
     </div>
   );

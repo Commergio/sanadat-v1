@@ -1,32 +1,34 @@
 "use client";
 
-import Link from "next/link";
 import { Plus, ArrowDownLeft, ArrowUpRight, FileText } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 const actions = [
   {
-    href: "/ar/dashboard/receipts/new",
-    label: "سند قبض",
+    href: "/dashboard/receipts/new",
+    labelKey: "newReceipt",
     icon: ArrowDownLeft,
     color: "hover:border-emerald-300 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30",
   },
   {
-    href: "/ar/dashboard/payments/new",
-    label: "سند صرف",
+    href: "/dashboard/payments/new",
+    labelKey: "newPayment",
     icon: ArrowUpRight,
     color: "hover:border-amber-300 hover:bg-amber-50/50 dark:hover:bg-amber-950/30",
   },
   {
-    href: "/ar/dashboard/invoices/new",
-    label: "فاتورة",
+    href: "/dashboard/invoices/new",
+    labelKey: "newInvoice",
     icon: FileText,
     color: "hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-950/30",
   },
-];
+] as const;
 
 export function QuickActions() {
+  const t = useTranslations("dashboard");
+
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       {actions.map((action, i) => (
@@ -44,10 +46,10 @@ export function QuickActions() {
                 <action.icon className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium">إنشاء</p>
-                <p className="text-sm font-semibold">{action.label}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("create")}</p>
+                <p className="text-sm font-semibold">{t(action.labelKey)}</p>
               </div>
-              <Plus className="h-4 w-4 mr-auto text-muted-foreground" />
+              <Plus className="h-4 w-4 ms-auto text-muted-foreground" />
             </div>
           </Link>
         </motion.div>

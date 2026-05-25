@@ -1,18 +1,25 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, Play } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { FadeUp } from "@/components/motion/fade-up";
 import { DocumentPreviewCard } from "@/components/documents/document-preview-card";
+import { isRtlLocale } from "@/i18n/routing";
 
 export function HeroSection() {
+  const t = useTranslations("hero");
+  const locale = useLocale();
+  const isRtl = isRtlLocale(locale);
+  const Arrow = isRtl ? ArrowLeft : ArrowRight;
+
   return (
     <section className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-32">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 right-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 h-[400px] w-[400px] rounded-full bg-indigo-100/50 blur-3xl dark:bg-indigo-950/30" />
+        <div className="absolute top-0 end-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-0 start-1/4 h-[400px] w-[400px] rounded-full bg-indigo-100/50 blur-3xl dark:bg-indigo-950/30" />
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -21,61 +28,50 @@ export function HeroSection() {
             <FadeUp>
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-sm text-muted-foreground">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                منصة سعودية موثوقة للمنشآت الصغيرة
+                {t("badge")}
               </div>
             </FadeUp>
 
             <FadeUp delay={0.1}>
               <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                وداعاً للسندات
+                {t("title1")}
                 <br />
-                <span className="text-primary">الورقية</span>
+                <span className="text-primary">{t("title1Highlight")}</span>
               </h1>
             </FadeUp>
 
             <FadeUp delay={0.2}>
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-lg">
-                إدارة سندات القبض والصرف والفواتير غير الضريبية بطريقة احترافية.
-                بسيطة، آمنة، وجاهزة للامتثال المستقبلي — باشتراك سنوي 399 ر.س.
+                {t("subtitle")}
               </p>
             </FadeUp>
 
             <FadeUp delay={0.3}>
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                <Link href="/ar/register">
+                <Link href="/register">
                   <Button size="lg" className="gap-2">
-                    ابدأ الآن
-                    <ArrowLeft className="h-4 w-4" />
+                    {t("ctaPrimary")}
+                    <Arrow className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/ar/register">
+                <Link href="/register">
                   <Button variant="outline" size="lg">
-                    جرّب النظام
+                    {t("ctaTrial")}
                   </Button>
                 </Link>
                 <a href="#features">
                   <Button variant="ghost" size="lg" className="gap-2">
                     <Play className="h-4 w-4" />
-                    شاهد المميزات
+                    {t("ctaSecondary")}
                   </Button>
                 </a>
               </div>
             </FadeUp>
 
             <FadeUp delay={0.4}>
-              <div className="mt-10 flex items-center gap-6 text-sm text-muted-foreground">
-                <div className="flex -space-x-2 space-x-reverse">
-                  {["م", "أ", "س"].map((letter, i) => (
-                    <div
-                      key={i}
-                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary/10 text-xs font-medium text-primary"
-                    >
-                      {letter}
-                    </div>
-                  ))}
-                </div>
-                <span>+500 منشأة تثق بنظام السندات</span>
-              </div>
+              <p className="mt-10 text-sm text-muted-foreground">
+                {t("socialProof")}
+              </p>
             </FadeUp>
           </div>
 
@@ -89,7 +85,7 @@ export function HeroSection() {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-4 -right-4 z-10 rotate-2"
+                className="absolute -top-4 end-0 z-10 rotate-2"
               >
                 <DocumentPreviewCard type="receipt_voucher" scale={0.45} />
               </motion.div>
@@ -103,7 +99,7 @@ export function HeroSection() {
               <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute -bottom-4 -left-4 z-10 -rotate-3"
+                className="absolute -bottom-4 start-0 z-10 -rotate-3"
               >
                 <DocumentPreviewCard type="payment_voucher" scale={0.42} />
               </motion.div>

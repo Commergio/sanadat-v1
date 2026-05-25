@@ -1,17 +1,21 @@
 "use client";
 
 import { use } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { A4Document } from "@/components/documents/a4-document";
 import { DocumentActions } from "@/components/documents/document-actions";
 import { Badge } from "@/components/ui/badge";
 import { mockPayment } from "@/lib/mock-data";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@/lib/format";
 
 export default function PaymentDetailPage({
   params,
 }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const locale = useLocale();
+  const t = useTranslations("documents");
+  const td = useTranslations("dashboard.table");
   const doc = { ...mockPayment, id };
 
   return (
@@ -20,17 +24,17 @@ export default function PaymentDetailPage({
       <main className="flex-1 p-4 lg:p-8 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Badge variant={doc.status === "active" ? "success" : "destructive"}>
-            {doc.status === "active" ? "نشط" : "ملغى"}
+            {doc.status === "active" ? td("active") : td("cancelled")}
           </Badge>
           <DocumentActions
             documentId={doc.id}
             documentNumber={doc.display_number}
             partyName={doc.party_name}
-            amount={formatCurrency(doc.amount)}
+            amount={formatCurrency(doc.amount, locale)}
           />
         </div>
         <div id="document-preview" className="overflow-auto bg-muted/30 rounded-xl p-4 lg:p-8">
-          <A4Document document={doc} title="سند صرف" />
+          <A4Document document={doc} title={t("payment")} />
         </div>
       </main>
     </>

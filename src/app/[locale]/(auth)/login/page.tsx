@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { LoginForm } from "@/components/auth/login-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,12 +14,11 @@ function LoginFormFallback() {
   );
 }
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations("auth");
+
   return (
-    <AuthLayout
-      title="تسجيل الدخول"
-      subtitle="مرحباً بعودتك — أدخل بيانات حسابك"
-    >
+    <AuthLayout title={t("login")} subtitle={t("loginSubtitle")}>
       <Suspense fallback={<LoginFormFallback />}>
         <LoginForm />
       </Suspense>

@@ -1,0 +1,435 @@
+{
+  "app": {
+    "name": "Sanadat",
+    "tagline": "Professional receipt, payment & invoice management",
+    "description": "Saudi platform to digitize receipt vouchers, payment vouchers, and non-tax invoices for small businesses.",
+    "madeIn": "Made in Saudi Arabia 🇸🇦",
+    "copyright": "All rights reserved."
+  },
+  "common": {
+    "close": "Close"
+  },
+  "locale": {
+    "ar": "العربية",
+    "en": "English",
+    "switch": "Language"
+  },
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it works",
+    "showcase": "Documents",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "login": "Sign in",
+    "register": "Get started",
+    "dashboard": "Dashboard",
+    "toggleTheme": "Toggle theme",
+    "openMenu": "Open menu"
+  },
+  "hero": {
+    "badge": "Trusted Saudi platform for small businesses",
+    "title1": "Goodbye to",
+    "title1Highlight": "paper vouchers",
+    "title2": "Manage receipts, payments & invoices professionally",
+    "subtitle": "A trusted Saudi platform to digitize vouchers and non-tax invoices — simple, secure, and ready for future Ministry of Commerce compliance. Annual plan SAR 399.",
+    "ctaPrimary": "Get started",
+    "ctaTrial": "Try the system",
+    "ctaSecondary": "See features",
+    "socialProof": "+500 businesses trust Sanadat"
+  },
+  "features": {
+    "label": "Features",
+    "title": "Everything your business needs",
+    "subtitle": "A simple, powerful system focused on the documents small businesses use every day",
+    "items": {
+      "types": {
+        "title": "Three document types",
+        "description": "Receipt vouchers, payment vouchers, and non-tax invoices — all in one platform with official design."
+      },
+      "numbering": {
+        "title": "Secure sequential numbering",
+        "description": "Unique document numbers that are never reused. Documents cannot be edited after creation."
+      },
+      "legal": {
+        "title": "Legal reliability",
+        "description": "Government-ready print layout with signature, stamp areas, and QR placeholder for future compliance."
+      },
+      "export": {
+        "title": "PDF export & print",
+        "description": "Professional A4 documents with RTL/LTR support, print, and WhatsApp sharing."
+      },
+      "responsive": {
+        "title": "Fully responsive",
+        "description": "Works smoothly on mobile and desktop — built for the Saudi market."
+      },
+      "scale": {
+        "title": "Ready to scale",
+        "description": "Architecture ready for payment gateways and Ministry of Commerce integrations."
+      }
+    }
+  },
+  "howItWorks": {
+    "label": "How it works",
+    "title": "Four steps to get started",
+    "steps": {
+      "1": { "title": "Create your account", "description": "Register your business in minutes and complete your company profile with logo and official details." },
+      "2": { "title": "Subscribe yearly", "description": "Pay SAR 399 via Saudi payment methods (Mada, Visa, Apple Pay, STC Pay)." },
+      "3": { "title": "Issue documents", "description": "Create receipt/payment vouchers and invoices with automatic numbering and official layout." },
+      "4": { "title": "Share & print", "description": "Export PDF, print, or share via WhatsApp — with a full activity log." }
+    }
+  },
+  "showcase": {
+    "label": "Document preview",
+    "title": "Official print-ready documents",
+    "subtitle": "Professional A4 layout — suitable for printing and official archiving"
+  },
+  "pricing": {
+    "label": "Pricing",
+    "title": "One plan — simple & transparent",
+    "subtitle": "No complexity — all features included",
+    "yearly": "Annual subscription",
+    "perYear": "SAR / year",
+    "renewal": "Auto-renewal — cancel anytime",
+    "cta": "Subscribe now",
+    "gateways": "Supported via Moyasar · HyperPay · STC Pay",
+    "features": {
+      "unlimitedVouchers": "Unlimited receipt & payment vouchers",
+      "invoices": "Non-tax invoices",
+      "numbering": "Secure sequential numbering",
+      "pdf": "PDF export & print",
+      "whatsapp": "WhatsApp sharing",
+      "analytics": "Dashboard & analytics",
+      "support": "WhatsApp support",
+      "autoRenew": "Auto-renewal"
+    }
+  },
+  "testimonials": {
+    "label": "Testimonials",
+    "title": "Trusted by business owners",
+    "items": {
+      "1": { "name": "Ahmed Al-Shammari", "company": "Al-Shammari Trading", "text": "Saved us hours of paperwork. Documents look very official and clients trust them." },
+      "2": { "name": "Fatima Al-Otaibi", "company": "Al-Otaibi Accounting Office", "text": "Best voucher system I've used. Simple, fast, and sequential numbering gives peace of mind." },
+      "3": { "name": "Khalid Al-Qahtani", "company": "Al-Nokhba Contracting", "text": "Invoices linked to receipt vouchers — exactly what we need as contractors." }
+    }
+  },
+  "faq": {
+    "label": "FAQ",
+    "title": "Frequently asked questions",
+    "items": {
+      "edit": { "q": "Can I edit a document after creation?", "a": "No. Documents are immutable after creation for reliability. You can only cancel with a reason; cancelled docs remain visible." },
+      "cancel": { "q": "What happens when I cancel a document?", "a": "It is marked as cancelled and stays in the log with its original number. Numbers are never reused." },
+      "tax": { "q": "Does it support tax invoices?", "a": "Designed for non-tax invoices and receipt/payment vouchers. ZATCA tax invoice support is planned for the future." },
+      "subscription": { "q": "How does subscription & renewal work?", "a": "SAR 399/year with optional auto-renewal. Notifications 7, 3, and 1 days before expiry." },
+      "payments": { "q": "Which payment gateways are supported?", "a": "Ready for Moyasar, HyperPay, and STC Pay, with Mada, Visa, and Apple Pay." }
+    }
+  },
+  "cta": {
+    "title": "Start digitizing your vouchers today",
+    "subtitle": "Join hundreds of Saudi businesses that trust Sanadat for their financial documents",
+    "button": "Get started — SAR 399/year"
+  },
+  "footer": {
+    "about": "Sanadat — a trusted Saudi platform to digitize receipt vouchers, payment vouchers, and non-tax invoices. Ready for future Ministry of Commerce compliance.",
+    "product": "Product",
+    "support": "Support"
+  },
+  "auth": {
+    "login": "Sign in",
+    "loginSubtitle": "Welcome back — enter your credentials",
+    "register": "Create account",
+    "registerSubtitle": "Start digitizing your business vouchers",
+    "forgotPassword": "Forgot password?",
+    "forgotSubtitle": "Enter your email and we'll send a reset link",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "companyName": "Business name",
+    "phone": "Mobile number",
+    "submit": "Continue",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "createAccount": "Create account",
+    "creating": "Creating...",
+    "sendLink": "Send link",
+    "sending": "Sending...",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "terms": "By registering you agree to the terms and privacy policy",
+    "backToLogin": "Back to sign in",
+    "emailSent": "Reset link sent to",
+    "emailConfirmSent": "Confirmation link sent to your email",
+    "emailConfirmHint": "Open your inbox and click the link to activate your account",
+    "loginSuccess": "Signed in successfully",
+    "registerSuccess": "Account created successfully",
+    "resetSuccess": "Password reset link sent",
+    "resetHint": "Check your email (and spam folder)",
+    "logout": "Sign out",
+    "logoutSuccess": "Signed out successfully",
+    "logoutFailed": "Sign out failed",
+    "callbackError": "Account verification failed — try signing in again",
+    "authNotConfigured": "Authentication is not configured — contact support",
+    "errors": {
+      "invalid_credentials": "Invalid email or password",
+      "email_not_confirmed": "Please confirm your email first — check your inbox",
+      "user_already_registered": "This email is already registered — try signing in",
+      "weak_password": "Password is too weak — use at least 8 characters",
+      "over_email_send_rate_limit": "Too many emails sent — wait a moment and try again",
+      "same_password": "New password must differ from the old one",
+      "session_not_found": "Session expired — please sign in again",
+      "unexpected": "An unexpected error occurred",
+      "tryAgain": "Something went wrong — please try again"
+    }
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "receipts": "Receipt vouchers",
+    "payments": "Payment vouchers",
+    "invoices": "Invoices",
+    "settings": "Settings",
+    "subscription": "Subscription",
+    "support": "Support",
+    "newReceipt": "New receipt",
+    "newPayment": "New payment",
+    "newInvoice": "New invoice",
+    "create": "Create",
+    "viewAll": "View all",
+    "activity": "Document activity",
+    "recent": "Recent documents",
+    "quickActions": "Quick actions",
+    "stats": {
+      "receipts": "Receipt vouchers",
+      "payments": "Payment vouchers",
+      "invoices": "Invoices",
+      "subscription": "Subscription",
+      "active": "Active",
+      "expired": "Expired",
+      "expiresIn": "Expires in {days} days"
+    },
+    "subscriptionAlert": {
+      "title": "Your subscription expires in {days} {daysLabel}",
+      "day": "day",
+      "days": "days",
+      "hint": "Renew to avoid account suspension",
+      "renew": "Renew"
+    },
+    "table": {
+      "number": "Number",
+      "party": "Party",
+      "amount": "Amount",
+      "date": "Date",
+      "payment": "Payment",
+      "status": "Status",
+      "search": "Search by number or name...",
+      "filter": "Filter",
+      "noDocuments": "No documents found",
+      "active": "Active",
+      "cancelled": "Cancelled"
+    },
+    "invoiceTable": {
+      "client": "Client",
+      "paymentStatus": "Payment",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "view": "View"
+    },
+    "issueReceipt": "Issue receipt voucher"
+  },
+  "documents": {
+    "receipt": "Receipt voucher",
+    "payment": "Payment voucher",
+    "invoice": "Invoice",
+    "newReceipt": "New receipt voucher",
+    "newPayment": "New payment voucher",
+    "newInvoice": "New invoice",
+    "date": "Date",
+    "amount": "Amount (SAR)",
+    "party": "Party name",
+    "client": "Client name",
+    "description": "Description / notes",
+    "paymentMethod": "Payment method",
+    "bankName": "Bank name",
+    "transferNumber": "Transfer number",
+    "referenceNumber": "Reference number",
+    "create": "Create document",
+    "creating": "Creating...",
+    "cancel": "Cancel",
+    "immutableNote": "Documents cannot be edited after creation. Only cancellation with a reason is allowed.",
+    "createSuccess": "Document created successfully — cannot be edited",
+    "createFailed": "Failed to create document",
+    "cancelDoc": "Cancel document",
+    "print": "Print",
+    "exportPdf": "Export PDF",
+    "whatsapp": "WhatsApp",
+    "pdfSuccess": "PDF exported successfully",
+    "pdfFailed": "PDF export failed",
+    "whatsappMessage": "Document {number}\nParty: {party}\nAmount: {amount}\n— Sanadat",
+    "invoiceItems": "Invoice items",
+    "addItem": "Add line",
+    "itemDescription": "Description",
+    "quantity": "Qty",
+    "unitPrice": "Unit price",
+    "discount": "Discount (SAR)",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "cancelled": "Cancelled — {reason}",
+    "signature": "Recipient / Signature",
+    "stamp": "Company stamp",
+    "accountant": "Accountant / Signature",
+    "qrFuture": "QR\nFuture",
+    "watermark": "Sanadat — sanadat.sa",
+    "logoPlaceholder": "Logo",
+    "cr": "CR: {number}",
+    "paidStatus": "Paid",
+    "partialStatus": "Partially paid",
+    "unpaidStatus": "Unpaid"
+  },
+  "paymentMethods": {
+    "cash": "Cash",
+    "bank_transfer": "Bank transfer",
+    "pos": "Card / POS"
+  },
+  "documentPrefixes": {
+    "receipt_voucher": "REC",
+    "payment_voucher": "PAY",
+    "invoice": "INV"
+  },
+  "settings": {
+    "title": "Settings",
+    "profileCompletion": "Profile completion",
+    "completion": "Completion rate",
+    "branding": "Visual identity",
+    "logo": "Company logo",
+    "logoHint": "Shown on vouchers and invoices — PNG, JPG, WebP, SVG (max 2MB)",
+    "uploadLogo": "Upload logo",
+    "changeLogo": "Change logo",
+    "removeLogo": "Remove",
+    "uploading": "Uploading...",
+    "logoSuccess": "Logo uploaded successfully",
+    "logoRemoved": "Logo removed",
+    "logoFailed": "Logo upload failed",
+    "logoDemo": "Logo updated (local preview)",
+    "companyData": "Company details",
+    "companyName": "Business name",
+    "crNumber": "Commercial registration",
+    "vatNumber": "VAT number",
+    "address": "Address",
+    "city": "City",
+    "mobile": "Mobile",
+    "email": "Email",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saveSuccess": "Company details saved",
+    "saveFailed": "Failed to save",
+    "saveDemo": "Saved (demo mode)",
+    "readFileFailed": "Failed to read file",
+    "invalidFormat": "Supported formats: PNG, JPG, WebP, SVG",
+    "maxSize": "Maximum logo size: 2 MB",
+    "notFound": "Company not found — please sign in first"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "status": "Subscription status",
+    "active": "Active",
+    "remaining": "Time remaining",
+    "days": "{days} days",
+    "expiryDate": "Expiry date",
+    "yearlyAmount": "Annual amount",
+    "autoRenew": "Auto-renewal",
+    "enabled": "Enabled",
+    "renew": "Renew subscription",
+    "renewing": "Redirecting...",
+    "gateways": "Supported: Moyasar · HyperPay · STC Pay · Mada · Visa · Apple Pay",
+    "paymentReady": "Payment gateway ready — add API keys to activate",
+    "paymentFailed": "Failed to start payment"
+  },
+  "onboarding": {
+    "company": "Company details",
+    "subscribe": "Subscribe",
+    "ready": "Ready!",
+    "completeCompany": "Complete your company profile",
+    "subscribeNow": "Subscribe now",
+    "allFeatures": "Annual plan with all features",
+    "allSet": "You're all set!",
+    "allSetHint": "You can now create your first receipt or invoice",
+    "next": "Next",
+    "prev": "Previous",
+    "goDashboard": "Go to dashboard"
+  },
+  "admin": {
+    "badge": "Admin",
+    "overview": "Overview",
+    "clients": "Clients",
+    "subscriptions": "Subscriptions",
+    "payments": "Payments",
+    "analytics": "Analytics",
+    "notifications": "Notifications",
+    "whatsapp": "WhatsApp templates",
+    "totalRevenue": "Total revenue",
+    "activeClients": "Active clients",
+    "expiredSubs": "Expired subscriptions",
+    "monthlyGrowth": "Monthly growth",
+    "note": "Admins cannot edit client documents — only accounts, subscriptions, and payments.",
+    "searchClient": "Search clients...",
+    "activate": "Activate",
+    "extend": "Extend",
+    "suspend": "Suspend",
+    "completed": "Completed",
+    "pending": "Pending",
+    "monthlyRevenue": "Monthly revenue",
+    "expiryNotify": "Send subscription expiry notification",
+    "expiryAuto": "Sent automatically 7, 3, and 1 days before expiry",
+    "sendManual": "Send manual notification",
+    "edit": "Edit",
+    "importantNoteTitle": "Important note",
+    "suspended": "Suspended",
+    "companyCol": "Company",
+    "emailCol": "Email",
+    "statusCol": "Status",
+    "expiryCol": "Expiry",
+    "actionsCol": "Actions",
+    "gatewayCol": "Gateway",
+    "amountCol": "Amount",
+    "clientCol": "Client",
+    "dateCol": "Date",
+    "autoRenewCol": "Auto-renew",
+    "yes": "Yes",
+    "no": "No",
+    "templateReceipt": "Send receipt voucher",
+    "templateReceiptBody": "Hello {{name}}, attached receipt {{number}} for {{amount}} SAR",
+    "templateSubscription": "Subscription reminder",
+    "templateSubscriptionBody": "Reminder: your Sanadat subscription expires in {{days}} days"
+  },
+  "demo": {
+    "banner": "Preview mode — browsing without sign-in (demo data)",
+    "signInLater": "Sign in later"
+  },
+  "support": {
+    "whatsapp": "WhatsApp support",
+    "message": "Hello, I need help with Sanadat"
+  },
+  "empty": {
+    "title": "No results",
+    "description": "Nothing to show yet"
+  },
+  "metadata": {
+    "title": "Sanadat | Receipt & invoice management",
+    "description": "Saudi platform to digitize receipt vouchers, payment vouchers, and non-tax invoices."
+  },
+  "validation": {
+    "emailInvalid": "Invalid email address",
+    "passwordMin6": "Password must be at least 6 characters",
+    "passwordMin8": "Password must be at least 8 characters",
+    "passwordMismatch": "Passwords do not match",
+    "companyRequired": "Business name is required",
+    "phoneInvalid": "Invalid mobile (e.g. 0512345678)",
+    "partyRequired": "Party name is required",
+    "amountPositive": "Amount must be greater than zero",
+    "itemRequired": "Add at least one line item",
+    "descriptionRequired": "Description is required",
+    "cancelReason": "Cancellation reason is required"
+  },
+  "errors": {
+    "unexpected": "An unexpected error occurred",
+    "tryAgain": "Please try again"
+  }
+}

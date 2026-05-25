@@ -1,29 +1,33 @@
 "use client";
 
-import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { DOCUMENT_PREFIXES } from "@/lib/constants";
+import { Link } from "@/i18n/navigation";
+import { formatCurrency, formatDate } from "@/lib/format";
 import type { DashboardStats } from "@/lib/types";
 
 const typeRoutes = {
-  receipt_voucher: "/ar/dashboard/receipts",
-  payment_voucher: "/ar/dashboard/payments",
-  invoice: "/ar/dashboard/invoices",
-};
+  receipt_voucher: "/dashboard/receipts",
+  payment_voucher: "/dashboard/payments",
+  invoice: "/dashboard/invoices",
+} as const;
 
 export function RecentDocuments({
   documents,
 }: {
   documents: DashboardStats["recentDocuments"];
 }) {
+  const t = useTranslations("dashboard");
+  const tTable = useTranslations("dashboard.table");
+  const locale = useLocale();
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-base">آخر المستندات</CardTitle>
-        <Link href="/ar/dashboard/receipts" className="text-xs text-primary hover:underline">
-          عرض الكل
+        <CardTitle className="text-base">{t("recent")}</CardTitle>
+        <Link href="/dashboard/receipts" className="text-xs text-primary hover:underline">
+          {t("viewAll")}
         </Link>
       </CardHeader>
       <CardContent className="p-0">
@@ -36,21 +40,23 @@ export function RecentDocuments({
             >
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
-                  {DOCUMENT_PREFIXES[doc.type].charAt(0)}
+                  {doc.display_number.split("-")[0]?.charAt(0) ?? "D"}
                 </div>
                 <div>
                   <p className="text-sm font-medium">{doc.display_number}</p>
                   <p className="text-xs text-muted-foreground">{doc.party_name}</p>
                 </div>
               </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold">{formatCurrency(doc.amount)}</p>
-                <div className="flex items-center gap-2 mt-0.5">
+              <div className="text-end">
+                <p className="text-sm font-semibold">{formatCurrency(doc.amount, locale)}</p>
+                <div className="flex items-center gap-2 mt-0.5 justify-end">
                   <span className="text-xs text-muted-foreground">
-                    {formatDate(doc.date)}
+                    {formatDate(doc.date, locale)}
                   </span>
                   {doc.status === "cancelled" && (
-                    <Badge variant="destructive" className="text-[10px]">ملغى</Badge>
+                    <Badge variant="destructive" className="text-[10px]">
+                      {tTable("cancelled")}
+                    </Badge>
                   )}
                 </div>
               </div>

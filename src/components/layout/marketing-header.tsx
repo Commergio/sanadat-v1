@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Menu, X, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/logo";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { NAV_LINKS } from "@/lib/constants";
 
 export function MarketingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("nav");
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -25,34 +28,36 @@ export function MarketingHeader() {
               href={link.href}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              {link.label}
+              {t(link.key)}
             </a>
           ))}
         </nav>
 
         <div className="flex items-center gap-2">
+          <LocaleSwitcher variant="compact" className="hidden sm:flex" />
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label="تبديل الوضع"
+            aria-label={t("toggleTheme")}
           >
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
-          <Link href="/ar/login" className="hidden sm:block">
+          <Link href="/login" className="hidden sm:block">
             <Button variant="ghost" size="sm">
-              تسجيل الدخول
+              {t("login")}
             </Button>
           </Link>
-          <Link href="/ar/register">
-            <Button size="sm">ابدأ الآن</Button>
+          <Link href="/register">
+            <Button size="sm">{t("register")}</Button>
           </Link>
           <Button
             variant="ghost"
             size="icon"
             className="md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={t("openMenu")}
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -68,6 +73,9 @@ export function MarketingHeader() {
             className="border-t border-border md:hidden"
           >
             <nav className="flex flex-col gap-1 p-4">
+              <div className="pb-3">
+                <LocaleSwitcher />
+              </div>
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.href}
@@ -75,7 +83,7 @@ export function MarketingHeader() {
                   className="rounded-lg px-4 py-3 text-sm hover:bg-muted"
                   onClick={() => setMobileOpen(false)}
                 >
-                  {link.label}
+                  {t(link.key)}
                 </a>
               ))}
             </nav>

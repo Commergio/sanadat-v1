@@ -1,11 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { FadeUp } from "@/components/motion/fade-up";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
+import { isRtlLocale } from "@/i18n/routing";
 
 export function CtaSection() {
+  const t = useTranslations("cta");
+  const locale = useLocale();
+  const Arrow = isRtlLocale(locale) ? ArrowLeft : ArrowRight;
+
   return (
     <section className="py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -14,20 +20,20 @@ export function CtaSection() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent)]" />
             <div className="relative">
               <h2 className="text-3xl font-bold text-primary-foreground sm:text-4xl">
-                ابدأ رقمنة سنداتك اليوم
+                {t("title")}
               </h2>
               <p className="mt-4 text-primary-foreground/80 max-w-lg mx-auto">
-                انضم لمئات المنشآت السعودية التي تثق بنظام السندات لإدارة مستنداتها المالية
+                {t("subtitle")}
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Link href="/ar/register">
+                <Link href="/register">
                   <Button
                     size="lg"
                     variant="secondary"
                     className="gap-2 bg-white text-primary hover:bg-white/90"
                   >
-                    ابدأ الآن — 399 ر.س/سنة
-                    <ArrowLeft className="h-4 w-4" />
+                    {t("button")}
+                    <Arrow className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>

@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   ArrowDownLeft,
@@ -13,21 +12,24 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
+import { LocaleSwitcher } from "@/components/locale-switcher";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useAppStore } from "@/stores/app-store";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { href: "/ar/dashboard", label: "نظرة عامة", icon: LayoutDashboard },
-  { href: "/ar/dashboard/receipts", label: "سندات القبض", icon: ArrowDownLeft },
-  { href: "/ar/dashboard/payments", label: "سندات الصرف", icon: ArrowUpRight },
-  { href: "/ar/dashboard/invoices", label: "الفواتير", icon: FileText },
-  { href: "/ar/dashboard/subscription", label: "الاشتراك", icon: CreditCard },
-  { href: "/ar/dashboard/settings", label: "الإعدادات", icon: Settings },
-];
+  { href: "/dashboard", labelKey: "overview", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/receipts", labelKey: "receipts", icon: ArrowDownLeft },
+  { href: "/dashboard/payments", labelKey: "payments", icon: ArrowUpRight },
+  { href: "/dashboard/invoices", labelKey: "invoices", icon: FileText },
+  { href: "/dashboard/subscription", labelKey: "subscription", icon: CreditCard },
+  { href: "/dashboard/settings", labelKey: "settings", icon: Settings },
+] as const;
 
 export function DashboardSidebar() {
   const pathname = usePathname();
   const { sidebarOpen, setSidebarOpen } = useAppStore();
+  const t = useTranslations("dashboard");
 
   return (
     <>
@@ -39,12 +41,14 @@ export function DashboardSidebar() {
       )}
       <aside
         className={cn(
-          "fixed top-0 right-0 z-50 h-full w-64 border-l border-border bg-card transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto",
-          sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
+          "fixed top-0 end-0 z-50 h-full w-64 border-s border-border bg-card transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto",
+          sidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-full rtl:translate-x-full lg:translate-x-0"
         )}
       >
         <div className="flex h-16 items-center justify-between px-5 border-b border-border">
-          <Logo href="/ar/dashboard" showText />
+          <Logo href="/dashboard" showText />
           <Button
             variant="ghost"
             size="icon"
@@ -58,8 +62,9 @@ export function DashboardSidebar() {
         <nav className="flex flex-col gap-1 p-4">
           {navItems.map((item) => {
             const isActive =
-              pathname === item.href ||
-              (item.href !== "/ar/dashboard" && pathname.startsWith(item.href));
+              "exact" in item && item.exact
+                ? pathname === item.href
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -73,11 +78,15 @@ export function DashboardSidebar() {
                 )}
               >
                 <item.icon className="h-4 w-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}
         </nav>
+
+        <div className="absolute bottom-4 start-4 end-4 hidden lg:block">
+          <LocaleSwitcher variant="compact" className="w-full justify-center" />
+        </div>
       </aside>
     </>
   );

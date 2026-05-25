@@ -1,8 +1,8 @@
-import { IBM_Plex_Sans_Arabic } from "next/font/google";
+import { IBM_Plex_Sans_Arabic, Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { routing } from "@/i18n/routing";
+import { routing, isRtlLocale, type Locale } from "@/i18n/routing";
 import { Providers } from "@/components/providers";
 import "../globals.css";
 
@@ -13,6 +13,29 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   display: "swap",
 });
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans-en",
+  display: "swap",
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("title"),
+    description: t("description"),
+    openGraph: {
+      locale: locale === "ar" ? "ar_SA" : "en_US",
+    },
+  };
+}
+
 export default async function LocaleLayout({
   children,
   params,
@@ -22,19 +45,24 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  if (!routing.locales.includes(locale as "ar")) {
+  if (!routing.locales.includes(locale as Locale)) {
     notFound();
   }
 
   const messages = await getMessages();
+  const dir = isRtlLocale(locale) ? "rtl" : "ltr";
+  const fontClass =
+    locale === "ar"
+      ? ibmPlexArabic.variable
+      : `${inter.variable} ${ibmPlexArabic.variable}`;
 
   return (
-    <html lang={locale} dir="rtl" suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
-        className={`${ibmPlexArabic.variable} min-h-screen bg-background font-sans antialiased`}
+        className={`${fontClass} min-h-screen bg-background font-sans antialiased`}
       >
-        <NextIntlClientProvider messages={messages}>
-          <Providers>{children}</Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers locale={locale}>{children}</Providers>
         </NextIntlClientProvider>
       </body>
     </html>

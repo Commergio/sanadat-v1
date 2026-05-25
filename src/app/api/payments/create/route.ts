@@ -7,13 +7,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     const gateway = (body.gateway || "moyasar") as PaymentGateway;
     const amount = body.amount || 399;
+    const locale = body.locale === "en" ? "en" : "ar";
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const result = await createPayment({
       gateway,
       amount,
       companyId: body.companyId || "demo",
-      callbackUrl: `${appUrl}/ar/dashboard/subscription?payment=success`,
+      callbackUrl: `${appUrl}/${locale}/dashboard/subscription?payment=success`,
     });
 
     if (!result.success) {

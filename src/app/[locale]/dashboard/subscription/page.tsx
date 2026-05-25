@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { CreditCard, Check, RefreshCw } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/header";
@@ -10,9 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { SUBSCRIPTION_PRICE } from "@/lib/constants";
 import { mockSubscription } from "@/lib/mock-data";
-import { formatDate, daysUntil } from "@/lib/utils";
+import { formatDate } from "@/lib/format";
+import { daysUntil } from "@/lib/utils";
 
 export default function SubscriptionPage() {
+  const t = useTranslations("subscription");
+  const locale = useLocale();
   const [loading, setLoading] = useState(false);
   const sub = mockSubscription;
   const days = daysUntil(sub.expires_at);
@@ -24,16 +28,16 @@ export default function SubscriptionPage() {
       const res = await fetch("/api/payments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gateway: "moyasar", amount: SUBSCRIPTION_PRICE }),
+        body: JSON.stringify({ gateway: "moyasar", amount: SUBSCRIPTION_PRICE, locale }),
       });
       const data = await res.json();
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
-        toast.info("بوابة الدفع جاهزة — أضف مفاتيح API للتفعيل");
+        toast.info(t("paymentReady"));
       }
     } catch {
-      toast.error("فشل بدء عملية الدفع");
+      toast.error(t("paymentFailed"));
     } finally {
       setLoading(false);
     }
@@ -41,53 +45,53 @@ export default function SubscriptionPage() {
 
   return (
     <>
-      <DashboardHeader title="الاشتراك" />
+      <DashboardHeader title={t("title")} />
       <main className="flex-1 p-4 lg:p-8 max-w-2xl space-y-6">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-primary" />
-                حالة الاشتراك
+                {t("status")}
               </CardTitle>
-              <Badge variant="success">نشط</Badge>
+              <Badge variant="success">{t("active")}</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-muted-foreground">المدة المتبقية</span>
-                <span className="font-medium">{days} يوم</span>
+                <span className="text-muted-foreground">{t("remaining")}</span>
+                <span className="font-medium">{t("days", { days })}</span>
               </div>
               <Progress value={progress} />
             </div>
 
             <div className="grid gap-3 text-sm">
               <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">تاريخ الانتهاء</span>
-                <span>{formatDate(sub.expires_at)}</span>
+                <span className="text-muted-foreground">{t("expiryDate")}</span>
+                <span>{formatDate(sub.expires_at, locale)}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">المبلغ السنوي</span>
-                <span className="font-semibold">{SUBSCRIPTION_PRICE} ر.س</span>
+                <span className="text-muted-foreground">{t("yearlyAmount")}</span>
+                <span className="font-semibold">
+                  {SUBSCRIPTION_PRICE} {locale === "ar" ? "ر.س" : "SAR"}
+                </span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-muted-foreground">التجديد التلقائي</span>
+                <span className="text-muted-foreground">{t("autoRenew")}</span>
                 <span className="flex items-center gap-1 text-emerald-600">
                   <Check className="h-4 w-4" />
-                  مفعّل
+                  {t("enabled")}
                 </span>
               </div>
             </div>
 
             <Button className="w-full gap-2" onClick={handleRenew} disabled={loading}>
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-              {loading ? "جاري التحويل..." : "تجديد الاشتراك"}
+              {loading ? t("renewing") : t("renew")}
             </Button>
 
-            <p className="text-xs text-center text-muted-foreground">
-              مدعوم: ميسر · هايبر باي · STC Pay · مدى · Visa · Apple Pay
-            </p>
+            <p className="text-xs text-center text-muted-foreground">{t("gateways")}</p>
           </CardContent>
         </Card>
       </main>

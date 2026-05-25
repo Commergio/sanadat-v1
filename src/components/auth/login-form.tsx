@@ -1,44 +1,48 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loginSchema, type LoginInput } from "@/lib/validations";
+import { Link, useRouter } from "@/i18n/navigation";
+import { createLoginSchema, type LoginInput } from "@/lib/validations";
 import {
   getAuthErrorMessage,
-  getAuthRedirectUrl,
   getSupabaseBrowserClient,
+  useAuthRedirectUrl,
 } from "@/lib/auth/client";
 import { isSupabaseConfigured } from "@/lib/auth/errors";
 
 export function LoginForm() {
+  const t = useTranslations("auth");
+  const tVal = useTranslations("validation");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const redirectUrl = useAuthRedirectUrl("/dashboard");
 
   useEffect(() => {
     if (searchParams.get("error") === "auth_callback") {
-      toast.error("فشل تأكيد الحساب — حاول تسجيل الدخول مجدداً");
+      toast.error(t("callbackError"));
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(tVal)),
   });
 
   const onSubmit = async (data: LoginInput) => {
     if (!isSupabaseConfigured()) {
-      toast.error("نظام المصادقة غير مُعدّ — تواصل مع الدعم");
+      toast.error(t("authNotConfigured"));
       return;
     }
 
@@ -52,11 +56,11 @@ export function LoginForm() {
 
       if (error) throw error;
 
-      toast.success("تم تسجيل الدخول بنجاح");
-      router.push(getAuthRedirectUrl("/ar/dashboard"));
+      toast.success(t("loginSuccess"));
+      router.push(redirectUrl);
       router.refresh();
     } catch (err) {
-      toast.error(getAuthErrorMessage(err as Error));
+      toast.error(getAuthErrorMessage(err as Error, t));
     } finally {
       setLoading(false);
     }
@@ -65,14 +69,14 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="email">البريد الإلكتروني</Label>
+        <Label htmlFor="email">{t("email")}</Label>
         <Input
           id="email"
           type="email"
           autoComplete="email"
           placeholder="name@company.com"
           dir="ltr"
-          className="text-left"
+          className="text-start"
           disabled={loading}
           {...register("email")}
         />
@@ -83,12 +87,9 @@ export function LoginForm() {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password">كلمة المرور</Label>
-          <Link
-            href="/ar/forgot-password"
-            className="text-xs text-primary hover:underline"
-          >
-            نسيت كلمة المرور؟
+          <Label htmlFor="password">{t("password")}</Label>
+          <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+            {t("forgotPassword")}
           </Link>
         </div>
         <Input
@@ -96,7 +97,7 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           dir="ltr"
-          className="text-left"
+          className="text-start"
           disabled={loading}
           {...register("password")}
         />
@@ -106,13 +107,13 @@ export function LoginForm() {
       </div>
 
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
-        {loading ? "جاري الدخول..." : "تسجيل الدخول"}
+        {loading ? t("signingIn") : t("signIn")}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        ليس لديك حساب؟{" "}
-        <Link href="/ar/register" className="text-primary font-medium hover:underline">
-          إنشاء حساب
+        {t("noAccount")}{" "}
+        <Link href="/register" className="text-primary font-medium hover:underline">
+          {t("register")}
         </Link>
       </p>
     </form>

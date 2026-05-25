@@ -1,12 +1,12 @@
+import { getTranslations } from "next-intl/server";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const t = await getTranslations("auth");
+
   return (
-    <AuthLayout
-      title="نسيت كلمة المرور"
-      subtitle="أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين"
-    >
+    <AuthLayout title={t("forgotPassword")} subtitle={t("forgotSubtitle")}>
       <ForgotPasswordForm />
     </AuthLayout>
   );

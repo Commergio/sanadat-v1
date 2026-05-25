@@ -1,38 +1,57 @@
 import type { AuthError } from "@supabase/supabase-js";
 
-const AUTH_ERROR_MESSAGES: Record<string, string> = {
-  invalid_credentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-  email_not_confirmed:
-    "يرجى تأكيد بريدك الإلكتروني أولاً — تحقق من صندوق الوارد",
-  user_already_registered: "هذا البريد مسجّل مسبقاً — جرّب تسجيل الدخول",
-  weak_password: "كلمة المرور ضعيفة — استخدم 8 أحرف على الأقل",
-  over_email_send_rate_limit:
-    "تم إرسال رسائل كثيرة — انتظر قليلاً ثم حاول مجدداً",
-  same_password: "كلمة المرور الجديدة يجب أن تختلف عن القديمة",
-  session_not_found: "انتهت الجلسة — سجّل الدخول مجدداً",
-};
+export type AuthErrorKey =
+  | "invalid_credentials"
+  | "email_not_confirmed"
+  | "user_already_registered"
+  | "weak_password"
+  | "over_email_send_rate_limit"
+  | "same_password"
+  | "session_not_found"
+  | "unexpected"
+  | "tryAgain";
 
-export function getAuthErrorMessage(error: AuthError | Error | null): string {
-  if (!error) return "حدث خطأ غير متوقع";
+const AUTH_ERROR_KEYS = new Set<string>([
+  "invalid_credentials",
+  "email_not_confirmed",
+  "user_already_registered",
+  "weak_password",
+  "over_email_send_rate_limit",
+  "same_password",
+  "session_not_found",
+]);
+
+export function resolveAuthErrorKey(
+  error: AuthError | Error | null
+): AuthErrorKey {
+  if (!error) return "unexpected";
 
   const authError = error as AuthError;
   const code = authError.code ?? authError.message;
 
-  if (AUTH_ERROR_MESSAGES[code]) {
-    return AUTH_ERROR_MESSAGES[code];
+  if (code && AUTH_ERROR_KEYS.has(code)) {
+    return code as AuthErrorKey;
   }
 
   if (authError.message?.includes("Invalid login credentials")) {
-    return AUTH_ERROR_MESSAGES.invalid_credentials;
+    return "invalid_credentials";
   }
   if (authError.message?.includes("already registered")) {
-    return AUTH_ERROR_MESSAGES.user_already_registered;
+    return "user_already_registered";
   }
   if (authError.message?.includes("Email not confirmed")) {
-    return AUTH_ERROR_MESSAGES.email_not_confirmed;
+    return "email_not_confirmed";
   }
 
-  return authError.message || "حدث خطأ — حاول مرة أخرى";
+  return "tryAgain";
+}
+
+export function getAuthErrorMessage(
+  error: AuthError | Error | null,
+  t: (key: string) => string
+): string {
+  const key = resolveAuthErrorKey(error);
+  return t(`errors.${key}`);
 }
 
 export function isSupabaseConfigured(): boolean {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import {
   AreaChart,
   Area,
@@ -11,17 +12,21 @@ import {
   Legend,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockChartData } from "@/lib/mock-data";
+import { getChartData } from "@/lib/mock-data";
 
 export function DocumentsChart() {
+  const t = useTranslations("dashboard");
+  const locale = useLocale();
+  const data = getChartData(locale);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">نشاط المستندات</CardTitle>
+        <CardTitle className="text-base">{t("activity")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={mockChartData}>
+          <AreaChart data={data}>
             <defs>
               <linearGradient id="receipts" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2} />
@@ -36,7 +41,7 @@ export function DocumentsChart() {
             <Area
               type="monotone"
               dataKey="receipts"
-              name="قبض"
+              name={t("receipts")}
               stroke="#4F46E5"
               fill="url(#receipts)"
               strokeWidth={2}
@@ -44,7 +49,7 @@ export function DocumentsChart() {
             <Area
               type="monotone"
               dataKey="payments"
-              name="صرف"
+              name={t("payments")}
               stroke="#f59e0b"
               fill="transparent"
               strokeWidth={2}
@@ -52,7 +57,7 @@ export function DocumentsChart() {
             <Area
               type="monotone"
               dataKey="invoices"
-              name="فواتير"
+              name={t("invoices")}
               stroke="#10b981"
               fill="transparent"
               strokeWidth={2}

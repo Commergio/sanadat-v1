@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Building2, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ export function CompanyLogoUpload({
   demoMode = false,
   onUpdated,
 }: CompanyLogoUploadProps) {
+  const t = useTranslations("settings");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -36,7 +38,7 @@ export function CompanyLogoUpload({
   const handleFile = async (file: File) => {
     const validation = validateLogoFile(file);
     if (validation) {
-      toast.error(validation);
+      toast.error(t(validation));
       return;
     }
 
@@ -48,11 +50,11 @@ export function CompanyLogoUpload({
         const dataUrl = reader.result as string;
         setPreview(dataUrl);
         onUpdated(dataUrl);
-        toast.success("تم تحديث الشعار (معاينة محلية)");
+        toast.success(t("logoDemo"));
         setUploading(false);
       };
       reader.onerror = () => {
-        toast.error("فشل قراءة الملف");
+        toast.error(t("readFileFailed"));
         setUploading(false);
       };
       reader.readAsDataURL(file);
@@ -72,12 +74,14 @@ export function CompanyLogoUpload({
       );
       setPreview(publicUrl);
       onUpdated(publicUrl);
-      toast.success("تم رفع الشعار بنجاح");
+      toast.success(t("logoSuccess"));
     } catch (err) {
       setPreview(company.logo_url ?? null);
-      toast.error(
-        err instanceof Error ? err.message : "فشل رفع الشعار"
-      );
+      const msg =
+        err instanceof Error && (err.message === "invalidFormat" || err.message === "maxSize")
+          ? t(err.message)
+          : t("logoFailed");
+      toast.error(msg);
     } finally {
       setUploading(false);
       URL.revokeObjectURL(localPreview);
@@ -90,7 +94,7 @@ export function CompanyLogoUpload({
       if (demoMode) {
         setPreview(null);
         onUpdated(null);
-        toast.success("تم حذف الشعار");
+        toast.success(t("logoRemoved"));
         return;
       }
 
@@ -98,9 +102,9 @@ export function CompanyLogoUpload({
       await removeCompanyLogo(supabase, userId, company.id);
       setPreview(null);
       onUpdated(null);
-      toast.success("تم حذف الشعار");
+      toast.success(t("logoRemoved"));
     } catch {
-      toast.error("فشل حذف الشعار");
+      toast.error(t("logoFailed"));
     } finally {
       setRemoving(false);
     }
@@ -108,10 +112,8 @@ export function CompanyLogoUpload({
 
   return (
     <div className="space-y-3">
-      <Label>شعار المنشأة</Label>
-      <p className="text-xs text-muted-foreground">
-        يظهر على سندات القبض والصرف والفواتير — PNG, JPG, WebP, SVG (حد أقصى 2MB)
-      </p>
+      <Label>{t("logo")}</Label>
+      <p className="text-xs text-muted-foreground">{t("logoHint")}</p>
 
       <div
         className={cn(
@@ -124,7 +126,7 @@ export function CompanyLogoUpload({
             <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-border bg-white shadow-sm">
               <Image
                 src={preview}
-                alt="شعار المنشأة"
+                alt={t("logo")}
                 fill
                 className="object-contain p-2"
                 unoptimized
@@ -163,7 +165,7 @@ export function CompanyLogoUpload({
             ) : (
               <Upload className="h-4 w-4" />
             )}
-            {preview ? "تغيير الشعار" : "رفع الشعار"}
+            {uploading ? t("uploading") : preview ? t("changeLogo") : t("uploadLogo")}
           </Button>
 
           {preview && (
@@ -180,7 +182,7 @@ export function CompanyLogoUpload({
               ) : (
                 <Trash2 className="h-4 w-4" />
               )}
-              حذف
+              {t("removeLogo")}
             </Button>
           )}
         </div>
