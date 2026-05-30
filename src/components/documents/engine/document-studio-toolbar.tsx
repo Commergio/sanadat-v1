@@ -1,10 +1,11 @@
 "use client";
 
-import { Save, X, Loader2 } from "lucide-react";
+import { Save, X, Loader2, Maximize2, PencilLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DocumentActionButtons } from "./document-action-buttons";
+import type { StudioViewMode } from "@/components/documents/voucher-studio/voucher-studio-context";
 
 interface DocumentStudioToolbarProps {
   previewId: string;
@@ -15,6 +16,8 @@ interface DocumentStudioToolbarProps {
   saving?: boolean;
   onSave: () => void;
   onCancel: () => void;
+  viewMode?: StudioViewMode;
+  onViewModeChange?: (mode: StudioViewMode) => void;
   className?: string;
   trailing?: React.ReactNode;
   pdfFilenamePrefix?: string;
@@ -29,6 +32,8 @@ export function DocumentStudioToolbar({
   saving,
   onSave,
   onCancel,
+  viewMode = "edit",
+  onViewModeChange,
   className,
   trailing,
   pdfFilenamePrefix = "sanadat",
@@ -41,7 +46,7 @@ export function DocumentStudioToolbar({
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 border-b border-border/80 bg-card/80 px-3 py-2.5 backdrop-blur-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 sm:px-4 sm:py-3 lg:px-6",
+        "document-studio-toolbar no-print flex flex-col gap-2 border-b border-border/80 bg-card/80 px-3 py-2.5 backdrop-blur-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 sm:px-4 sm:py-3 lg:px-6",
         className
       )}
     >
@@ -57,8 +62,35 @@ export function DocumentStudioToolbar({
         <div className="hidden h-6 w-px bg-border sm:block" />
       </div>
 
-      <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-0.5 sm:mx-0 sm:overflow-visible sm:pb-0">
+      <div className="-mx-1 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto px-1 pb-0.5 sm:mx-0 sm:overflow-visible sm:pb-0">
         <DocumentActionButtons compact exportConfig={exportConfig} shareMeta={shareMeta} />
+        {onViewModeChange ? (
+          viewMode === "edit" ? (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="gap-2 shrink-0"
+              onClick={() => onViewModeChange("preview")}
+            >
+              <Maximize2 className="h-4 w-4" />
+              <span className="hidden sm:inline">{t("fullPreview")}</span>
+              <span className="sm:hidden">{t("fullPreviewShort")}</span>
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="gap-2 shrink-0"
+              onClick={() => onViewModeChange("edit")}
+            >
+              <PencilLine className="h-4 w-4" />
+              <span className="hidden sm:inline">{t("backToEdit")}</span>
+              <span className="sm:hidden">{t("backToEditShort")}</span>
+            </Button>
+          )
+        ) : null}
       </div>
 
       {trailing ? (

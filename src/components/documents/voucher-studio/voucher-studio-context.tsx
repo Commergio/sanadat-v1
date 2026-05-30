@@ -17,6 +17,8 @@ export type VoucherStudioFormData = z.infer<
   ReturnType<typeof createDocumentBaseSchema>
 >;
 
+export type StudioViewMode = "edit" | "preview";
+
 export interface VoucherStudioContextValue {
   config: VoucherStudioConfig;
   displayNum: string;
@@ -29,6 +31,8 @@ export interface VoucherStudioContextValue {
   fieldValid: (name: keyof VoucherStudioFormData) => boolean;
   paymentMethod: PaymentMethod;
   loading: boolean;
+  viewMode: StudioViewMode;
+  setViewMode: (mode: StudioViewMode) => void;
 }
 
 const VoucherStudioContext = createContext<VoucherStudioContextValue | null>(null);

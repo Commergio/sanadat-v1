@@ -33,7 +33,7 @@ export function VoucherStudioForm() {
   const { labels, theme } = config;
 
   return (
-    <div className="studio-inspector order-2 flex flex-col border-t border-border/80 bg-background lg:border-t-0 lg:border-s lg:border-border/80">
+    <div className="studio-inspector no-print order-2 flex flex-col border-t border-border/80 bg-background md:border-t-0 md:border-s md:border-border/80">
       <form
         onSubmit={handleSubmit}
         className="flex-1 space-y-5 overflow-y-auto p-4 lg:p-6"

@@ -15,6 +15,7 @@ import { VoucherStudioCanvas } from "@/components/documents/voucher-studio/vouch
 import { VoucherStudioForm } from "@/components/documents/voucher-studio/voucher-studio-form";
 import {
   VoucherStudioProvider,
+  type StudioViewMode,
   type VoucherStudioFormData,
 } from "@/components/documents/voucher-studio/voucher-studio-context";
 import type { VoucherStudioConfig } from "@/components/documents/voucher-studio/config";
@@ -27,6 +28,7 @@ import {
 } from "@/hooks/use-draft-autosave";
 import { isRtlLocale } from "@/i18n/routing";
 import type { PaymentMethod } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 const defaultFormValues: Partial<VoucherStudioFormData> = {
   date: new Date().toISOString().split("T")[0],
@@ -52,6 +54,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
   const tv = useTranslations("validation");
   const [loading, setLoading] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [viewMode, setViewMode] = useState<StudioViewMode>("edit");
 
   const { number, displayNumber, displayNumberEn } = useMemo(
     () => config.getNextNumber(),
@@ -136,6 +139,8 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
       fieldValid,
       paymentMethod,
       loading,
+      viewMode,
+      setViewMode,
     }),
     [
       config,
@@ -150,13 +155,24 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
       fieldValid,
       paymentMethod,
       loading,
+      viewMode,
     ]
   );
 
   return (
     <VoucherStudioProvider value={contextValue}>
-      <div className="flex min-h-[100dvh] flex-col bg-background lg:min-h-full">
-        <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border/80 bg-card px-3 py-2.5 sm:gap-4 sm:px-4 lg:px-5">
+      <div
+        className={cn(
+          "document-studio flex min-h-[100dvh] flex-col bg-background lg:min-h-full",
+          viewMode === "preview" && "document-studio--preview"
+        )}
+      >
+        <header
+          className={cn(
+            "document-studio-header no-print flex shrink-0 items-center justify-between gap-2 border-b border-border/80 bg-card px-3 py-2.5 sm:gap-4 sm:px-4 lg:px-5",
+            viewMode === "preview" && "lg:flex"
+          )}
+        >
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <Link href="/dashboard">
               <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
@@ -177,7 +193,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           <AutosaveIndicator
             status={autosaveStatus}
             lastSavedAt={lastSavedAt}
-            className="hidden shrink-0 sm:flex"
+            className={cn("hidden shrink-0 sm:flex", viewMode === "preview" && "sm:hidden lg:flex")}
           />
         </header>
 
@@ -190,6 +206,8 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           saving={loading}
           onSave={handleSubmit(onSubmit)}
           onCancel={() => router.back()}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
           pdfFilenamePrefix={pdfFilenamePrefix}
           trailing={
             <span className="hidden font-mono text-[11px] text-muted-foreground tabular-nums lg:inline">
@@ -198,9 +216,17 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           }
         />
 
-        <div className="grid min-h-0 flex-1 md:grid-cols-2" dir={isRtl ? "rtl" : "ltr"}>
+        <div
+          className={cn(
+            "grid min-h-0 flex-1",
+            viewMode === "preview"
+              ? "grid-cols-1"
+              : "grid-cols-1 md:grid-cols-2"
+          )}
+          dir={isRtl ? "rtl" : "ltr"}
+        >
           <VoucherStudioCanvas />
-          <VoucherStudioForm />
+          {viewMode === "edit" ? <VoucherStudioForm /> : null}
         </div>
       </div>
     </VoucherStudioProvider>

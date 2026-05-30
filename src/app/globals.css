@@ -217,6 +217,16 @@ body {
   background: var(--muted);
 }
 
+.document-studio--preview .document-studio-preview {
+  min-height: calc(100dvh - 7.25rem);
+}
+
+@media (min-width: 768px) {
+  .document-studio--preview .document-studio-preview {
+    min-height: calc(100vh - 7.25rem);
+  }
+}
+
 .studio-inspector {
   max-height: none;
 }
@@ -259,13 +269,19 @@ body {
 }
 
 @media print {
+  .no-print {
+    display: none !important;
+  }
+
   body * {
     visibility: hidden;
   }
+
   .print-area,
   .print-area * {
     visibility: visible;
   }
+
   .print-area {
     position: absolute;
     left: 0;
@@ -275,6 +291,22 @@ body {
     padding: 0 !important;
     box-shadow: none !important;
     background: #fff !important;
+  }
+
+  .document-studio-preview,
+  .document-preview-export-root,
+  .a4-scale-container,
+  .a4-scale-content {
+    visibility: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    zoom: 1 !important;
+    transform: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
 }
 
@@ -883,10 +915,10 @@ body.pdf-exporting .a4-document[dir="ltr"] {
   }
 
   .dashboard-shell,
-  .studio-canvas,
-  .studio-inspector,
   aside,
-  nav {
+  nav,
+  .no-print {
+    display: none !important;
     visibility: hidden !important;
   }
 
