@@ -1,6 +1,5 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { isRtlLocale } from "@/i18n/routing";
 
@@ -14,12 +13,7 @@ export function Providers({
   const dir = isRtlLocale(locale) ? "rtl" : "ltr";
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="light"
-      enableSystem
-      disableTransitionOnChange
-    >
+    <>
       {children}
       <Toaster
         position="top-center"
@@ -30,6 +24,6 @@ export function Providers({
           },
         }}
       />
-    </ThemeProvider>
+    </>
   );
 }

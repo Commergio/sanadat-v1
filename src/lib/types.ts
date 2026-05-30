@@ -21,11 +21,14 @@ export interface Company {
   name_en?: string;
   cr_number?: string;
   vat_number?: string;
+  license_number?: string;
   address?: string;
   city?: string;
   phone?: string;
   email?: string;
+  responsible_person?: string;
   logo_url?: string;
+  signature_url?: string;
   stamp_url?: string;
   profile_completed: number;
   created_at: string;
@@ -56,6 +59,7 @@ export interface DocumentBase {
   payment_method: PaymentMethod;
   transfer_number?: string;
   bank_name?: string;
+  transfer_date?: string;
   reference_number?: string;
   cancelled_at?: string;
   cancel_reason?: string;

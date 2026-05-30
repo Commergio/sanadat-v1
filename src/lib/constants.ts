@@ -1,5 +1,5 @@
-/** Preview without login — enable with NEXT_PUBLIC_DEMO_MODE=true */
-export const IS_DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+/** Re-exported from env — prototype when Supabase is missing or DEMO_MODE=true */
+export { IS_DEMO_MODE, isSupabaseConfigured, getAppUrl } from "@/lib/env";
 
 export const SUBSCRIPTION_PRICE = 399;
 export const SUBSCRIPTION_CURRENCY = "SAR";

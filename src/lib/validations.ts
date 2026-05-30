@@ -41,15 +41,33 @@ export const createCompanySchema = (t: T) =>
     email: z.string().email(t("emailInvalid")).optional().or(z.literal("")),
   });
 
+export const createCompanySettingsSchema = (t: T) =>
+  z.object({
+    name: z.string().min(2, t("companyRequired")),
+    cr_number: z.string().min(1, t("crRequired")),
+    vat_number: z.string().optional(),
+    license_number: z.string().min(1, t("licenseRequired")),
+    address: z.string().min(1, t("addressRequired")),
+    phone: z
+      .string()
+      .min(1, t("phoneRequired"))
+      .regex(/^05\d{8}$/, t("phoneInvalid")),
+    responsible_person: z.string().min(2, t("responsibleRequired")),
+  });
+
 export const createDocumentBaseSchema = (t: T) =>
   z.object({
     date: z.string(),
     party_name: z.string().min(2, t("partyRequired")),
-    amount: z.number().positive(t("amountPositive")),
+    amount: z
+      .number({ error: t("amountPositive") })
+      .positive(t("amountPositive")),
     description: z.string().optional(),
+    notes: z.string().optional(),
     payment_method: z.enum(["cash", "bank_transfer", "pos"]),
     transfer_number: z.string().optional(),
     bank_name: z.string().optional(),
+    transfer_date: z.string().optional(),
     reference_number: z.string().optional(),
   });
 
@@ -84,4 +102,7 @@ export const invoiceSchema = createInvoiceSchema((k) => k);
 export type LoginInput = z.infer<ReturnType<typeof createLoginSchema>>;
 export type RegisterInput = z.infer<ReturnType<typeof createRegisterSchema>>;
 export type CompanyInput = z.infer<ReturnType<typeof createCompanySchema>>;
+export type CompanySettingsInput = z.infer<
+  ReturnType<typeof createCompanySettingsSchema>
+>;
 export type InvoiceInput = z.infer<ReturnType<typeof createInvoiceSchema>>;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { CreditCard, Check, RefreshCw } from "lucide-react";
@@ -9,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { SUBSCRIPTION_PRICE } from "@/lib/constants";
+import { SUBSCRIPTION_PRICE, IS_DEMO_MODE } from "@/lib/constants";
 import { mockSubscription } from "@/lib/mock-data";
 import { formatDate } from "@/lib/format";
 import { daysUntil } from "@/lib/utils";
@@ -17,10 +18,17 @@ import { daysUntil } from "@/lib/utils";
 export default function SubscriptionPage() {
   const t = useTranslations("subscription");
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const sub = mockSubscription;
   const days = daysUntil(sub.expires_at);
   const progress = Math.max(0, Math.min(100, ((365 - days) / 365) * 100));
+
+  useEffect(() => {
+    if (searchParams.get("payment") === "success") {
+      toast.success(t("paymentDemoSuccess"));
+    }
+  }, [searchParams, t]);
 
   const handleRenew = async () => {
     setLoading(true);
@@ -47,6 +55,11 @@ export default function SubscriptionPage() {
     <>
       <DashboardHeader title={t("title")} />
       <main className="flex-1 p-4 lg:p-8 max-w-2xl space-y-6">
+        {IS_DEMO_MODE && (
+          <p className="text-xs text-muted-foreground rounded-lg border border-dashed border-primary/30 bg-primary/5 px-4 py-3">
+            {t("paymentReady")}
+          </p>
+        )}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">

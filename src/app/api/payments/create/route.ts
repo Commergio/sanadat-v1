@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createPayment } from "@/lib/payments";
+import { getAppUrl } from "@/lib/env";
 import type { PaymentGateway } from "@/lib/types";
 
 export async function POST(request: Request) {
@@ -8,7 +9,7 @@ export async function POST(request: Request) {
     const gateway = (body.gateway || "moyasar") as PaymentGateway;
     const amount = body.amount || 399;
     const locale = body.locale === "en" ? "en" : "ar";
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl = getAppUrl();
 
     const result = await createPayment({
       gateway,

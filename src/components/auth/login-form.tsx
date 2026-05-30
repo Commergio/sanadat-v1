@@ -16,7 +16,9 @@ import {
   getSupabaseBrowserClient,
   useAuthRedirectUrl,
 } from "@/lib/auth/client";
-import { isSupabaseConfigured } from "@/lib/auth/errors";
+import { IS_DEMO_MODE } from "@/lib/constants";
+import { simulateNetworkDelay } from "@/lib/demo";
+import { isSupabaseConfigured } from "@/lib/env";
 
 export function LoginForm() {
   const t = useTranslations("auth");
@@ -41,13 +43,20 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginInput) => {
-    if (!isSupabaseConfigured()) {
-      toast.error(t("authNotConfigured"));
-      return;
-    }
-
     setLoading(true);
     try {
+      if (IS_DEMO_MODE) {
+        await simulateNetworkDelay();
+        toast.success(t("loginSuccess"));
+        router.push(redirectUrl);
+        return;
+      }
+
+      if (!isSupabaseConfigured()) {
+        toast.error(t("authNotConfigured"));
+        return;
+      }
+
       const supabase = getSupabaseBrowserClient();
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email.trim().toLowerCase(),
@@ -109,6 +118,12 @@ export function LoginForm() {
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
         {loading ? t("signingIn") : t("signIn")}
       </Button>
+
+      {IS_DEMO_MODE && (
+        <p className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5 text-center text-xs leading-relaxed text-muted-foreground">
+          {t("demoHint")}
+        </p>
+      )}
 
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}

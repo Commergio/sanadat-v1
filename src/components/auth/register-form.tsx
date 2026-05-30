@@ -14,7 +14,9 @@ import {
   getAuthErrorMessage,
   getSupabaseBrowserClient,
 } from "@/lib/auth/client";
-import { isSupabaseConfigured } from "@/lib/auth/errors";
+import { IS_DEMO_MODE } from "@/lib/constants";
+import { simulateNetworkDelay } from "@/lib/demo";
+import { isSupabaseConfigured } from "@/lib/env";
 
 export function RegisterForm() {
   const t = useTranslations("auth");
@@ -32,13 +34,20 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterInput) => {
-    if (!isSupabaseConfigured()) {
-      toast.error(t("authNotConfigured"));
-      return;
-    }
-
     setLoading(true);
     try {
+      if (IS_DEMO_MODE) {
+        await simulateNetworkDelay();
+        toast.success(t("registerSuccess"));
+        router.push("/onboarding");
+        return;
+      }
+
+      if (!isSupabaseConfigured()) {
+        toast.error(t("authNotConfigured"));
+        return;
+      }
+
       const supabase = getSupabaseBrowserClient();
       const origin = window.location.origin;
 

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { FadeUp } from "@/components/motion/fade-up";
+import { SectionHeader } from "@/components/landing/section-header";
 import { A4Document } from "@/components/documents/a4-document";
 import { mockReceipt } from "@/lib/mock-data";
 
@@ -10,26 +11,28 @@ export function ShowcaseSection() {
   const tDoc = useTranslations("documents");
 
   return (
-    <section id="showcase" className="py-24 overflow-hidden">
+    <section id="showcase" className="landing-section overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <FadeUp className="text-center mb-16">
-          <p className="text-sm font-medium text-primary mb-3">{t("label")}</p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t("title")}
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            {t("subtitle")}
-          </p>
+        <FadeUp>
+          <SectionHeader label={t("label")} title={t("title")} subtitle={t("subtitle")} />
         </FadeUp>
 
-        <FadeUp delay={0.2}>
-          <div className="relative mx-auto max-w-2xl">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10 pointer-events-none h-32 bottom-0 top-auto" />
+        <FadeUp delay={0.15}>
+          <div className="relative mx-auto max-w-3xl">
+            <div className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-gradient-to-b from-primary/5 to-transparent" />
             <div
-              className="transform scale-[0.65] sm:scale-75 origin-top mx-auto"
-              style={{ height: 400 }}
+              className="relative mx-auto overflow-hidden rounded-2xl border border-border/60 bg-muted/30 p-6 sm:p-10"
+              style={{ maxHeight: 480 }}
             >
-              <A4Document document={mockReceipt} title={tDoc("receipt")} />
+              <div
+                className="mx-auto origin-top transform scale-[0.55] sm:scale-[0.65]"
+                style={{ height: 420 }}
+              >
+                <div className="hero-paper rounded-sm">
+                  <A4Document document={mockReceipt} title={tDoc("receipt")} />
+                </div>
+              </div>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-muted/80 to-transparent" />
             </div>
           </div>
         </FadeUp>

@@ -1,16 +1,5 @@
-import { getTranslations } from "next-intl/server";
-import { DashboardHeader } from "@/components/dashboard/header";
-import { VoucherForm } from "@/components/documents/voucher-form";
+import { PaymentVoucherStudio } from "@/components/documents/payment-voucher-studio";
 
-export default async function NewPaymentPage() {
-  const t = await getTranslations("documents");
-
-  return (
-    <>
-      <DashboardHeader title={t("newPayment")} />
-      <main className="flex-1 p-4 lg:p-8">
-        <VoucherForm type="payment" redirectPath="/dashboard/payments" />
-      </main>
-    </>
-  );
+export default function NewPaymentPage() {
+  return <PaymentVoucherStudio />;
 }

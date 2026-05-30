@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { FadeUp } from "@/components/motion/fade-up";
+import { SectionHeader } from "@/components/landing/section-header";
 import { cn } from "@/lib/utils";
 
 const faqKeys = ["edit", "cancel", "tax", "subscription", "payments"] as const;
@@ -14,13 +15,10 @@ export function FaqSection() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-24 bg-surface">
+    <section id="faq" className="landing-section bg-surface">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <FadeUp className="text-center mb-16">
-          <p className="text-sm font-medium text-primary mb-3">{t("label")}</p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t("title")}
-          </h2>
+        <FadeUp>
+          <SectionHeader label={t("label")} title={t("title")} className="mb-12" />
         </FadeUp>
 
         <div className="space-y-3">

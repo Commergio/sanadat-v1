@@ -1,6 +1,7 @@
 import { create } from "zustand";
+import { buildDemoCompany } from "@/lib/company-local-storage";
 import type { Company, Subscription } from "@/lib/types";
-import { mockCompany, mockSubscription } from "@/lib/mock-data";
+import { mockSubscription } from "@/lib/mock-data";
 
 interface AppState {
   company: Company | null;
@@ -14,7 +15,7 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  company: mockCompany as unknown as Company,
+  company: buildDemoCompany(),
   subscription: mockSubscription as unknown as Subscription,
   sidebarOpen: false,
   onboardingStep: 0,

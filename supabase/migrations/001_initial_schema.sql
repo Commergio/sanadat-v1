@@ -1,4 +1,4 @@
--- نظام السندات - Initial Schema
+-- سندات - Initial Schema
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 

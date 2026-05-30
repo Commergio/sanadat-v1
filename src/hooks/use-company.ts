@@ -2,8 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/auth/client";
+import {
+  buildDemoCompany,
+  loadStoredCompany,
+  saveStoredCompany,
+} from "@/lib/company-local-storage";
 import { IS_DEMO_MODE } from "@/lib/constants";
-import { mockCompany } from "@/lib/mock-data";
 import type { Company } from "@/lib/types";
 import { useAppStore } from "@/stores/app-store";
 
@@ -13,10 +17,13 @@ export function useCompany() {
 
   const fetchCompany = useCallback(async () => {
     if (IS_DEMO_MODE) {
-      setCompany(mockCompany as unknown as Company);
+      const stored = loadStoredCompany();
+      setCompany(buildDemoCompany(stored));
       setLoading(false);
       return;
     }
+
+    setLoading(true);
 
     try {
       const supabase = getSupabaseBrowserClient();
@@ -41,7 +48,7 @@ export function useCompany() {
         setCompany(data as Company);
       }
     } catch {
-      setCompany(mockCompany as unknown as Company);
+      setCompany(buildDemoCompany(loadStoredCompany()));
     } finally {
       setLoading(false);
     }
@@ -54,7 +61,15 @@ export function useCompany() {
   const updateCompanyInStore = useCallback(
     (updates: Partial<Company>) => {
       if (storeCompany) {
-        setCompany({ ...storeCompany, ...updates });
+        const next = {
+          ...storeCompany,
+          ...updates,
+          updated_at: new Date().toISOString(),
+        };
+        setCompany(next);
+        if (IS_DEMO_MODE) {
+          saveStoredCompany(next);
+        }
       }
     },
     [storeCompany, setCompany]
@@ -66,4 +81,9 @@ export function useCompany() {
     refresh: fetchCompany,
     updateCompanyInStore,
   };
+}
+
+/** Fallback company when store is empty (SSR / first paint). */
+export function getDefaultCompany(): Company {
+  return buildDemoCompany();
 }

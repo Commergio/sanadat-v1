@@ -5,60 +5,97 @@ import {
   LayoutDashboard,
   Users,
   CreditCard,
-  BarChart3,
-  Bell,
+  Wallet,
   MessageSquare,
+  Settings,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
-import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Link, usePathname } from "@/i18n/navigation";
+import { useAppStore } from "@/stores/app-store";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { href: "/admin", labelKey: "overview", icon: LayoutDashboard },
+  { href: "/admin", labelKey: "overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/clients", labelKey: "clients", icon: Users },
   { href: "/admin/subscriptions", labelKey: "subscriptions", icon: CreditCard },
-  { href: "/admin/payments", labelKey: "payments", icon: CreditCard },
-  { href: "/admin/analytics", labelKey: "analytics", icon: BarChart3 },
-  { href: "/admin/notifications", labelKey: "notifications", icon: Bell },
-  { href: "/admin/whatsapp", labelKey: "whatsapp", icon: MessageSquare },
+  { href: "/admin/payments", labelKey: "payments", icon: Wallet },
+  { href: "/admin/messages", labelKey: "messages", icon: MessageSquare },
+  { href: "/admin/settings", labelKey: "settings", icon: Settings },
 ] as const;
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { sidebarOpen, setSidebarOpen } = useAppStore();
   const t = useTranslations("admin");
 
-  return (
-    <aside className="w-64 border-s border-border bg-card min-h-screen hidden lg:block">
-      <div className="h-16 flex items-center justify-between px-5 border-b border-border">
-        <Logo href="/admin" />
-        <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-          {t("badge")}
-        </span>
+  const content = (
+    <>
+      <div className="flex h-14 items-center justify-between gap-2 border-b border-border/80 px-4">
+        <Logo href="/admin" showText className="min-w-0 shrink" />
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+            {t("badge")}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close menu"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      <nav className="p-4 space-y-1">
+      <nav className="flex-1 space-y-0.5 p-3">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            "exact" in item && item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
           return (
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setSidebarOpen(false)}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
+                  ? "bg-primary/10 text-primary shadow-sm"
+                  : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               )}
             >
-              <item.icon className="h-4 w-4" />
+              {isActive && (
+                <span className="absolute inset-y-1.5 start-0 w-0.5 rounded-full bg-primary" />
+              )}
+              <item.icon className="h-[18px] w-[18px] shrink-0 stroke-[1.75]" />
               {t(item.labelKey)}
             </Link>
           );
         })}
       </nav>
-      <div className="p-4">
-        <LocaleSwitcher variant="compact" />
-      </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside
+        className={cn(
+          "fixed top-0 end-0 z-50 flex h-full w-[260px] flex-col border-s border-border bg-card/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:z-auto lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "translate-x-full rtl:-translate-x-full lg:translate-x-0"
+        )}
+      >
+        {content}
+      </aside>
+    </>
   );
 }

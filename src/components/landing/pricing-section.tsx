@@ -1,12 +1,13 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { motion } from "framer-motion";
 import { FadeUp } from "@/components/motion/fade-up";
+import { SectionHeader } from "@/components/landing/section-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
-import { SUBSCRIPTION_PRICE } from "@/lib/constants";
+import { SUBSCRIPTION_PRICE, IS_DEMO_MODE } from "@/lib/constants";
 
 const featureKeys = [
   "unlimitedVouchers",
@@ -19,64 +20,99 @@ const featureKeys = [
   "autoRenew",
 ] as const;
 
-const paymentIcons = ["Mada", "Visa", "Apple Pay", "STC Pay"];
+const paymentMethods = [
+  { id: "mada", label: "مدى", style: "font-bold text-[#004D40]" },
+  { id: "visa", label: "VISA", style: "font-bold text-[#1A1F71] tracking-wider" },
+  { id: "apple", label: "Apple Pay", style: "font-semibold" },
+  { id: "stc", label: "STC Pay", style: "font-bold text-[#4F008C]" },
+  { id: "moyasar", label: "Moyasar", style: "font-semibold text-primary" },
+  { id: "hyperpay", label: "HyperPay", style: "font-semibold text-muted-foreground" },
+];
 
 export function PricingSection() {
   const t = useTranslations("pricing");
 
   return (
-    <section id="pricing" className="py-24 bg-surface">
+    <section id="pricing" className="landing-section bg-surface relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[120px]" />
+      </div>
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <FadeUp className="text-center mb-16">
-          <p className="text-sm font-medium text-primary mb-3">{t("label")}</p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            {t("title")}
-          </h2>
-          <p className="mt-4 text-muted-foreground">{t("subtitle")}</p>
+        <FadeUp>
+          <SectionHeader label={t("label")} title={t("title")} subtitle={t("subtitle")} />
         </FadeUp>
 
-        <FadeUp delay={0.1} className="max-w-md mx-auto">
-          <Card className="relative overflow-hidden border-primary/20 shadow-xl">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
-            <CardHeader className="text-center pt-10 pb-4">
-              <p className="text-sm text-muted-foreground mb-2">{t("yearly")}</p>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-5xl font-bold">{SUBSCRIPTION_PRICE}</span>
+        <FadeUp delay={0.1} className="mx-auto max-w-lg">
+          <motion.div
+            className="relative overflow-hidden rounded-3xl border border-primary/25 bg-card shadow-2xl shadow-primary/15"
+            whileHover={{ y: -4 }}
+            transition={{ type: "spring", stiffness: 300, damping: 24 }}
+          >
+            <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-primary via-indigo-500 to-violet-500" />
+
+            <div className="absolute top-5 start-5 end-5 flex justify-center sm:justify-end">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg shadow-primary/30">
+                <Sparkles className="h-3.5 w-3.5" />
+                {t("popular")}
+              </span>
+            </div>
+
+            <div className="px-8 pt-14 pb-4 text-center">
+              <p className="text-sm font-medium text-muted-foreground">{t("yearly")}</p>
+              <div className="mt-3 flex items-baseline justify-center gap-2">
+                <span className="text-6xl font-bold tracking-tight text-foreground tabular-nums">
+                  {SUBSCRIPTION_PRICE}
+                </span>
                 <span className="text-lg text-muted-foreground">{t("perYear")}</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">{t("renewal")}</p>
-            </CardHeader>
-            <CardContent className="px-8 pb-10">
-              <ul className="space-y-3 mb-8">
+              <p className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                {t("monthlyEquiv")}
+              </p>
+              <div className="mt-4 inline-flex flex-col gap-1 rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-4 py-2">
+                <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                  {t("savings")}
+                </span>
+                <span className="text-xs text-muted-foreground">{t("savingsHint")}</span>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">{t("renewal")}</p>
+            </div>
+
+            <div className="border-t border-border/60 px-8 py-8">
+              <ul className="grid gap-3 sm:grid-cols-2">
                 {featureKeys.map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-sm">
-                    <Check className="h-4 w-4 text-primary shrink-0" />
-                    {t(`features.${f}`)}
+                  <li key={f} className="flex items-start gap-2.5 text-sm">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                      <Check className="h-3 w-3 text-primary" />
+                    </span>
+                    <span className="text-muted-foreground">{t(`features.${f}`)}</span>
                   </li>
                 ))}
               </ul>
 
-              <Link href="/register" className="block">
-                <Button size="lg" className="w-full">
+              <Link href={IS_DEMO_MODE ? "/login" : "/register"} className="mt-8 block">
+                <Button size="lg" className="h-12 w-full text-base shadow-lg shadow-primary/25 sm:h-14">
                   {t("cta")}
                 </Button>
               </Link>
 
-              <div className="mt-6 flex items-center justify-center gap-3">
-                {paymentIcons.map((icon) => (
-                  <div
-                    key={icon}
-                    className="flex h-8 items-center justify-center rounded-md border border-border bg-background px-3 text-[10px] font-medium text-muted-foreground"
-                  >
-                    {icon}
-                  </div>
-                ))}
+              <div className="mt-8">
+                <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                  {t("gateways")}
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {paymentMethods.map((pm) => (
+                    <div
+                      key={pm.id}
+                      className="flex h-9 min-w-[4.5rem] items-center justify-center rounded-lg border border-border/80 bg-background/80 px-3 text-[11px] shadow-sm"
+                    >
+                      <span className={pm.style}>{pm.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <p className="text-center text-[10px] text-muted-foreground mt-3">
-                {t("gateways")}
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         </FadeUp>
       </div>
     </section>

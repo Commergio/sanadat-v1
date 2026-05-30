@@ -5,8 +5,7 @@ import { cn } from "@/lib/utils";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { usePaymentMethodLabel } from "@/hooks/use-translated-constants";
 import type { ReceiptVoucher, PaymentVoucher, Invoice, Company } from "@/lib/types";
-import { useCompany } from "@/hooks/use-company";
-import { mockCompany } from "@/lib/mock-data";
+import { useDocumentBranding } from "@/components/documents/engine";
 
 type DocumentData = ReceiptVoucher | PaymentVoucher | Invoice;
 
@@ -15,97 +14,213 @@ interface A4DocumentProps {
   title: string;
   className?: string;
   company?: Company;
+  notes?: string;
+  draft?: boolean;
+  partyFieldLabel?: string;
+  previewPartyPlaceholder?: string;
 }
 
-export function A4Document({ document, title, className, company: companyProp }: A4DocumentProps) {
+function CompanyLine({ children, dir }: { children: React.ReactNode; dir?: "ltr" | "rtl" }) {
+  return (
+    <p className="a4-company-line" dir={dir}>
+      {children}
+    </p>
+  );
+}
+
+export function A4Document({
+  document,
+  title,
+  className,
+  company: companyProp,
+  notes,
+  draft = false,
+  partyFieldLabel,
+  previewPartyPlaceholder,
+}: A4DocumentProps) {
   const locale = useLocale();
   const t = useTranslations("documents");
-  const { company: storeCompany } = useCompany();
-  const company = companyProp ?? storeCompany ?? (mockCompany as unknown as Company);
+  const company = useDocumentBranding(companyProp);
   const isInvoice = document.type === "invoice";
+  const isReceipt = document.type === "receipt_voucher";
+  const isPayment = document.type === "payment_voucher";
+  const isVoucher = isReceipt || isPayment;
   const invoice = isInvoice ? (document as Invoice) : null;
   const paymentLabel = usePaymentMethodLabel(document.payment_method);
   const dir = locale === "ar" ? "rtl" : "ltr";
+  const isCancelled = document.status === "cancelled";
+  const isActive = document.status === "active";
+
+  const partyDisplay =
+    document.party_name?.trim() ||
+    (draft ? (previewPartyPlaceholder ?? t("previewCustomerPlaceholder")) : "—");
+
+  const partyLabel =
+    partyFieldLabel ?? (isInvoice ? t("client") : t("customerName"));
+
+  const totalAmount = invoice ? invoice.total : document.amount;
+
+  const amountDisplay =
+    totalAmount > 0
+      ? formatCurrency(totalAmount, locale)
+      : draft
+        ? formatCurrency(0, locale)
+        : "—";
+
+  const accentClass = isReceipt
+    ? "a4-document--receipt"
+    : isPayment
+      ? "a4-document--payment"
+      : "a4-document--invoice";
 
   return (
     <div className={cn("print-area", className)}>
-      <div className="a4-document mx-auto p-12 text-gray-900" dir={dir}>
-        <div className="flex items-start justify-between border-b-2 border-gray-900 pb-6 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold">{title}</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {t("numberLabel")} {document.display_number}
-            </p>
-            <p className="text-sm text-gray-500">
-              {t("dateLabel")} {formatDate(document.date, locale)}
-            </p>
-            {document.status === "cancelled" && (
-              <div className="mt-2 inline-block rounded bg-red-50 px-3 py-1 text-xs font-medium text-red-600 border border-red-200">
-                {t("cancelled", { reason: document.cancel_reason ?? "" })}
-              </div>
-            )}
-          </div>
-          <div className={locale === "ar" ? "text-left" : "text-right"}>
-            {company.logo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={company.logo_url} alt={t("logoPlaceholder")} className="h-16 w-auto" />
-            ) : (
-              <div className="h-16 w-16 rounded-xl bg-indigo-50 flex items-center justify-center border border-indigo-100">
-                <span className="text-xs font-bold text-indigo-600">{t("logoPlaceholder")}</span>
-              </div>
-            )}
-            <p className="text-sm font-bold mt-2">{company.name}</p>
-            {company.cr_number && (
-              <p className="text-xs text-gray-500">{t("cr", { number: company.cr_number })}</p>
-            )}
-          </div>
-        </div>
+      <div
+        className={cn("a4-document", accentClass, isCancelled && "a4-document--cancelled")}
+        dir={dir}
+      >
+        {isCancelled && !draft && <div className="a4-cancelled-mark" aria-hidden />}
 
-        <div className="grid grid-cols-2 gap-6 mb-8">
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs text-gray-500 mb-1">
-              {isInvoice ? t("client") : t("party")}
-            </p>
-            <p className="font-semibold">{document.party_name}</p>
+        {/* Status */}
+        {!draft && (
+          <div className="a4-status-row">
+            <span
+              className={cn(
+                "a4-status-badge",
+                isActive && "a4-status-badge--active",
+                isCancelled && "a4-status-badge--cancelled"
+              )}
+            >
+              {isActive ? t("statusActive") : t("statusCancelled")}
+            </span>
+            {isCancelled && document.cancel_reason && (
+              <span className="a4-status-reason">
+                {t("cancelReason", { reason: document.cancel_reason })}
+              </span>
+            )}
           </div>
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-xs text-gray-500 mb-1">{t("paymentMethod")}</p>
-            <p className="font-semibold">{paymentLabel}</p>
+        )}
+
+        {draft && (
+          <div className="a4-draft-banner">{t("draftWatermark")}</div>
+        )}
+
+        {/* Document title banner */}
+        {isVoucher ? (
+          <div className="a4-voucher-banner">
+            <p className="a4-voucher-banner__eyebrow">{t("officialDocument")}</p>
+            <h1 className="a4-voucher-banner__title">{title}</h1>
+          </div>
+        ) : (
+          <h1 className="a4-invoice-title">{title}</h1>
+        )}
+
+        {/* Header: company + meta */}
+        <header className={cn("a4-header", locale !== "ar" && "a4-header--ltr")}>
+          <div className="a4-company">
+            <div className="a4-company__logo-wrap">
+              {company.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={company.logo_url}
+                  alt={company.name}
+                  className="a4-company__logo"
+                />
+              ) : (
+                <div className="a4-company__logo-placeholder">
+                  <span>{t("logoPlaceholder")}</span>
+                </div>
+              )}
+            </div>
+            <div className="a4-company__details">
+              <p className="a4-company__name">{company.name}</p>
+              {company.name_en && (
+                <p className="a4-company__name-en" dir="ltr">
+                  {company.name_en}
+                </p>
+              )}
+              {company.cr_number && (
+                <CompanyLine>{t("cr", { number: company.cr_number })}</CompanyLine>
+              )}
+              {company.vat_number && (
+                <CompanyLine>{t("vat", { number: company.vat_number })}</CompanyLine>
+              )}
+              {company.license_number && (
+                <CompanyLine>{t("license", { number: company.license_number })}</CompanyLine>
+              )}
+              {company.phone && (
+                <CompanyLine dir="ltr">
+                  {t("phoneLabel")}: {company.phone}
+                </CompanyLine>
+              )}
+              {company.address && (
+                <CompanyLine>
+                  {t("addressLabel")}: {company.address}
+                </CompanyLine>
+              )}
+            </div>
+          </div>
+
+          <div className="a4-meta">
+            <div className="a4-meta__row">
+              <span className="a4-meta__label">{t("numberLabel")}</span>
+              <span className="a4-meta__value tabular-nums">{document.display_number}</span>
+            </div>
+            <div className="a4-meta__row">
+              <span className="a4-meta__label">{t("dateLabel")}</span>
+              <span className="a4-meta__value">
+                {document.date ? formatDate(document.date, locale) : "—"}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* Party + payment */}
+        <div className="a4-info-grid">
+          <div className="a4-info-card">
+            <p className="a4-info-card__label">{partyLabel}</p>
+            <p className={cn("a4-info-card__value", draft && !document.party_name && "is-placeholder")}>
+              {partyDisplay}
+            </p>
+          </div>
+          <div className="a4-info-card">
+            <p className="a4-info-card__label">{t("paymentMethod")}</p>
+            <p className="a4-info-card__value">{paymentLabel}</p>
             {document.bank_name && (
-              <p className="text-xs text-gray-500 mt-1">
-                {t("bankLabel")} {document.bank_name}
-              </p>
+              <p className="a4-info-card__sub">{t("bankLabel")} {document.bank_name}</p>
             )}
             {document.transfer_number && (
-              <p className="text-xs text-gray-500">
-                {t("transferLabel")} {document.transfer_number}
+              <p className="a4-info-card__sub">{t("transferLabel")} {document.transfer_number}</p>
+            )}
+            {document.transfer_date && (
+              <p className="a4-info-card__sub">
+                {t("transferDateLabel")} {formatDate(document.transfer_date, locale)}
               </p>
             )}
             {document.reference_number && (
-              <p className="text-xs text-gray-500">
-                {t("referenceLabel")} {document.reference_number}
-              </p>
+              <p className="a4-info-card__sub">{t("referenceLabel")} {document.reference_number}</p>
             )}
           </div>
         </div>
 
+        {/* Invoice line items */}
         {invoice && (
-          <table className="w-full mb-8 text-sm">
+          <table className="a4-table">
             <thead>
-              <tr className="border-b-2 border-gray-900">
-                <th className="py-3 font-semibold text-start">{t("itemDescription")}</th>
-                <th className="py-3 text-center font-semibold w-20">{t("quantity")}</th>
-                <th className="py-3 text-center font-semibold w-28">{t("unitPrice")}</th>
-                <th className="py-3 font-semibold w-28 text-end">{t("total")}</th>
+              <tr>
+                <th>{t("itemDescription")}</th>
+                <th className="a4-table__num">{t("quantity")}</th>
+                <th className="a4-table__num">{t("unitPrice")}</th>
+                <th className="a4-table__num a4-table__end">{t("total")}</th>
               </tr>
             </thead>
             <tbody>
               {invoice.items.map((item) => (
-                <tr key={item.id} className="border-b border-gray-100">
-                  <td className="py-3">{item.description}</td>
-                  <td className="py-3 text-center">{item.quantity}</td>
-                  <td className="py-3 text-center">{formatCurrency(item.unit_price, locale)}</td>
-                  <td className="py-3 text-end font-medium">{formatCurrency(item.total, locale)}</td>
+                <tr key={item.id}>
+                  <td>{item.description}</td>
+                  <td className="a4-table__num">{item.quantity}</td>
+                  <td className="a4-table__num">{formatCurrency(item.unit_price, locale)}</td>
+                  <td className="a4-table__num a4-table__end">{formatCurrency(item.total, locale)}</td>
                 </tr>
               ))}
             </tbody>
@@ -113,81 +228,105 @@ export function A4Document({ document, title, className, company: companyProp }:
         )}
 
         {document.description && (
-          <div className="mb-8 rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 mb-1">{t("statement")}</p>
-            <p className="text-sm">{document.description}</p>
+          <div className="a4-block">
+            <p className="a4-block__label">{t("statement")}</p>
+            <p className="a4-block__text">{document.description}</p>
           </div>
         )}
 
-        <div className="flex justify-end mb-12">
-          <div className="w-64 space-y-2">
-            {invoice && invoice.discount > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t("discount")}</span>
-                <span>-{formatCurrency(invoice.discount, locale)}</span>
-              </div>
-            )}
-            <div className="flex justify-between items-center border-t-2 border-gray-900 pt-3">
-              <span className="font-semibold">{t("totalAmount")}</span>
-              <span className="text-2xl font-bold text-indigo-600">
-                {formatCurrency(document.amount, locale)}
+        {notes?.trim() && (
+          <div className="a4-block a4-block--dashed">
+            <p className="a4-block__label">{t("notes")}</p>
+            <p className="a4-block__text">{notes}</p>
+          </div>
+        )}
+
+        {/* Totals */}
+        <div className="a4-totals">
+          {invoice && invoice.discount > 0 && (
+            <div className="a4-totals__row">
+              <span>{t("discount")}</span>
+              <span className="tabular-nums">-{formatCurrency(invoice.discount, locale)}</span>
+            </div>
+          )}
+          {invoice && (
+            <div className="a4-totals__row">
+              <span>{t("subtotal")}</span>
+              <span className="tabular-nums">{formatCurrency(invoice.subtotal, locale)}</span>
+            </div>
+          )}
+          <div className="a4-totals__grand">
+            <span>{t("totalAmount")}</span>
+            <span className="a4-totals__amount tabular-nums">{amountDisplay}</span>
+          </div>
+          {isVoucher && <p className="a4-totals__currency">{t("amountInSar")}</p>}
+          {invoice && (
+            <div className="a4-totals__row a4-totals__row--status">
+              <span>{t("paymentStatusLabel")}</span>
+              <span
+                className={cn(
+                  invoice.payment_status === "paid" && "text-emerald-700",
+                  invoice.payment_status !== "paid" && "text-amber-700"
+                )}
+              >
+                {invoice.payment_status === "paid"
+                  ? t("paidStatus")
+                  : invoice.payment_status === "partial"
+                    ? t("partialStatus")
+                    : t("unpaidStatus")}
               </span>
             </div>
-            {invoice && (
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">{t("paymentStatusLabel")}</span>
-                <span
-                  className={
-                    invoice.payment_status === "paid"
-                      ? "text-emerald-600 font-medium"
-                      : "text-amber-600 font-medium"
-                  }
-                >
-                  {invoice.payment_status === "paid"
-                    ? t("paidStatus")
-                    : invoice.payment_status === "partial"
-                      ? t("partialStatus")
-                      : t("unpaidStatus")}
-                </span>
-              </div>
+          )}
+        </div>
+
+        {/* Signature & stamp */}
+        <div className="a4-signatures">
+          <div className="a4-signatures__item">
+            <div className="a4-signatures__box">
+              {company.signature_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={company.signature_url}
+                  alt={t("signature")}
+                  className="a4-signatures__image"
+                />
+              ) : (
+                <div className="a4-signatures__line" />
+              )}
+            </div>
+            <p className="a4-signatures__label">{t("signature")}</p>
+            {company.responsible_person && (
+              <p className="a4-signatures__name">{company.responsible_person}</p>
             )}
           </div>
-        </div>
 
-        <div className="flex justify-between items-end mt-16 pt-8 border-t border-gray-200">
-          <div className="text-center w-40">
-            <div className="h-16 border-b border-gray-400 mb-2" />
-            <p className="text-xs text-gray-500">{t("signature")}</p>
-          </div>
-          <div className="text-center w-32">
-            <div className="h-20 w-20 mx-auto rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center mb-2">
-              <span className="text-xs text-gray-400">{t("stamp")}</span>
+          <div className="a4-signatures__item a4-signatures__item--stamp">
+            <div className="a4-signatures__box a4-signatures__box--round">
+              {company.stamp_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={company.stamp_url}
+                  alt={t("stamp")}
+                  className="a4-signatures__stamp"
+                />
+              ) : (
+                <span className="a4-signatures__stamp-placeholder">{t("stampShort")}</span>
+              )}
             </div>
-            <p className="text-xs text-gray-500">{t("stamp")}</p>
-          </div>
-          <div className="text-center w-40">
-            <div className="h-16 border-b border-gray-400 mb-2" />
-            <p className="text-xs text-gray-500">{t("accountant")}</p>
+            <p className="a4-signatures__label">{t("stamp")}</p>
           </div>
         </div>
 
-        <div className="mt-8 flex items-end justify-between">
-          <div className="h-16 w-16 border border-gray-200 rounded flex items-center justify-center">
-            <span className="text-[8px] text-gray-400 text-center leading-tight whitespace-pre-line">
-              {t("qrFuture")}
-            </span>
+        {/* Footer */}
+        <footer className="a4-footer">
+          <div className="a4-footer__contact">
+            {company.address && <p>{company.address}</p>}
+            {company.phone && (
+              <p dir="ltr">{company.phone}</p>
+            )}
           </div>
-          <div className={`text-xs text-gray-400 ${locale === "ar" ? "text-left" : "text-right"}`}>
-            <p>{company.address}</p>
-            <p>
-              {company.phone} | {company.email}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-          <p className="text-[10px] text-indigo-300 tracking-widest">{t("watermark")}</p>
-        </div>
+          <p className="a4-footer__powered">{t("poweredBy")}</p>
+        </footer>
       </div>
     </div>
   );

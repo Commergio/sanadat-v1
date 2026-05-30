@@ -16,7 +16,9 @@ import {
   getAuthErrorMessage,
   getSupabaseBrowserClient,
 } from "@/lib/auth/client";
-import { isSupabaseConfigured } from "@/lib/auth/errors";
+import { IS_DEMO_MODE } from "@/lib/constants";
+import { simulateNetworkDelay } from "@/lib/demo";
+import { isSupabaseConfigured } from "@/lib/env";
 import type { z } from "zod";
 
 export function ForgotPasswordForm() {
@@ -39,13 +41,23 @@ export function ForgotPasswordForm() {
   });
 
   const onSubmit = async (data: ForgotInput) => {
-    if (!isSupabaseConfigured()) {
-      toast.error(t("authNotConfigured"));
-      return;
-    }
-
     setLoading(true);
     try {
+      if (IS_DEMO_MODE) {
+        await simulateNetworkDelay();
+        setSent(true);
+        toast.success(t("resetSuccess"), {
+          description: t("resetHint"),
+          duration: 8000,
+        });
+        return;
+      }
+
+      if (!isSupabaseConfigured()) {
+        toast.error(t("authNotConfigured"));
+        return;
+      }
+
       const supabase = getSupabaseBrowserClient();
       const { error } = await supabase.auth.resetPasswordForEmail(
         data.email.trim().toLowerCase(),

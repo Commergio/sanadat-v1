@@ -54,9 +54,4 @@ export function getAuthErrorMessage(
   return t(`errors.${key}`);
 }
 
-export function isSupabaseConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-}
+export { isSupabaseConfigured } from "@/lib/env";

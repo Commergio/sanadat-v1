@@ -1,20 +1,28 @@
-# نظام السندات (Sanadat)
+# سندات (Sanadat)
 
 منصة SaaS سعودية لرقمنة سندات القبض والصرف والفواتير غير الضريبية للمنشآت الصغيرة.
 
+## MVP prototype (management demo)
+
+This branch is configured for **internal review** without Supabase or payment credentials:
+
+- **Demo mode** activates automatically when Supabase env vars are missing (or set `NEXT_PUBLIC_DEMO_MODE=true`).
+- All dashboard and admin pages use **mock data**.
+- Login / register / forgot-password **simulate success** and redirect into the app.
+- Subscription **renew** simulates payment and redirects back with a success message.
+- PDF export, A4 preview, and bilingual UI (Arabic RTL / English LTR) work in the browser.
+
+To connect real backend in phase 2: add Supabase keys and set `NEXT_PUBLIC_DEMO_MODE=false`.
+
 ## Tech Stack
 
-- **Next.js 16** (App Router) + TypeScript
-- **Tailwind CSS v4** + shadcn/ui components
-- **Framer Motion** — animations
-- **Supabase** — database, auth, RLS
-- **next-intl** — Arabic RTL
-- **Zustand** — client state
-- **React Hook Form + Zod** — validation
-- **Recharts** — analytics
-- **jsPDF + html2canvas** — PDF export
+- **Next.js 16** (App Router, webpack build) + TypeScript
+- **Tailwind CSS v4** + shadcn/ui
+- **next-intl** — Arabic & English
+- **Supabase** — optional (phase 2)
+- **Zustand**, **React Hook Form + Zod**, **Recharts**, **jsPDF + html2canvas**
 
-## Getting Started
+## Run locally
 
 ```bash
 npm install
@@ -22,83 +30,57 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — redirects to `/ar`.
+Open:
 
-## Environment Variables
+- Arabic: [http://localhost:3000/ar](http://localhost:3000/ar)
+- English: [http://localhost:3000/en](http://localhost:3000/en)
 
-```env
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-MOYASAR_API_KEY=
-HYPERPAY_ENTITY_ID=
-STC_PAY_MERCHANT_ID=
+**Quick demo path:** Landing → **جرّب النظام** / Dashboard → explore receipts, payments, invoices, PDF, subscription, `/ar/admin`.
+
+No `.env.local` is required for the prototype; an empty file is enough.
+
+## Build
+
+```bash
+npm run build
+npm start
 ```
 
-## Database Setup
+## Deploy to Vercel
 
-Run the migration in Supabase SQL Editor:
+1. Import the GitHub repo in [Vercel](https://vercel.com).
+2. Framework preset: **Next.js** (uses `vercel.json` → `next build --webpack`).
+3. For **demo only**, you can deploy with **no environment variables** — demo mode turns on automatically.
+4. Optional env for custom URL:
+   - `NEXT_PUBLIC_APP_URL` = `https://your-domain.vercel.app`
+   - `NEXT_PUBLIC_DEMO_MODE` = `true`
+5. Deploy. Root `/` redirects to `/ar`.
 
-```
-supabase/migrations/001_initial_schema.sql
-```
+**Phase 2 (production):** add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, run SQL migrations in Supabase, set `NEXT_PUBLIC_DEMO_MODE=false`, configure Auth redirect URLs to include `/auth/callback`.
 
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── [locale]/           # Arabic routes (/ar)
-│   │   ├── page.tsx        # Landing page
-│   │   ├── (auth)/         # Login, Register, Forgot Password
-│   │   ├── dashboard/      # Client dashboard
-│   │   ├── admin/          # Admin dashboard
-│   │   └── onboarding/     # Welcome wizard
-│   └── api/
-│       └── payments/       # Payment create + webhook
-├── components/
-│   ├── ui/                 # shadcn primitives
-│   ├── landing/            # Marketing sections
-│   ├── dashboard/          # Dashboard widgets
-│   ├── documents/          # A4 templates, forms
-│   └── admin/              # Admin sidebar
-├── lib/
-│   ├── payments/           # Moyasar, HyperPay, STC Pay
-│   ├── supabase/           # Client helpers
-│   └── validations.ts      # Zod schemas
-└── stores/                 # Zustand
-```
-
-## Key Routes
+## Key routes
 
 | Route | Description |
 |-------|-------------|
-| `/ar` | Landing page |
-| `/ar/login` | Authentication |
+| `/ar` | Landing |
+| `/ar/login` | Login (demo: any valid form submits) |
+| `/ar/register` | Register |
 | `/ar/dashboard` | Client overview |
 | `/ar/dashboard/receipts` | Receipt vouchers |
 | `/ar/dashboard/payments` | Payment vouchers |
-| `/ar/dashboard/invoices` | Non-tax invoices |
-| `/ar/dashboard/subscription` | Subscription management |
+| `/ar/dashboard/invoices` | Invoices |
+| `/ar/dashboard/subscription` | Subscription |
 | `/ar/admin` | Admin dashboard |
 
-## Business Rules
+Replace `ar` with `en` for English.
 
-- Documents are **immutable** after creation
-- Only **cancellation** is allowed (with reason)
-- Sequential numbering — numbers **never reused**
-- Cancelled documents remain visible in records
-- Admin **cannot edit** client documents
+## Database (phase 2)
 
-## Payment Integration
+Run in Supabase SQL Editor:
 
-Architecture-ready for:
-- **Moyasar** — `MOYASAR_API_KEY`
-- **HyperPay** — `HYPERPAY_ENTITY_ID`
-- **STC Pay** — `STC_PAY_MERCHANT_ID`
-
-Flow: Subscribe → Redirect → Webhook → Activate account
+- `supabase/migrations/001_initial_schema.sql`
+- `supabase/migrations/002_auth_triggers.sql`
+- `supabase/migrations/003_company_logos_storage.sql`
 
 ## License
 

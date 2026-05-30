@@ -11,8 +11,40 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { getChartData } from "@/lib/mock-data";
+
+function ChartTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { name: string; value: number; color: string }[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+
+  return (
+    <div className="rounded-lg border border-border bg-card/95 px-3 py-2.5 shadow-lg backdrop-blur-sm">
+      <p className="mb-2 text-xs font-medium text-muted-foreground">{label}</p>
+      <div className="space-y-1">
+        {payload.map((entry) => (
+          <div key={entry.name} className="flex items-center justify-between gap-6 text-xs">
+            <span className="flex items-center gap-1.5">
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: entry.color }}
+              />
+              {entry.name}
+            </span>
+            <span className="font-semibold tabular-nums">{entry.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function DocumentsChart() {
   const t = useTranslations("dashboard");
@@ -20,51 +52,81 @@ export function DocumentsChart() {
   const data = getChartData(locale);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{t("activity")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={data}>
+    <DashboardSection title={t("activity")} description={t("activityHint")}>
+      <div className="dashboard-card p-4 sm:p-5">
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
             <defs>
-              <linearGradient id="receipts" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
+              <linearGradient id="chartReceipts" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#4f46e5" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="chartPayments" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="chartInvoices" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip />
-            <Legend />
+            <CartesianGrid
+              strokeDasharray="4 4"
+              vertical={false}
+              className="stroke-border/60"
+            />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              axisLine={false}
+              tickLine={false}
+              dy={8}
+            />
+            <YAxis
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              axisLine={false}
+              tickLine={false}
+              width={32}
+            />
+            <Tooltip content={<ChartTooltip />} />
+            <Legend
+              iconType="circle"
+              iconSize={8}
+              wrapperStyle={{ fontSize: 12, paddingTop: 16 }}
+            />
             <Area
               type="monotone"
               dataKey="receipts"
               name={t("receipts")}
-              stroke="#4F46E5"
-              fill="url(#receipts)"
+              stroke="#4f46e5"
+              fill="url(#chartReceipts)"
               strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 0 }}
             />
             <Area
               type="monotone"
               dataKey="payments"
               name={t("payments")}
               stroke="#f59e0b"
-              fill="transparent"
+              fill="url(#chartPayments)"
               strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 0 }}
             />
             <Area
               type="monotone"
               dataKey="invoices"
               name={t("invoices")}
               stroke="#10b981"
-              fill="transparent"
+              fill="url(#chartInvoices)"
               strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 0 }}
             />
           </AreaChart>
         </ResponsiveContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardSection>
   );
 }

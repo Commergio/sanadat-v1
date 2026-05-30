@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
+import { IS_DEMO_MODE } from "@/lib/constants";
 import { getSupabaseBrowserClient } from "@/lib/auth/client";
 
 export function SignOutButton() {
@@ -13,8 +14,10 @@ export function SignOutButton() {
 
   const handleSignOut = async () => {
     try {
-      const supabase = getSupabaseBrowserClient();
-      await supabase.auth.signOut();
+      if (!IS_DEMO_MODE) {
+        const supabase = getSupabaseBrowserClient();
+        await supabase.auth.signOut();
+      }
       toast.success(t("logoutSuccess"));
       router.push("/login");
       router.refresh();

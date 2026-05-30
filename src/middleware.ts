@@ -1,9 +1,8 @@
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
+import { IS_DEMO_MODE, isSupabaseConfigured } from "./lib/env";
 import { updateSession } from "./lib/supabase/middleware";
-
-const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -28,14 +27,12 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some((r) => pathWithoutLocale.startsWith(r));
   const isAdminRoute = pathWithoutLocale.startsWith("/admin");
 
-  if (isDemoMode) {
+  // MVP prototype: open access, mock data, no Supabase session required
+  if (IS_DEMO_MODE) {
     return intlMiddleware(request);
   }
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    if (isProtected) {
-      return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
-    }
+  if (!isSupabaseConfigured()) {
     return intlMiddleware(request);
   }
 

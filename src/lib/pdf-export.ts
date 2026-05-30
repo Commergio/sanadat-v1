@@ -1,26 +1,50 @@
+/** Resolve the DOM node used for PDF rasterization (prefers `.print-area`). */
+export function resolvePdfExportElement(elementId: string): HTMLElement {
+  const container = document.getElementById(elementId);
+  if (!container) throw new Error("Element not found");
+  return container.querySelector<HTMLElement>(".print-area") ?? container;
+}
+
 export async function exportToPdf(elementId: string, filename: string) {
-  const element = document.getElementById(elementId);
-  if (!element) throw new Error("Element not found");
+  const element = resolvePdfExportElement(elementId);
+  document.body.classList.add("pdf-exporting");
 
-  const html2canvas = (await import("html2canvas")).default;
-  const { jsPDF } = await import("jspdf");
+  try {
+    const html2canvas = (await import("html2canvas")).default;
+    const { jsPDF } = await import("jspdf");
 
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    logging: false,
-  });
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-  });
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      width: element.offsetWidth,
+      height: element.offsetHeight,
+      scrollX: 0,
+      scrollY: 0,
+    });
 
-  const imgWidth = 210;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
 
-  pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-  pdf.save(`${filename}.pdf`);
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+    if (imgHeight <= pageHeight) {
+      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, imgHeight);
+    } else {
+      pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
+    }
+
+    pdf.save(`${filename}.pdf`);
+  } finally {
+    document.body.classList.remove("pdf-exporting");
+  }
 }

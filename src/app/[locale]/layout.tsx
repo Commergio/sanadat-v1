@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, isRtlLocale, type Locale } from "@/i18n/routing";
+import { ThemeProvider } from "@wrksz/themes/next";
 import { Providers } from "@/components/providers";
 import "../globals.css";
 
@@ -61,9 +62,17 @@ export default async function LocaleLayout({
       <body
         className={`${fontClass} min-h-screen bg-background font-sans antialiased`}
       >
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers locale={locale}>{children}</Providers>
-        </NextIntlClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+          storage="cookie"
+        >
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <Providers locale={locale}>{children}</Providers>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
