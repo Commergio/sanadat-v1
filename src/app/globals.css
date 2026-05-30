@@ -86,6 +86,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -94,6 +95,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 ::-webkit-scrollbar {
@@ -219,7 +221,7 @@ body {
   max-height: none;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .studio-inspector {
     max-height: calc(100vh - 7.25rem);
   }
@@ -243,6 +245,7 @@ body {
   background:
     radial-gradient(ellipse 120% 80% at 100% -20%, color-mix(in srgb, var(--primary) 6%, transparent), transparent),
     var(--background);
+  overflow-x: hidden;
 }
 
 .landing-section {
@@ -744,10 +747,20 @@ body {
 }
 
 body.pdf-exporting .document-studio-preview,
-body.pdf-exporting .document-preview-export-root {
+body.pdf-exporting .document-preview-export-root,
+body.pdf-exporting .a4-scale-container,
+body.pdf-exporting .a4-scale-frame,
+body.pdf-exporting .a4-scale-content {
   transform: none !important;
   scale: 1 !important;
   box-shadow: none !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+body.pdf-exporting .a4-scale-content {
+  position: static !important;
+  translate: none !important;
 }
 
 @media print {

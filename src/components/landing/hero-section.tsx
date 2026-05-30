@@ -39,8 +39,8 @@ export function HeroSection() {
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-14 lg:grid-cols-[1.12fr_0.88fr] lg:gap-12 xl:gap-16">
-          {/* Copy — dominant */}
-          <div className="relative z-20 order-2 lg:order-1">
+          {/* Copy — primary on all breakpoints */}
+          <div className="relative z-20 order-1">
             <FadeUp>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-xs font-semibold text-primary">
                 <span className="relative flex h-2 w-2">
@@ -52,7 +52,7 @@ export function HeroSection() {
             </FadeUp>
 
             <FadeUp delay={0.06}>
-              <h1 className="max-w-[14ch] text-[2.75rem] font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-[3.5rem] xl:text-[4rem]">
+              <h1 className="max-w-none text-[2rem] font-bold leading-[1.08] tracking-tight sm:max-w-[18ch] sm:text-5xl lg:max-w-[14ch] lg:text-[3.5rem] xl:text-[4rem]">
                 {t("title1")}{" "}
                 <span className="bg-gradient-to-l from-primary via-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-primary dark:to-violet-400">
                   {t("title1Highlight")}
@@ -127,7 +127,7 @@ export function HeroSection() {
 
           {/* Visual — supporting */}
           <motion.div
-            className="relative order-1 lg:order-2 lg:scale-[0.92] lg:origin-center xl:scale-95"
+            className="relative order-2 lg:scale-[0.92] lg:origin-center xl:scale-95"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.12 }}

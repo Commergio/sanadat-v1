@@ -92,22 +92,22 @@ export function AdminSubscriptionsContent() {
       ) : (
         <div className="dashboard-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="w-full min-w-[480px] text-sm">
               <thead>
                 <tr className="border-b border-border/80 bg-muted/30">
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
                     {t("clientCol")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
                     {t("statusCol")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground md:table-cell">
                     {t("renewalDate")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
                     {t("amountCol")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground lg:table-cell">
                     {t("autoRenewCol")}
                   </th>
                 </tr>
@@ -115,8 +115,10 @@ export function AdminSubscriptionsContent() {
               <tbody>
                 {filtered.map((s) => (
                   <tr key={s.id} className="border-b border-border/60 last:border-0 hover:bg-muted/20">
-                    <td className="px-4 py-3 font-medium">{s.clientName}</td>
-                    <td className="px-4 py-3">
+                    <td className="max-w-[140px] px-3 py-3 font-medium sm:max-w-none sm:px-4">
+                      <p className="truncate">{s.clientName}</p>
+                    </td>
+                    <td className="px-3 py-3 sm:px-4">
                       <Badge
                         variant={
                           s.status === "active"
@@ -129,13 +131,13 @@ export function AdminSubscriptionsContent() {
                         {statusLabel(s.status)}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 tabular-nums">
+                    <td className="hidden px-4 py-3 tabular-nums md:table-cell">
                       {formatDate(s.renewalDate, locale)}
                     </td>
-                    <td className="px-4 py-3 font-semibold tabular-nums">
+                    <td className="px-3 py-3 font-semibold tabular-nums sm:px-4">
                       {formatCurrency(s.planPrice, locale)}
                     </td>
-                    <td className="px-4 py-3">{s.autoRenew ? t("yes") : t("no")}</td>
+                    <td className="hidden px-4 py-3 lg:table-cell">{s.autoRenew ? t("yes") : t("no")}</td>
                   </tr>
                 ))}
               </tbody>

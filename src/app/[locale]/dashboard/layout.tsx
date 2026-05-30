@@ -1,6 +1,5 @@
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
-import { DemoModeBanner } from "@/components/shared/demo-mode-banner";
-import { AppFooterBar } from "@/components/shared/app-footer-bar";
+import { DashboardChrome } from "@/components/shared/dashboard-chrome";
 import { FloatingSupport } from "@/components/shared/floating-support";
 
 export default function DashboardLayout({
@@ -9,12 +8,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen min-w-0 overflow-x-hidden">
       <DashboardSidebar />
       <div className="dashboard-shell flex min-w-0 flex-1 flex-col">
-        <DemoModeBanner />
-        {children}
-        <AppFooterBar />
+        <DashboardChrome>{children}</DashboardChrome>
       </div>
       <FloatingSupport />
     </div>

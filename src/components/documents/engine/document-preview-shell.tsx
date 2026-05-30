@@ -1,5 +1,6 @@
 "use client";
 
+import { ResponsiveA4Scale } from "@/components/documents/responsive-a4-scale";
 import { cn } from "@/lib/utils";
 
 interface DocumentPreviewShellProps {
@@ -11,8 +12,7 @@ interface DocumentPreviewShellProps {
 
 /**
  * Wraps A4 preview content with consistent export/print targeting.
- * - detail: padded container; preview id on inner node (print/PDF target)
- * - studio: scaled preview for live editor
+ * Uses ResponsiveA4Scale so preview fits phones/tablets without horizontal scroll.
  */
 export function DocumentPreviewShell({
   previewId,
@@ -20,31 +20,22 @@ export function DocumentPreviewShell({
   children,
   className,
 }: DocumentPreviewShellProps) {
-  if (mode === "detail") {
-    return (
-      <div
-        className={cn(
-          "overflow-auto rounded-xl bg-muted/30 p-3 sm:p-4 lg:p-8",
-          className
-        )}
-      >
-        <div id={previewId} className="mx-auto w-full max-w-[210mm]">
-          {children}
-        </div>
-      </div>
-    );
-  }
+  const maxScale = mode === "studio" ? 0.92 : 1;
 
   return (
     <div
       id={previewId}
       className={cn(
-        "document-preview-export-root w-full max-w-[210mm] origin-top shadow-2xl shadow-black/10 transition-transform duration-200",
-        "scale-[0.42] sm:scale-[0.52] md:scale-[0.58] lg:scale-[0.72] xl:scale-[0.82] 2xl:scale-[0.9]",
+        "document-preview-export-root w-full",
+        mode === "detail" &&
+          "overflow-hidden rounded-xl bg-muted/30 p-2 sm:p-4 lg:p-6",
+        mode === "studio" && "shadow-2xl shadow-black/10",
         className
       )}
     >
-      {children}
+      <ResponsiveA4Scale maxScale={maxScale} padding={mode === "studio" ? 4 : 12}>
+        {children}
+      </ResponsiveA4Scale>
     </div>
   );
 }

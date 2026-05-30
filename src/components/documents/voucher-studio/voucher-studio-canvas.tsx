@@ -36,7 +36,7 @@ export function VoucherStudioCanvas() {
   );
 
   return (
-    <div className="studio-canvas order-1 flex min-h-[320px] flex-col lg:min-h-0 lg:sticky lg:top-0 lg:h-[calc(100vh-7.25rem)]">
+    <div className="studio-canvas order-1 flex min-h-[280px] flex-col md:min-h-0 md:sticky md:top-0 md:h-[calc(100vh-7.25rem)]">
       <div className="flex items-center justify-between border-b border-border/60 bg-muted/40 px-4 py-2">
         <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
           <span className="relative flex h-2 w-2">
@@ -55,7 +55,7 @@ export function VoucherStudioCanvas() {
         </span>
       </div>
 
-      <div className="document-studio-preview flex flex-1 items-start justify-center overflow-auto p-4 lg:p-8">
+      <div className="document-studio-preview flex flex-1 items-start justify-center overflow-hidden p-3 sm:p-4 lg:p-6">
         <DocumentPreviewShell previewId={previewElementId} mode="studio">
           <A4Document
             document={previewDoc}

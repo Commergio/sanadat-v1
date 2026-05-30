@@ -110,7 +110,7 @@ export function QuickActionsHero() {
                     >
                       <action.icon className="h-6 w-6" strokeWidth={2} />
                     </div>
-                    <div className="min-w-0 pe-16">
+                    <div className="min-w-0 sm:pe-16">
                       <p className="text-base font-bold tracking-tight">{t(action.labelKey)}</p>
                       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                         {t(action.descKey)}

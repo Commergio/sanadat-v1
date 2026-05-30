@@ -57,7 +57,9 @@ export function MarketingHeader() {
             </Button>
           </Link>
           <Link href="/register">
-            <Button size="sm">{t("register")}</Button>
+            <Button size="sm" className="px-3 text-xs sm:px-4 sm:text-sm">
+              {t("register")}
+            </Button>
           </Link>
           <Button
             variant="ghost"
@@ -92,6 +94,20 @@ export function MarketingHeader() {
                   {t("dashboard")}
                 </Link>
               )}
+              <Link
+                href="/login"
+                className="rounded-lg px-4 py-3 text-sm font-medium hover:bg-muted"
+                onClick={() => setMobileOpen(false)}
+              >
+                {t("login")}
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-lg px-4 py-3 text-sm font-medium text-primary hover:bg-muted"
+                onClick={() => setMobileOpen(false)}
+              >
+                {t("register")}
+              </Link>
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.href}

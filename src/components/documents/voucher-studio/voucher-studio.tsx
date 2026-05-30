@@ -198,7 +198,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           }
         />
 
-        <div className="grid min-h-0 flex-1 lg:grid-cols-2" dir={isRtl ? "rtl" : "ltr"}>
+        <div className="grid min-h-0 flex-1 md:grid-cols-2" dir={isRtl ? "rtl" : "ltr"}>
           <VoucherStudioCanvas />
           <VoucherStudioForm />
         </div>

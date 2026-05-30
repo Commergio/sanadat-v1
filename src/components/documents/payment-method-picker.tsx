@@ -40,7 +40,7 @@ export function PaymentMethodPicker({ value, onChange }: PaymentMethodPickerProp
   const t = useTranslations("paymentMethods");
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
       {methods.map(({ value: method, icon: Icon, labelKey, accent }) => {
         const selected = value === method;
         return (

@@ -72,10 +72,10 @@ export function HeroVisualShowcase({ className }: { className?: string }) {
         ))}
       </motion.div>
 
-      <div className="relative min-h-[420px] sm:min-h-[460px] lg:min-h-[500px]">
+      <div className="relative min-h-[300px] sm:min-h-[400px] lg:min-h-[480px]">
         {/* Analytics — top corner */}
         <motion.div
-          className="absolute top-0 end-0 z-20 lg:-top-4 lg:end-4"
+          className="absolute top-0 end-0 z-20 origin-top-end scale-[0.85] sm:scale-100 lg:-top-4 lg:end-4"
           animate={floatB}
         >
           <HeroAnalyticsCard />
@@ -101,7 +101,7 @@ export function HeroVisualShowcase({ className }: { className?: string }) {
 
         {/* Receipt card — bottom start */}
         <motion.div
-          className="absolute bottom-2 start-0 z-20 lg:bottom-8 lg:-start-6"
+          className="absolute bottom-0 start-0 z-20 origin-bottom-start scale-[0.9] sm:scale-100 lg:bottom-8 lg:-start-6"
           animate={floatB}
         >
           <HeroReceiptCard />

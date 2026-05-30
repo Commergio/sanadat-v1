@@ -13,7 +13,7 @@ export function FloatingSupport() {
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 start-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+      className="fixed bottom-20 start-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl sm:bottom-6 sm:start-6 sm:h-14 sm:w-14"
       aria-label={t("whatsapp")}
     >
       <MessageCircle className="h-6 w-6" />

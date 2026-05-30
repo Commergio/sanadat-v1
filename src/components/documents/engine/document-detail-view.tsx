@@ -45,12 +45,12 @@ export function DocumentDetailView({
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         {header ? <div className="flex flex-wrap items-center gap-2">{header}</div> : null}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           {actionsExtra}
           <DocumentActionButtons
             exportConfig={exportConfig}
             shareMeta={shareMeta}
-            className="w-full sm:w-auto"
+            className="w-full justify-start sm:w-auto sm:justify-end"
           />
         </div>
       </div>

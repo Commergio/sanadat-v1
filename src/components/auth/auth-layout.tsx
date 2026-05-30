@@ -16,7 +16,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   const t = useTranslations("app");
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden lg:grid lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between auth-gradient p-12 relative overflow-hidden">
         <div className="flex items-center justify-between">
           <Logo href="/" />

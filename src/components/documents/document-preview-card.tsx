@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { A4Document } from "@/components/documents/a4-document";
+import { ResponsiveA4Scale } from "@/components/documents/responsive-a4-scale";
 import { getDocumentConfig } from "@/components/documents/engine";
 import { cn } from "@/lib/utils";
 import type { DocumentType } from "@/lib/types";
@@ -22,7 +23,7 @@ const previews = {
 /** Scaled A4 preview for marketing/auth — uses shared `A4Document` renderer. */
 export function DocumentPreviewCard({
   type,
-  scale = 0.5,
+  scale = 0.7,
   className,
 }: DocumentPreviewCardProps) {
   const t = useTranslations("documents");
@@ -30,13 +31,10 @@ export function DocumentPreviewCard({
   const config = getDocumentConfig(type);
 
   return (
-    <div
-      className={cn("origin-top-right", className)}
-      style={{ transform: `scale(${scale})` }}
-    >
-      <div className="w-[210mm] max-w-none">
+    <div className={cn("w-full max-w-sm", className)}>
+      <ResponsiveA4Scale maxScale={scale} padding={0}>
         <A4Document document={doc} title={t(config.titleKey)} />
-      </div>
+      </ResponsiveA4Scale>
     </div>
   );
 }

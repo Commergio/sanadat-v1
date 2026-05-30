@@ -93,25 +93,25 @@ export function AdminClientsContent() {
       ) : (
         <div className="dashboard-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
+            <table className="w-full min-w-[580px] text-sm">
               <thead>
                 <tr className="border-b border-border/80 bg-muted/30">
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
                     {t("companyCol")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground xl:table-cell">
                     {t("emailCol")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
                     {t("statusCol")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground md:table-cell">
                     {t("expiryCol")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground lg:table-cell">
                     {t("documentsCol")}
                   </th>
-                  <th className="px-4 py-3 text-start font-medium text-muted-foreground">
+                  <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
                     {t("actionsCol")}
                   </th>
                 </tr>
@@ -119,22 +119,25 @@ export function AdminClientsContent() {
               <tbody>
                 {filtered.map((c) => (
                   <tr key={c.id} className="border-b border-border/60 last:border-0 hover:bg-muted/20">
-                    <td className="px-4 py-3 font-medium">{c.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground" dir="ltr">
+                    <td className="max-w-[140px] px-3 py-3 font-medium sm:max-w-none sm:px-4">
+                      <p className="truncate">{c.name}</p>
+                    </td>
+                    <td className="hidden px-4 py-3 text-muted-foreground xl:table-cell" dir="ltr">
                       {c.email}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3 sm:px-4">
                       <Badge variant={statusVariant(c.status)}>{statusLabel(c.status)}</Badge>
                     </td>
-                    <td className="px-4 py-3 tabular-nums">
+                    <td className="hidden px-4 py-3 tabular-nums md:table-cell">
                       {formatDate(c.subscriptionExpires, locale)}
                     </td>
-                    <td className="px-4 py-3 tabular-nums">{c.documentsCount}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
+                    <td className="hidden px-4 py-3 tabular-nums lg:table-cell">{c.documentsCount}</td>
+                    <td className="px-3 py-3 sm:px-4">
+                      <div className="flex min-w-[140px] flex-col gap-1 sm:flex-row sm:flex-wrap">
                         <Button
                           variant="outline"
                           size="sm"
+                          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
                           onClick={() => handleAction("activate", c.name)}
                         >
                           {t("activate")}
@@ -142,6 +145,7 @@ export function AdminClientsContent() {
                         <Button
                           variant="outline"
                           size="sm"
+                          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
                           onClick={() => handleAction("extend", c.name)}
                         >
                           {t("extend")}
@@ -149,7 +153,7 @@ export function AdminClientsContent() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-destructive hover:text-destructive"
+                          className="h-8 px-2 text-xs text-destructive hover:text-destructive sm:h-9 sm:px-3 sm:text-sm"
                           onClick={() => handleAction("suspend", c.name)}
                         >
                           {t("suspend")}
