@@ -5,7 +5,33 @@ export function resolvePdfExportElement(elementId: string): HTMLElement {
   return container.querySelector<HTMLElement>(".print-area") ?? container;
 }
 
+function applyPdfTypography(clonedRoot: HTMLElement) {
+  const sourceDoc = clonedRoot.querySelector<HTMLElement>(".a4-document");
+  if (!sourceDoc) return;
+
+  const liveDoc = document.querySelector<HTMLElement>(".a4-document");
+  const computed = liveDoc ? getComputedStyle(liveDoc) : null;
+
+  sourceDoc.style.fontFamily =
+    computed?.fontFamily ??
+    'var(--font-arabic), "IBM Plex Sans Arabic", "Cairo", "Segoe UI", Tahoma, sans-serif';
+  sourceDoc.style.textRendering = "optimizeLegibility";
+  sourceDoc.style.letterSpacing = "normal";
+  sourceDoc.style.textTransform = "none";
+
+  sourceDoc.querySelectorAll<HTMLElement>("*").forEach((node) => {
+    node.style.letterSpacing = "normal";
+    if (sourceDoc.dir === "rtl") {
+      node.style.textTransform = "none";
+    }
+  });
+}
+
 export async function exportToPdf(elementId: string, filename: string) {
+  if (typeof document !== "undefined" && document.fonts?.ready) {
+    await document.fonts.ready;
+  }
+
   const element = resolvePdfExportElement(elementId);
   document.body.classList.add("pdf-exporting");
 
@@ -24,6 +50,9 @@ export async function exportToPdf(elementId: string, filename: string) {
       height: element.offsetHeight,
       scrollX: 0,
       scrollY: 0,
+      onclone: (_clonedDoc, clonedElement) => {
+        applyPdfTypography(clonedElement);
+      },
     });
 
     const imgData = canvas.toDataURL("image/png");

@@ -78,6 +78,7 @@ export function A4Document({
       <div
         className={cn("a4-document", accentClass, isCancelled && "a4-document--cancelled")}
         dir={dir}
+        lang={locale === "ar" ? "ar" : "en"}
       >
         {isCancelled && !draft && <div className="a4-cancelled-mark" aria-hidden />}
 

@@ -17,8 +17,8 @@ interface ResponsiveA4ScaleProps {
 }
 
 /**
- * Scales A4 content to fit the container width without horizontal page scroll.
- * PDF export resets transforms via `body.pdf-exporting` in globals.css.
+ * Scales A4 content to fit the container width.
+ * Uses `zoom` (not transform) to preserve Arabic cursive joining in preview.
  */
 export function ResponsiveA4Scale({
   children,
@@ -49,24 +49,16 @@ export function ResponsiveA4Scale({
     };
   }, [maxScale, padding]);
 
-  const scaledWidth = A4_WIDTH_PX * scale;
-  const scaledHeight = A4_HEIGHT_PX * scale;
-
   return (
-    <div ref={containerRef} className={cn("a4-scale-container w-full", className)}>
+    <div ref={containerRef} className={cn("a4-scale-container", className)}>
       <div
-        className="a4-scale-frame relative mx-auto shrink-0"
-        style={{ width: scaledWidth, height: scaledHeight }}
+        className="a4-scale-content mx-auto"
+        style={{
+          width: A4_WIDTH_PX,
+          zoom: scale,
+        }}
       >
-        <div
-          className="a4-scale-content absolute top-0 left-1/2 origin-top"
-          style={{
-            width: A4_WIDTH_PX,
-            transform: `translateX(-50%) scale(${scale})`,
-          }}
-        >
-          {children}
-        </div>
+        {children}
       </div>
     </div>
   );

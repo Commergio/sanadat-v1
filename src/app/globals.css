@@ -282,6 +282,8 @@ body {
 .a4-document {
   --a4-accent: #111827;
   --a4-accent-soft: #f3f4f6;
+  --a4-font-ar: var(--font-arabic), "IBM Plex Sans Arabic", "Cairo", "Segoe UI", Tahoma, sans-serif;
+  --a4-font-en: var(--font-sans-en), Inter, system-ui, sans-serif;
   width: 210mm;
   min-height: 297mm;
   margin-inline: auto;
@@ -294,7 +296,26 @@ body {
   display: flex;
   flex-direction: column;
   font-size: 11pt;
-  line-height: 1.5;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.a4-document[dir="rtl"] {
+  font-family: var(--a4-font-ar);
+  direction: rtl;
+  text-align: right;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+.a4-document[dir="ltr"] {
+  font-family: var(--a4-font-en);
+  direction: ltr;
+  text-align: left;
+}
+
+.print-area {
+  font-family: inherit;
 }
 
 .a4-document--receipt {
@@ -348,6 +369,10 @@ body {
   border: 1px solid transparent;
 }
 
+.a4-document[dir="rtl"] .a4-status-badge {
+  letter-spacing: normal;
+}
+
 .a4-status-badge--active {
   color: #047857;
   background: #ecfdf5;
@@ -394,11 +419,22 @@ body {
   opacity: 0.75;
 }
 
+.a4-document[dir="rtl"] .a4-voucher-banner__eyebrow {
+  letter-spacing: normal;
+  text-transform: none;
+  opacity: 0.85;
+}
+
 .a4-voucher-banner__title {
   margin-top: 2px;
   font-size: 17pt;
   font-weight: 800;
   letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.a4-document[dir="rtl"] .a4-voucher-banner__title {
+  letter-spacing: normal;
 }
 
 .a4-invoice-title {
@@ -408,6 +444,7 @@ body {
   font-size: 18pt;
   font-weight: 800;
   color: var(--a4-accent);
+  line-height: 1.35;
 }
 
 .a4-header {
@@ -425,9 +462,10 @@ body {
 }
 
 .a4-meta__row {
-  display: flex;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: auto 1fr;
   gap: 8px;
+  align-items: baseline;
   margin-bottom: 4px;
   font-size: 10pt;
 }
@@ -435,7 +473,7 @@ body {
 .a4-meta__label {
   color: #9ca3af;
   font-weight: 500;
-  min-width: 3.5rem;
+  white-space: nowrap;
 }
 
 .a4-meta__value {
@@ -476,6 +514,12 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #9ca3af;
+}
+
+.a4-document[dir="rtl"] .a4-company__logo-placeholder {
+  letter-spacing: normal;
+  text-transform: none;
+  font-size: 8pt;
 }
 
 .a4-company__name {
@@ -521,6 +565,12 @@ body {
   color: #9ca3af;
 }
 
+.a4-document[dir="rtl"] .a4-info-card__label {
+  letter-spacing: normal;
+  text-transform: none;
+  font-size: 8pt;
+}
+
 .a4-info-card__value {
   font-size: 11pt;
   font-weight: 700;
@@ -552,6 +602,19 @@ body {
   padding: 8px 6px;
   font-weight: 700;
   text-align: start;
+}
+
+.a4-document[dir="rtl"] .a4-table th,
+.a4-document[dir="rtl"] .a4-table td {
+  text-align: right;
+}
+
+.a4-document[dir="rtl"] .a4-table__num {
+  text-align: center;
+}
+
+.a4-document[dir="rtl"] .a4-table__end {
+  text-align: left;
 }
 
 .a4-table td {
@@ -589,6 +652,12 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #9ca3af;
+}
+
+.a4-document[dir="rtl"] .a4-block__label {
+  letter-spacing: normal;
+  text-transform: none;
+  font-size: 8pt;
 }
 
 .a4-block__text {
@@ -746,6 +815,24 @@ body {
   color: #d1d5db;
 }
 
+.a4-document[dir="rtl"] .a4-footer__powered {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* Preview scaling — prefer zoom over transform to preserve Arabic glyph shaping */
+.a4-scale-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.a4-scale-content {
+  transform-origin: top center;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
 body.pdf-exporting .document-studio-preview,
 body.pdf-exporting .document-preview-export-root,
 body.pdf-exporting .a4-scale-container,
@@ -753,6 +840,7 @@ body.pdf-exporting .a4-scale-frame,
 body.pdf-exporting .a4-scale-content {
   transform: none !important;
   scale: 1 !important;
+  zoom: 1 !important;
   box-shadow: none !important;
   width: auto !important;
   height: auto !important;
@@ -761,6 +849,20 @@ body.pdf-exporting .a4-scale-content {
 body.pdf-exporting .a4-scale-content {
   position: static !important;
   translate: none !important;
+}
+
+body.pdf-exporting .a4-document {
+  font-family: var(--a4-font-ar), "IBM Plex Sans Arabic", "Cairo", sans-serif !important;
+  direction: rtl;
+  text-align: right;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+
+body.pdf-exporting .a4-document[dir="ltr"] {
+  font-family: var(--a4-font-en), Inter, system-ui, sans-serif !important;
+  direction: ltr;
+  text-align: left;
 }
 
 @media print {

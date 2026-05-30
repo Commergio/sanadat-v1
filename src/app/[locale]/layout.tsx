@@ -54,8 +54,8 @@ export default async function LocaleLayout({
   const dir = isRtlLocale(locale) ? "rtl" : "ltr";
   const fontClass =
     locale === "ar"
-      ? ibmPlexArabic.variable
-      : `${inter.variable} ${ibmPlexArabic.variable}`;
+      ? `${ibmPlexArabic.variable} ${ibmPlexArabic.className}`
+      : `${inter.variable} ${inter.className} ${ibmPlexArabic.variable}`;
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
