@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
-import { mockSubscription } from "@/lib/mock-data";
+import { useCompany } from "@/hooks/use-company";
 import { SUBSCRIPTION_PRICE } from "@/lib/constants";
 import { daysUntil } from "@/lib/utils";
 import { isRtlLocale } from "@/i18n/routing";
@@ -27,6 +27,8 @@ export function SubscriptionWidget({
   const locale = useLocale();
   const isRtl = isRtlLocale(locale);
   const Chevron = isRtl ? ChevronLeft : ChevronRight;
+  const { subscription } = useCompany();
+  const expiresAt = subscription?.expires_at ?? new Date().toISOString();
   const days = daysUntilExpiry;
   const progress = Math.max(0, Math.min(100, ((365 - days) / 365) * 100));
   const isActive = status === "active";
@@ -54,7 +56,7 @@ export function SubscriptionWidget({
             <p className="mt-1 text-xs text-muted-foreground">
               {ts("expiresIn", { days })}{" "}
               <span className="text-foreground/80">
-                · {formatDate(mockSubscription.expires_at, locale)}
+                · {formatDate(expiresAt, locale)}
               </span>
             </p>
           </div>

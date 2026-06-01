@@ -7,7 +7,7 @@ import { FadeUp } from "@/components/motion/fade-up";
 import { SectionHeader } from "@/components/landing/section-header";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { SUBSCRIPTION_PRICE, IS_DEMO_MODE } from "@/lib/constants";
+import { SUBSCRIPTION_PRICE } from "@/lib/constants";
 
 const featureKeys = [
   "unlimitedVouchers",
@@ -90,7 +90,7 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Link href={IS_DEMO_MODE ? "/login" : "/register"} className="mt-8 block">
+              <Link href="/register" className="mt-8 block">
                 <Button size="lg" className="h-12 w-full text-base shadow-lg shadow-primary/25 sm:h-14">
                   {t("cta")}
                 </Button>

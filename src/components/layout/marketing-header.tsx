@@ -9,7 +9,7 @@ import { Logo } from "@/components/logo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { IS_DEMO_MODE, NAV_LINKS } from "@/lib/constants";
+import { NAV_LINKS } from "@/lib/constants";
 
 export function MarketingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -44,13 +44,6 @@ export function MarketingHeader() {
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
-          {IS_DEMO_MODE && (
-            <Link href="/dashboard" className="hidden sm:block">
-              <Button variant="secondary" size="sm">
-                {t("dashboard")}
-              </Button>
-            </Link>
-          )}
           <Link href="/login" className="hidden sm:block">
             <Button variant="ghost" size="sm">
               {t("login")}
@@ -85,15 +78,6 @@ export function MarketingHeader() {
               <div className="pb-3">
                 <LocaleSwitcher />
               </div>
-              {IS_DEMO_MODE && (
-                <Link
-                  href="/dashboard"
-                  className="rounded-lg px-4 py-3 text-sm font-medium text-primary hover:bg-muted"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {t("dashboard")}
-                </Link>
-              )}
               <Link
                 href="/login"
                 className="rounded-lg px-4 py-3 text-sm font-medium hover:bg-muted"

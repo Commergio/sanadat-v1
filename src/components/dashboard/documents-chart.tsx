@@ -12,7 +12,7 @@ import {
   Legend,
 } from "recharts";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
-import { getChartData } from "@/lib/mock-data";
+import { getEmptyChartData } from "@/lib/placeholders/dashboard";
 
 function ChartTooltip({
   active,
@@ -49,7 +49,7 @@ function ChartTooltip({
 export function DocumentsChart() {
   const t = useTranslations("dashboard");
   const locale = useLocale();
-  const data = getChartData(locale);
+  const data = getEmptyChartData(locale);
 
   return (
     <DashboardSection title={t("activity")} description={t("activityHint")}>

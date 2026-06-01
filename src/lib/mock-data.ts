@@ -1,10 +1,13 @@
 import type {
   DashboardStats,
+  DocumentListRow,
   Invoice,
-  PaymentMethod,
+  InvoiceListRow,
   PaymentVoucher,
   ReceiptVoucher,
 } from "./types";
+
+export type { DocumentListRow, InvoiceListRow } from "./types";
 
 /** Named Saudi demo businesses used across client & admin views */
 export const DEMO_BUSINESSES = {
@@ -17,6 +20,7 @@ export const DEMO_BUSINESSES = {
 
 export const mockCompany = {
   id: "comp-1",
+  owner_id: "demo-user",
   user_id: "demo-user",
   name: DEMO_BUSINESSES.nokhba,
   name_en: "Al Nokhba Trading Est.",
@@ -42,20 +46,6 @@ export const mockSubscription = {
   amount: 399,
   auto_renew: true,
 };
-
-export interface DocumentListRow {
-  id: string;
-  display_number: string;
-  party_name: string;
-  amount: number;
-  date: string;
-  status: "active" | "cancelled";
-  payment_method: PaymentMethod;
-}
-
-export interface InvoiceListRow extends DocumentListRow {
-  payment_status: "paid" | "unpaid";
-}
 
 export const mockReceiptsList: DocumentListRow[] = [
   {

@@ -18,9 +18,9 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompanyAssetUpload } from "@/components/settings/company-asset-upload";
-import { calcCompanyProfileCompletion } from "@/lib/company-local-storage";
-import { IS_DEMO_MODE } from "@/lib/constants";
-import { PrototypeBadge } from "@/components/shared/prototype-badge";
+import { calcCompanyProfileCompletion } from "@/lib/company-profile";
+import { getSupabaseBrowserClient } from "@/lib/auth/client";
+import { isSupabaseConfigured } from "@/lib/env";
 import { createCompanySettingsSchema, type CompanySettingsInput } from "@/lib/validations";
 import { useCompany } from "@/hooks/use-company";
 import { cn } from "@/lib/utils";
@@ -123,12 +123,30 @@ export function CompanySettingsForm() {
 
     setSaving(true);
     try {
-      await new Promise((r) => setTimeout(r, 600));
-
       const completed = calcCompanyProfileCompletion({
         ...company,
         ...data,
       });
+
+      if (isSupabaseConfigured()) {
+        const supabase = getSupabaseBrowserClient();
+        const { error } = await supabase
+          .from("companies")
+          .update({
+            name: data.name,
+            cr_number: data.cr_number,
+            vat_number: data.vat_number || null,
+            license_number: data.license_number,
+            address: data.address,
+            phone: data.phone,
+            responsible_person: data.responsible_person,
+            profile_completed: completed,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", company.id);
+
+        if (error) throw error;
+      }
 
       updateCompanyInStore({
         ...data,
@@ -136,7 +154,7 @@ export function CompanySettingsForm() {
         profile_completed: completed,
       });
 
-      toast.success(IS_DEMO_MODE ? t("saveDemo") : t("saveSuccess"));
+      toast.success(t("saveSuccess"));
     } catch {
       toast.error(t("saveFailed"));
     } finally {
@@ -271,19 +289,19 @@ export function CompanySettingsForm() {
           <CompanyAssetUpload
             kind="logo"
             value={company.logo_url}
-            demoMode={IS_DEMO_MODE}
+            demoMode={false}
             onChange={(url) => updateAsset("logo_url", url)}
           />
           <CompanyAssetUpload
             kind="signature"
             value={company.signature_url}
-            demoMode={IS_DEMO_MODE}
+            demoMode={false}
             onChange={(url) => updateAsset("signature_url", url)}
           />
           <CompanyAssetUpload
             kind="stamp"
             value={company.stamp_url}
-            demoMode={IS_DEMO_MODE}
+            demoMode={false}
             onChange={(url) => updateAsset("stamp_url", url)}
           />
         </div>
@@ -305,11 +323,6 @@ export function CompanySettingsForm() {
         {isDirty ? (
           <p className="mt-2 text-[11px] text-amber-600 dark:text-amber-400">{t("unsavedChanges")}</p>
         ) : null}
-        {IS_DEMO_MODE && (
-          <div className="mt-3 flex justify-center sm:justify-start">
-            <PrototypeBadge />
-          </div>
-        )}
       </div>
     </form>
   );

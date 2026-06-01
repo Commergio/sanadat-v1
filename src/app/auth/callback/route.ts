@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import { routing } from "@/i18n/routing";
+import { ACTIVE_COMPANY_COOKIE } from "@/lib/tenant/constants";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -18,7 +19,33 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(`${origin}${safePath}`);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const response = NextResponse.redirect(`${origin}${safePath}`);
+
+      if (user) {
+        const { data: membership } = await supabase
+          .from("company_members")
+          .select("company_id")
+          .eq("user_id", user.id)
+          .order("accepted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (membership?.company_id) {
+          response.cookies.set(ACTIVE_COMPANY_COOKIE, membership.company_id, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 * 365,
+          });
+        }
+      }
+
+      return response;
     }
   } catch {
     // fall through to login error

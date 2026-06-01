@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { DocumentsTable } from "@/components/dashboard/documents-table";
-import { mockPaymentsList } from "@/lib/mock-data";
+import { emptyPaymentsList } from "@/lib/placeholders/dashboard";
 
 export default async function PaymentsPage() {
   const t = await getTranslations("dashboard");
@@ -11,7 +11,7 @@ export default async function PaymentsPage() {
       <DashboardHeader title={t("payments")} />
       <main className="flex-1 p-4 lg:p-8">
         <DocumentsTable
-          documents={mockPaymentsList}
+          documents={emptyPaymentsList}
           basePath="/dashboard/payments"
           createHref="/dashboard/payments/new"
           createLabel={`+ ${t("newPayment")}`}

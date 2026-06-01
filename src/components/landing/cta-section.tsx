@@ -6,11 +6,9 @@ import { FadeUp } from "@/components/motion/fade-up";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { isRtlLocale } from "@/i18n/routing";
-import { IS_DEMO_MODE } from "@/lib/constants";
 
 export function CtaSection() {
   const t = useTranslations("cta");
-  const th = useTranslations("hero");
   const locale = useLocale();
   const Arrow = isRtlLocale(locale) ? ArrowLeft : ArrowRight;
 
@@ -29,27 +27,16 @@ export function CtaSection() {
                 {t("subtitle")}
               </p>
               <div className="mt-10 flex flex-wrap justify-center gap-3">
-                <Link href={IS_DEMO_MODE ? "/login" : "/register"}>
+                <Link href="/register">
                   <Button
                     size="lg"
                     variant="secondary"
                     className="h-12 gap-2 bg-white px-8 text-base text-primary shadow-xl hover:bg-white/95 sm:h-14"
                   >
-                    {IS_DEMO_MODE ? th("ctaDemoLogin") : t("button")}
+                    {t("button")}
                     <Arrow className="h-4 w-4" />
                   </Button>
                 </Link>
-                {IS_DEMO_MODE && (
-                  <Link href="/dashboard">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="h-12 border-white/30 bg-white/10 px-8 text-base text-white hover:bg-white/20 sm:h-14"
-                    >
-                      {th("ctaDemoExplore")}
-                    </Button>
-                  </Link>
-                )}
               </div>
             </div>
           </div>

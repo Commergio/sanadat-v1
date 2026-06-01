@@ -16,8 +16,6 @@ import {
   getSupabaseBrowserClient,
   useAuthRedirectUrl,
 } from "@/lib/auth/client";
-import { IS_DEMO_MODE } from "@/lib/constants";
-import { simulateNetworkDelay } from "@/lib/demo";
 import { isSupabaseConfigured } from "@/lib/env";
 
 export function LoginForm() {
@@ -29,8 +27,11 @@ export function LoginForm() {
   const redirectUrl = useAuthRedirectUrl("/dashboard");
 
   useEffect(() => {
-    if (searchParams.get("error") === "auth_callback") {
+    const error = searchParams.get("error");
+    if (error === "auth_callback") {
       toast.error(t("callbackError"));
+    } else if (error === "supabase_not_configured") {
+      toast.error(t("authNotConfigured"));
     }
   }, [searchParams, t]);
 
@@ -45,13 +46,6 @@ export function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     setLoading(true);
     try {
-      if (IS_DEMO_MODE) {
-        await simulateNetworkDelay();
-        toast.success(t("loginSuccess"));
-        router.push(redirectUrl);
-        return;
-      }
-
       if (!isSupabaseConfigured()) {
         toast.error(t("authNotConfigured"));
         return;
@@ -118,12 +112,6 @@ export function LoginForm() {
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
         {loading ? t("signingIn") : t("signIn")}
       </Button>
-
-      {IS_DEMO_MODE && (
-        <p className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5 text-center text-xs leading-relaxed text-muted-foreground">
-          {t("demoHint")}
-        </p>
-      )}
 
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}

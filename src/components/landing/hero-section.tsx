@@ -16,7 +16,6 @@ import { Link } from "@/i18n/navigation";
 import { FadeUp } from "@/components/motion/fade-up";
 import { HeroVisualShowcase } from "@/components/landing/hero/hero-visual-showcase";
 import { isRtlLocale } from "@/i18n/routing";
-import { IS_DEMO_MODE } from "@/lib/constants";
 
 const trustItems = [
   { icon: Users, key: "socialProof" as const },
@@ -68,25 +67,22 @@ export function HeroSection() {
 
             <FadeUp delay={0.18}>
               <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                <Link href={IS_DEMO_MODE ? "/login" : "/register"} className="w-full sm:w-auto">
+                <Link href="/register" className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     className="h-12 w-full sm:w-auto gap-2 px-8 text-base shadow-xl shadow-primary/30 sm:h-14"
                   >
-                    {IS_DEMO_MODE ? t("ctaDemoLogin") : t("ctaPrimary")}
+                    {t("ctaPrimary")}
                     <Arrow className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link
-                  href={IS_DEMO_MODE ? "/dashboard" : "/register"}
-                  className="w-full sm:w-auto"
-                >
+                <Link href="/login" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="lg"
                     className="h-12 w-full sm:w-auto border-primary/25 bg-background/80 px-8 text-base backdrop-blur-sm hover:bg-primary/5 sm:h-14"
                   >
-                    {IS_DEMO_MODE ? t("ctaDemoExplore") : t("ctaTrial")}
+                    {t("ctaTrial")}
                   </Button>
                 </Link>
               </div>

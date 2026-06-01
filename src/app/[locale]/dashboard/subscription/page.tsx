@@ -1,110 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { CreditCard, Check, RefreshCw } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { CreditCard } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { SUBSCRIPTION_PRICE, IS_DEMO_MODE } from "@/lib/constants";
-import { mockSubscription } from "@/lib/mock-data";
+import { SUBSCRIPTION_PRICE } from "@/lib/constants";
+import { useCompany } from "@/hooks/use-company";
 import { formatDate } from "@/lib/format";
 import { daysUntil } from "@/lib/utils";
+import { useLocale } from "next-intl";
 
 export default function SubscriptionPage() {
   const t = useTranslations("subscription");
   const locale = useLocale();
-  const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(false);
-  const sub = mockSubscription;
-  const days = daysUntil(sub.expires_at);
-  const progress = Math.max(0, Math.min(100, ((365 - days) / 365) * 100));
+  const { subscription, loading } = useCompany();
 
-  useEffect(() => {
-    if (searchParams.get("payment") === "success") {
-      toast.success(t("paymentDemoSuccess"));
-    }
-  }, [searchParams, t]);
-
-  const handleRenew = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/payments/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gateway: "moyasar", amount: SUBSCRIPTION_PRICE, locale }),
-      });
-      const data = await res.json();
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      } else {
-        toast.info(t("paymentReady"));
-      }
-    } catch {
-      toast.error(t("paymentFailed"));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const expiresAt = subscription?.expires_at ?? new Date().toISOString();
+  const days = daysUntil(expiresAt);
+  const status = subscription?.status ?? "trialing";
 
   return (
     <>
       <DashboardHeader title={t("title")} />
-      <main className="flex-1 p-4 lg:p-8 max-w-2xl space-y-6">
-        {IS_DEMO_MODE && (
-          <p className="text-xs text-muted-foreground rounded-lg border border-dashed border-primary/30 bg-primary/5 px-4 py-3">
-            {t("paymentReady")}
-          </p>
-        )}
+      <main className="max-w-2xl flex-1 space-y-6 p-4 lg:p-8">
+        <p className="rounded-lg border border-dashed border-border px-4 py-3 text-xs text-muted-foreground">
+          {t("paymentReady")}
+        </p>
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-base">
                 <CreditCard className="h-5 w-5 text-primary" />
                 {t("status")}
               </CardTitle>
-              <Badge variant="success">{t("active")}</Badge>
+              <Badge variant={status === "active" ? "success" : "secondary"}>
+                {loading ? "…" : status === "active" ? t("active") : t("status")}
+              </Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-muted-foreground">{t("remaining")}</span>
-                <span className="font-medium">{t("days", { days })}</span>
-              </div>
-              <Progress value={progress} />
-            </div>
-
-            <div className="grid gap-3 text-sm">
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">{t("expiryDate")}</span>
-                <span>{formatDate(sub.expires_at, locale)}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">{t("yearlyAmount")}</span>
-                <span className="font-semibold">
-                  {SUBSCRIPTION_PRICE} {locale === "ar" ? "ر.س" : "SAR"}
-                </span>
-              </div>
-              <div className="flex justify-between py-2">
-                <span className="text-muted-foreground">{t("autoRenew")}</span>
-                <span className="flex items-center gap-1 text-emerald-600">
-                  <Check className="h-4 w-4" />
-                  {t("enabled")}
-                </span>
-              </div>
-            </div>
-
-            <Button className="w-full gap-2" onClick={handleRenew} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-              {loading ? t("renewing") : t("renew")}
-            </Button>
-
-            <p className="text-xs text-center text-muted-foreground">{t("gateways")}</p>
+          <CardContent className="space-y-4 text-sm">
+            <p>
+              {t("yearlyAmount")}: {SUBSCRIPTION_PRICE} SAR
+            </p>
+            <p className="text-muted-foreground">
+              {t("expiryDate")}: {formatDate(expiresAt, locale)} ({t("days", { days })})
+            </p>
           </CardContent>
         </Card>
       </main>

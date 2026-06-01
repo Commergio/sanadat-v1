@@ -1,27 +1,22 @@
-import { mockDashboardStats } from "@/lib/mock-data";
-
 export interface NextDocumentNumber {
   number: number;
   displayNumber: string;
   displayNumberEn: string;
 }
 
-/** Next sequential receipt number for draft UI (demo / pre-save). */
-export function getNextReceiptNumber(): NextDocumentNumber {
-  const next = mockDashboardStats.totalReceipts + 1;
+/** Placeholder until P1 calls get_next_document_number RPC with tenant context. */
+function placeholderNext(prefixAr: string, prefixEn: string): NextDocumentNumber {
   return {
-    number: next,
-    displayNumber: `قبض-${String(next).padStart(3, "0")}`,
-    displayNumberEn: `RCP-${String(next).padStart(3, "0")}`,
+    number: 1,
+    displayNumber: `${prefixAr}-001`,
+    displayNumberEn: `${prefixEn}-001`,
   };
 }
 
-/** Next sequential payment voucher number for draft UI (demo / pre-save). */
+export function getNextReceiptNumber(): NextDocumentNumber {
+  return placeholderNext("قبض", "RCP");
+}
+
 export function getNextPaymentNumber(): NextDocumentNumber {
-  const next = mockDashboardStats.totalPayments + 1;
-  return {
-    number: next,
-    displayNumber: `صرف-${String(next).padStart(3, "0")}`,
-    displayNumberEn: `PAY-${String(next).padStart(3, "0")}`,
-  };
+  return placeholderNext("صرف", "PAY");
 }

@@ -1,32 +1,14 @@
 import { NextResponse } from "next/server";
-import { createPayment } from "@/lib/payments";
-import { getAppUrl } from "@/lib/env";
-import type { PaymentGateway } from "@/lib/types";
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    const gateway = (body.gateway || "moyasar") as PaymentGateway;
-    const amount = body.amount || 399;
-    const locale = body.locale === "en" ? "en" : "ar";
-    const appUrl = getAppUrl();
-
-    const result = await createPayment({
-      gateway,
-      amount,
-      companyId: body.companyId || "demo",
-      callbackUrl: `${appUrl}/${locale}/dashboard/subscription?payment=success`,
-    });
-
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    return NextResponse.json({
-      checkoutUrl: result.checkoutUrl,
-      reference: result.reference,
-    });
-  } catch {
-    return NextResponse.json({ error: "فشل إنشاء عملية الدفع" }, { status: 500 });
-  }
+/** Payment checkout — implemented in P2 (billing). */
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: {
+        code: "NOT_IMPLEMENTED",
+        message: "Subscription payments are not available yet.",
+      },
+    },
+    { status: 501 }
+  );
 }

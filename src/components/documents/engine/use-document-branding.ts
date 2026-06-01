@@ -1,15 +1,23 @@
 "use client";
 
-import { useCompany, getDefaultCompany } from "@/hooks/use-company";
-import { mockCompany } from "@/lib/mock-data";
+import { useCompany } from "@/hooks/use-company";
 import type { Company } from "@/lib/types";
 
 const DEFAULT_WHATSAPP_PHONE = "966500000000";
 
+const EMPTY_COMPANY: Company = {
+  id: "",
+  owner_id: "",
+  name: "",
+  profile_completed: 0,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
 /** Resolve company branding for document rendering and sharing. */
 export function useDocumentBranding(override?: Company): Company {
   const { company: storeCompany } = useCompany();
-  return override ?? storeCompany ?? getDefaultCompany();
+  return override ?? storeCompany ?? EMPTY_COMPANY;
 }
 
 /** Normalize company phone to international WhatsApp format. */

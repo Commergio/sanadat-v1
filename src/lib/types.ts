@@ -1,6 +1,15 @@
+/** @deprecated Use PlatformRole on profiles; kept for legacy DB column */
 export type UserRole = "client" | "admin";
 
-export type SubscriptionStatus = "active" | "expired" | "suspended";
+export type PlatformRole = "platform_admin" | "platform_support";
+
+export type TenantRole = "owner" | "admin" | "accountant" | "viewer";
+
+export type SubscriptionStatus =
+  | "active"
+  | "expired"
+  | "suspended"
+  | "trialing";
 
 export type DocumentType = "receipt_voucher" | "payment_voucher" | "invoice";
 
@@ -16,7 +25,9 @@ export type InvoicePaymentStatus = "paid" | "unpaid" | "partial";
 
 export interface Company {
   id: string;
-  user_id: string;
+  /** @deprecated Use owner_id; kept for DB compatibility */
+  user_id?: string;
+  owner_id: string;
   name: string;
   name_en?: string;
   cr_number?: string;
@@ -144,4 +155,18 @@ export interface DashboardStats {
     date: string;
     status: DocumentStatus;
   }>;
+}
+
+export interface DocumentListRow {
+  id: string;
+  display_number: string;
+  party_name: string;
+  amount: number;
+  date: string;
+  status: DocumentStatus;
+  payment_method: PaymentMethod;
+}
+
+export interface InvoiceListRow extends DocumentListRow {
+  payment_status: InvoicePaymentStatus;
 }

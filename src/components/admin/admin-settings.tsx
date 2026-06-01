@@ -6,7 +6,6 @@ import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminSettingsSkeleton } from "@/components/admin/admin-loading";
 import { useAdminLoading } from "@/components/admin/use-admin-loading";
-import { PrototypeBadge } from "@/components/shared/prototype-badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -65,10 +64,6 @@ export function AdminSettingsContent() {
         <Save className="h-4 w-4" />
         {t("saveSettings")}
       </Button>
-
-      <div className="flex justify-center pt-2">
-        <PrototypeBadge />
-      </div>
     </div>
   );
 }

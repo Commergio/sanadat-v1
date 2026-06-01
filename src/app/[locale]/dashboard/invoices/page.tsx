@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { mockInvoicesList } from "@/lib/mock-data";
+import { emptyInvoicesList } from "@/lib/placeholders/dashboard";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { Search, Plus, Eye } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -19,8 +19,8 @@ export default function InvoicesPage() {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    if (!q) return mockInvoicesList;
-    return mockInvoicesList.filter(
+    if (!q) return emptyInvoicesList;
+    return emptyInvoicesList.filter(
       (inv) =>
         inv.party_name.includes(search) ||
         inv.display_number.toLowerCase().includes(q)

@@ -9,15 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
-import {
-  createForgotPasswordSchema,
-} from "@/lib/validations";
-import {
-  getAuthErrorMessage,
-  getSupabaseBrowserClient,
-} from "@/lib/auth/client";
-import { IS_DEMO_MODE } from "@/lib/constants";
-import { simulateNetworkDelay } from "@/lib/demo";
+import { createForgotPasswordSchema } from "@/lib/validations";
+import { getAuthErrorMessage, getSupabaseBrowserClient } from "@/lib/auth/client";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { z } from "zod";
 
@@ -43,16 +36,6 @@ export function ForgotPasswordForm() {
   const onSubmit = async (data: ForgotInput) => {
     setLoading(true);
     try {
-      if (IS_DEMO_MODE) {
-        await simulateNetworkDelay();
-        setSent(true);
-        toast.success(t("resetSuccess"), {
-          description: t("resetHint"),
-          duration: 8000,
-        });
-        return;
-      }
-
       if (!isSupabaseConfigured()) {
         toast.error(t("authNotConfigured"));
         return;
@@ -83,11 +66,11 @@ export function ForgotPasswordForm() {
   if (sent) {
     return (
       <div className="space-y-6 text-center">
-        <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 p-6">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-900 dark:bg-emerald-950/30">
           <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
             {t("emailSent")}
           </p>
-          <p className="text-sm mt-1 font-mono" dir="ltr">
+          <p className="mt-1 font-mono text-sm" dir="ltr">
             {getValues("email")}
           </p>
         </div>

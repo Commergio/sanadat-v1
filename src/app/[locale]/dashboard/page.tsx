@@ -1,9 +1,9 @@
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { DashboardHome } from "@/components/dashboard/dashboard-home";
-import { mockDashboardStats } from "@/lib/mock-data";
+import { emptyDashboardStats } from "@/lib/placeholders/dashboard";
 
 export default function DashboardPage() {
-  const stats = mockDashboardStats;
+  const stats = emptyDashboardStats;
 
   return (
     <>

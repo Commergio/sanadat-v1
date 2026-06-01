@@ -1,6 +1,5 @@
 /**
- * Runtime environment helpers for MVP prototype vs production.
- * Prototype: works without Supabase or payment keys (mock data + open routes).
+ * Runtime environment helpers for production Sanadat.
  */
 
 const PLACEHOLDER_VALUES = new Set([
@@ -20,10 +19,6 @@ export function isSupabaseConfigured(): boolean {
   if (PLACEHOLDER_VALUES.has(url) || PLACEHOLDER_VALUES.has(key)) return false;
   return true;
 }
-
-/** True when running the management-review prototype (no real backend required). */
-export const IS_DEMO_MODE =
-  !isSupabaseConfigured() || process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 export function getAppUrl(): string {
   return readEnv(process.env.NEXT_PUBLIC_APP_URL) || "http://localhost:3000";

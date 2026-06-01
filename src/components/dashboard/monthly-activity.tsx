@@ -12,7 +12,7 @@ import {
   Legend,
 } from "recharts";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
-import { getChartData } from "@/lib/mock-data";
+import { getEmptyChartData } from "@/lib/placeholders/dashboard";
 
 function ChartTooltip({
   active,
@@ -41,7 +41,7 @@ function ChartTooltip({
 export function MonthlyActivity({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
-  const data = getChartData(locale);
+  const data = getEmptyChartData(locale);
   const height = compact ? 220 : 300;
 
   return (

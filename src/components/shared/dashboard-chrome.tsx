@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "@/i18n/navigation";
-import { DemoModeBanner } from "@/components/shared/demo-mode-banner";
 import { AppFooterBar } from "@/components/shared/app-footer-bar";
 
 const IMMERSIVE_PREFIXES = ["/dashboard/receipts/new", "/dashboard/payments/new"];
@@ -18,9 +17,8 @@ export function DashboardChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {!immersive && <DemoModeBanner />}
       {children}
-      {!immersive && <AppFooterBar />}
+      {!immersive && <AppFooterBar showAdminLink={false} />}
     </>
   );
 }

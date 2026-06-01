@@ -2,8 +2,6 @@ import { getTranslations } from "next-intl/server";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
-import { PrototypeBadge } from "@/components/shared/prototype-badge";
-
 export async function MarketingFooter() {
   const t = await getTranslations("footer");
   const tApp = await getTranslations("app");
@@ -133,7 +131,6 @@ export async function MarketingFooter() {
             <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} {tApp("name")}. {tApp("copyright")}
             </p>
-            <PrototypeBadge />
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-xs text-muted-foreground">
             {legalLinks.map((link) => (

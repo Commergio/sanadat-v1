@@ -4,7 +4,7 @@ import { CreditCard, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatDate } from "@/lib/format";
-import { mockSubscription } from "@/lib/mock-data";
+import { useCompany } from "@/hooks/use-company";
 import { isRtlLocale } from "@/i18n/routing";
 import type { SubscriptionStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,8 @@ export function SubscriptionCompact({
   const locale = useLocale();
   const isRtl = isRtlLocale(locale);
   const Chevron = isRtl ? ChevronLeft : ChevronRight;
+  const { subscription } = useCompany();
+  const expiresAt = subscription?.expires_at ?? new Date().toISOString();
   const isActive = status === "active";
   const statusLabel =
     status === "active" ? ts("active") : status === "suspended" ? ts("suspended") : ts("expired");
@@ -58,7 +60,7 @@ export function SubscriptionCompact({
         </Link>
       </div>
       <p className="mt-2 text-[10px] text-muted-foreground/80">
-        {formatDate(mockSubscription.expires_at, locale)}
+        {formatDate(expiresAt, locale)}
       </p>
     </div>
   );
