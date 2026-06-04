@@ -16,6 +16,8 @@ Production architecture for a scalable, multi-tenant Saudi document SaaS.
 | [Platform admin blueprint](./platform-admin-phase-a-blueprint.md) | Phase A design: internal admin console |
 | [P A.1 platform admin data layer](./pA1-platform-admin-data-layer.md) | Implemented: account status, audit, view, RPCs, RLS (`012`–`014`) |
 | [P A.2 platform admin APIs](./pA2-platform-admin-apis.md) | Implemented: `/api/platform/*`, `requirePlatformContext` |
+| [P A.4 platform announcements](./pA4-platform-announcements.md) | Implemented: announcements, tenant banners |
+| [P A.5 support tickets](./pA5-support-tickets.md) | Implemented: support tickets, notes, activity logs |
 | P1.9 Team Management (app + API + UI) | ✅ Complete — see README P1.9 notes |
 
 ## Status
@@ -33,7 +35,9 @@ Production architecture for a scalable, multi-tenant Saudi document SaaS.
 | P A.1 platform admin data layer | ✅ Migrations `012`–`014` — account status, audit, view, RPCs |
 | P A.2 platform admin APIs | ✅ `/api/platform/*` — dashboard, companies, subscriptions, payments, actions |
 | P A.3 platform admin UI (core) | ✅ Wired overview, clients, detail, subscriptions, payments, actions |
-| P A.4–A.7 platform admin app | ⏳ Announcements, support (see blueprint) |
+| P A.4 platform announcements | ✅ Migration `015`, APIs, admin + tenant banners |
+| P A.5 support tickets | ✅ Migration `016`, tenant + platform APIs and UI |
+| P A.6–A.7 platform admin app | ⏳ See blueprint |
 | Domain layer (`src/domain/`) | ✅ Active in production document flow |
 | Application layer (`src/application/`) | ✅ Use-cases + validation + authorization |
 | Infrastructure (`src/infrastructure/`) | ✅ Supabase repositories + activity logging |

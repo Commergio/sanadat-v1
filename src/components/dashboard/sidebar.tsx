@@ -27,6 +27,7 @@ const mainNav = [
 
 const accountNav = [
   { href: "/dashboard/subscription", labelKey: "subscription", icon: CreditCard },
+  { href: "/dashboard/support", labelKey: "supportNav", icon: LifeBuoy },
   { href: "/dashboard/settings/company", labelKey: "settings", icon: Settings },
   { href: "/dashboard/settings/team", labelKey: "team", icon: Settings },
 ] as const;
@@ -126,13 +127,6 @@ export function DashboardSidebar() {
         </nav>
 
         <div className="border-t border-border/80 p-3 space-y-2">
-          <a
-            href="mailto:info@sanadat.sa"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground"
-          >
-            <LifeBuoy className="h-[18px] w-[18px] stroke-[1.75]" />
-            {t("support")}
-          </a>
           <LocaleSwitcher variant="compact" className="w-full justify-center" />
         </div>
       </aside>

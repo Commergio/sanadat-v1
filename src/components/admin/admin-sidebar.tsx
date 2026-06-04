@@ -9,6 +9,7 @@ import {
   ScrollText,
   Settings,
   Megaphone,
+  LifeBuoy,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin/payments", labelKey: "payments", icon: Wallet },
   { href: "/admin/actions", labelKey: "actionsNav", icon: ScrollText },
   { href: "/admin/announcements", labelKey: "announcementsNav", icon: Megaphone },
+  { href: "/admin/support", labelKey: "supportNav", icon: LifeBuoy },
   { href: "/admin/settings", labelKey: "settings", icon: Settings },
 ] as const;
 
