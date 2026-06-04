@@ -5,11 +5,14 @@ import { DocumentsTimeline } from "@/components/dashboard/documents-timeline";
 import { FirstDocumentOnboarding } from "@/components/dashboard/first-document-onboarding";
 import { MonthlyActivity } from "@/components/dashboard/monthly-activity";
 import { SubscriptionCompact } from "@/components/dashboard/subscription-compact";
+import { AnnouncementBanners } from "@/components/dashboard/announcement-banners";
 import { SubscriptionAlert } from "@/components/dashboard/subscription-alert";
+import { EmptyState } from "@/components/dashboard/empty-state";
 import type { DashboardStats } from "@/lib/types";
 
 interface DashboardHomeProps {
   stats: DashboardStats;
+  loadError?: boolean;
 }
 
 function hasAnyDocuments(stats: DashboardStats): boolean {
@@ -21,12 +24,27 @@ function hasAnyDocuments(stats: DashboardStats): boolean {
   );
 }
 
-export function DashboardHome({ stats }: DashboardHomeProps) {
+export function DashboardHome({ stats, loadError = false }: DashboardHomeProps) {
   const showTimeline = hasAnyDocuments(stats);
+
+  if (loadError) {
+    return (
+      <main className="flex-1 space-y-8 bg-muted/20 p-4 lg:p-8">
+        <EmptyState
+          title="Unable to load dashboard"
+          description="Could not load tenant dashboard data from Supabase. Please refresh and try again."
+          variant="documents"
+          actionLabel="Refresh"
+          actionHref="/dashboard"
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 space-y-8 bg-muted/20 p-4 lg:p-8">
-      <SubscriptionAlert daysUntilExpiry={stats.daysUntilExpiry} />
+      <AnnouncementBanners />
+      <SubscriptionAlert />
 
       <QuickActionsHero />
 
@@ -40,11 +58,8 @@ export function DashboardHome({ stats }: DashboardHomeProps) {
         </div>
 
         <aside className="space-y-6">
-          <MonthlyActivity compact />
-          <SubscriptionCompact
-            daysUntilExpiry={stats.daysUntilExpiry}
-            status={stats.subscriptionStatus}
-          />
+          <MonthlyActivity compact data={stats.monthlyActivity} />
+          <SubscriptionCompact />
         </aside>
       </div>
     </main>

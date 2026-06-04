@@ -1,46 +1,43 @@
-"use client";
-
-import { useLocale, useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { emptyInvoicesList } from "@/lib/placeholders/dashboard";
+import { createClient } from "@/lib/supabase/server";
+import { requireTenantContext } from "@/lib/auth/require-tenant";
+import { buildInvoiceApp } from "@/application/documents/invoice.factory";
+import { toInvoiceListRow } from "@/application/documents/invoice.presenter";
+import { UseCaseError } from "@/application/shared/use-case-error";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { Search, Plus, Eye } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Plus, Eye } from "lucide-react";
 
-export default function InvoicesPage() {
-  const t = useTranslations("dashboard");
-  const locale = useLocale();
-  const [search, setSearch] = useState("");
+export default async function InvoicesPage() {
+  const t = await getTranslations("dashboard");
+  const locale = await getLocale();
+  let errorCode: string | null = null;
+  let invoices: ReturnType<typeof toInvoiceListRow>[] = [];
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase();
-    if (!q) return emptyInvoicesList;
-    return emptyInvoicesList.filter(
-      (inv) =>
-        inv.party_name.includes(search) ||
-        inv.display_number.toLowerCase().includes(q)
-    );
-  }, [search]);
+  try {
+    const ctx = await requireTenantContext();
+    const supabase = await createClient();
+    const app = buildInvoiceApp(supabase);
+    const result = await app.listInvoices(ctx, { limit: 50 });
+    invoices = result.items.map(toInvoiceListRow);
+  } catch (error) {
+    if (error instanceof UseCaseError) {
+      errorCode = error.code;
+    } else {
+      errorCode = "INTERNAL";
+    }
+  }
 
   return (
     <>
       <DashboardHeader title={t("invoices")} />
       <main className="flex-1 space-y-4 p-4 lg:p-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative max-w-md flex-1">
-            <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={t("table.search")}
-              className="h-9 bg-muted/40 pe-10 shadow-none"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          <div className="max-w-md flex-1" />
           <Link href="/dashboard/invoices/new">
             <Button size="sm" className="gap-1.5">
               <Plus className="h-4 w-4" />
@@ -50,11 +47,26 @@ export default function InvoicesPage() {
         </div>
 
         <div className="dashboard-card overflow-hidden">
-          {filtered.length === 0 ? (
+          {errorCode ? (
             <EmptyState
-              title={search ? t("emptySearchTitle") : t("emptyDocsTitle")}
-              description={search ? t("emptySearchDesc") : t("emptyDocsDesc")}
-              variant={search ? "search" : "documents"}
+              title={errorCode === "FORBIDDEN" ? "Access denied" : "Unable to load invoices"}
+              description={
+                errorCode === "FORBIDDEN"
+                  ? "You do not have permission to view invoices."
+                  : errorCode === "VALIDATION"
+                    ? "Invalid request while loading invoices."
+                    : "Please try again in a moment."
+              }
+              variant="documents"
+              actionLabel={`+ ${t("newInvoice")}`}
+              actionHref="/dashboard/invoices/new"
+              className="border-0 bg-transparent"
+            />
+          ) : invoices.length === 0 ? (
+            <EmptyState
+              title={t("emptyDocsTitle")}
+              description={t("emptyDocsDesc")}
+              variant="documents"
               actionLabel={`+ ${t("newInvoice")}`}
               actionHref="/dashboard/invoices/new"
               className="border-0 bg-transparent"
@@ -73,7 +85,7 @@ export default function InvoicesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((inv) => (
+                  {invoices.map((inv) => (
                     <tr
                       key={inv.id}
                       className="group border-b border-border/50 last:border-0 hover:bg-muted/40"

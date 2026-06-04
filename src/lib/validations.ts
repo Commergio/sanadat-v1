@@ -75,7 +75,7 @@ export const createInvoiceItemSchema = (t: T) =>
   z.object({
     description: z.string().min(1, t("descriptionRequired")),
     quantity: z.number().positive(),
-    unit_price: z.number().min(0),
+    unit_price: z.number().positive(t("amountPositive")),
   });
 
 export const createInvoiceSchema = (t: T) =>
@@ -89,6 +89,19 @@ export const createInvoiceSchema = (t: T) =>
     transfer_number: z.string().optional(),
     bank_name: z.string().optional(),
     reference_number: z.string().optional(),
+  }).superRefine((data, ctx) => {
+    const subtotal = data.items.reduce(
+      (sum, item) => sum + Number(item.quantity) * Number(item.unit_price),
+      0
+    );
+    const total = subtotal - Number(data.discount ?? 0);
+    if (total <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: t("amountPositive"),
+        path: ["discount"],
+      });
+    }
   });
 
 // Legacy exports for gradual migration

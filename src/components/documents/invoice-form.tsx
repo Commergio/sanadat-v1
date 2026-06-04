@@ -43,12 +43,47 @@ export function InvoiceForm() {
   );
   const total = Math.max(0, subtotal - Number(discount));
 
-  const onSubmit = async (_data: InvoiceInput) => {
+  const onSubmit = async (data: InvoiceInput) => {
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 1000));
+      const payload = {
+        date: data.date,
+        partyName: data.party_name,
+        description: data.description,
+        paymentMethod: data.payment_method,
+        transferNumber: data.transfer_number,
+        bankName: data.bank_name,
+        referenceNumber: data.reference_number,
+        discount: Number(data.discount || 0),
+        items: data.items.map((item) => ({
+          description: item.description,
+          quantity: Number(item.quantity),
+          unitPrice: Number(item.unit_price),
+        })),
+      };
+
+      const response = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        const code = result?.error?.code as string | undefined;
+        const message = code === "VALIDATION"
+          ? "Validation error: invoice must include valid items and totals."
+          : code === "FORBIDDEN"
+            ? "You do not have permission to create invoices."
+            : code === "NOT_FOUND"
+              ? "Tenant context not found. Please refresh and try again."
+              : result?.error?.message || "Supabase/RLS error while creating invoice.";
+        toast.error(message);
+        return;
+      }
+
       toast.success(t("invoiceCreateSuccess"));
-      router.push("/dashboard/invoices");
+      router.push(result.redirectPath ?? "/dashboard/invoices");
     } catch {
       toast.error(t("createFailed"));
     } finally {

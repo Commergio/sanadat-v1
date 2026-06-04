@@ -5,6 +5,8 @@ import type { DocumentType } from "@/lib/types";
 export const DETAIL_PREVIEW_ELEMENT_ID = "document-preview";
 
 export interface DocumentShareMeta {
+  documentId?: string;
+  documentType?: DocumentType;
   documentNumber: string;
   partyName: string;
   amountLabel: string;

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/auth/client";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { Company, Subscription } from "@/lib/types";
+import type { TenantRole } from "@/lib/tenant/types";
 import { useAppStore } from "@/stores/app-store";
 import { ACTIVE_COMPANY_COOKIE } from "@/lib/tenant/constants";
 import { mapCompanyRow, mapSubscriptionRow } from "@/lib/tenant/mappers";
@@ -20,11 +21,13 @@ export function useCompany() {
   const { company: storeCompany, subscription, setCompany, setSubscription } =
     useAppStore();
   const [loading, setLoading] = useState(true);
+  const [tenantRole, setTenantRole] = useState<TenantRole | null>(null);
 
   const fetchCompany = useCallback(async () => {
     if (!isSupabaseConfigured()) {
       setCompany(null);
       setSubscription(null);
+      setTenantRole(null);
       setLoading(false);
       return;
     }
@@ -58,6 +61,7 @@ export function useCompany() {
       if (!memberships?.length) {
         setCompany(null);
         setSubscription(null);
+        setTenantRole(null);
         return;
       }
 
@@ -78,6 +82,7 @@ export function useCompany() {
       }
 
       setCompany(mapCompanyRow(companyRow as Record<string, unknown>));
+      setTenantRole(active.role as TenantRole);
 
       const { data: subRow } = await supabase
         .from("subscriptions")
@@ -96,6 +101,7 @@ export function useCompany() {
     } catch {
       setCompany(null);
       setSubscription(null);
+      setTenantRole(null);
     } finally {
       setLoading(false);
     }
@@ -121,6 +127,7 @@ export function useCompany() {
   return {
     company: storeCompany,
     subscription,
+    tenantRole,
     loading,
     refresh: fetchCompany,
     updateCompanyInStore,

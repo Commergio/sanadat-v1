@@ -5,82 +5,79 @@ import {
   Users,
   UserCheck,
   AlertTriangle,
-  TrendingUp,
   DollarSign,
-  Repeat,
+  Clock,
+  Ban,
+  Sparkles,
 } from "lucide-react";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { AdminOverviewSkeleton } from "@/components/admin/admin-loading";
-import { useAdminLoading } from "@/components/admin/use-admin-loading";
-import {
-  AdminClientGrowthChart,
-  AdminRevenueChart,
-  AdminSubscriptionBreakdownChart,
-} from "@/components/admin/admin-charts";
-import { adminOverviewStats, adminRecentActivity } from "@/lib/mock-admin-data";
+import { AdminErrorBanner } from "@/components/admin/admin-error-banner";
+import { AdminSubscriptionBreakdownChart } from "@/components/admin/admin-charts";
+import { usePlatformDashboard } from "@/hooks/use-platform-admin";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/format";
-import { cn } from "@/lib/utils";
-
-const activityColors = {
-  payment: "bg-blue-500/10 text-blue-600",
-  subscription: "bg-emerald-500/10 text-emerald-600",
-  client: "bg-amber-500/10 text-amber-600",
-  system: "bg-violet-500/10 text-violet-600",
-};
+import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 
 export function AdminOverviewContent() {
   const t = useTranslations("admin");
   const locale = useLocale();
-  const loading = useAdminLoading();
-  const stats = adminOverviewStats;
+  const { stats, recentActions, loading, error, refresh } = usePlatformDashboard();
 
   if (loading) return <AdminOverviewSkeleton />;
 
+  if (error) {
+    return (
+      <AdminErrorBanner error={error} onRetry={() => void refresh()} retryLabel={t("retry")} />
+    );
+  }
+
+  if (!stats) {
+    return <AdminEmptyState title={t("loadFailed")} description={t("loadFailedDesc")} />;
+  }
+
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <AdminStatCard
           label={t("totalClients")}
-          value={formatNumber(stats.totalClients, locale)}
+          value={formatNumber(stats.totalCompanies, locale)}
           icon={Users}
         />
         <AdminStatCard
           label={t("activeClients")}
-          value={formatNumber(stats.activeClients, locale)}
+          value={formatNumber(stats.activeCompanies, locale)}
           icon={UserCheck}
           accent="success"
         />
         <AdminStatCard
+          label={t("trialing")}
+          value={formatNumber(stats.trialingCompanies, locale)}
+          icon={Sparkles}
+        />
+        <AdminStatCard
           label={t("expiredSubs")}
-          value={formatNumber(stats.expiredSubscriptions, locale)}
+          value={formatNumber(stats.expiredCompanies, locale)}
           icon={AlertTriangle}
           accent="warning"
         />
         <AdminStatCard
-          label={t("monthlyRevenue")}
-          value={formatCurrency(stats.monthlyRevenue, locale)}
+          label={t("suspended")}
+          value={formatNumber(stats.suspendedCompanies, locale)}
+          icon={Ban}
+          accent="warning"
+        />
+        <AdminStatCard
+          label={t("totalRevenue")}
+          value={formatCurrency(stats.totalRevenue, locale)}
           icon={DollarSign}
           accent="primary"
         />
         <AdminStatCard
-          label={t("arr")}
-          value={formatCurrency(stats.arr, locale)}
-          hint={t("arrHint")}
-          icon={Repeat}
-          accent="primary"
+          label={t("pending")}
+          value={formatNumber(stats.pendingPayments, locale)}
+          icon={Clock}
+          accent="warning"
         />
-        <AdminStatCard
-          label={t("monthlyGrowth")}
-          value={`+${stats.monthlyGrowth}%`}
-          icon={TrendingUp}
-          accent="success"
-          trend={t("vsLastMonth")}
-        />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <AdminRevenueChart />
-        <AdminClientGrowthChart />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -89,29 +86,33 @@ export function AdminOverviewContent() {
             <div className="border-b border-border/80 px-5 py-4">
               <p className="text-sm font-semibold">{t("recentActivity")}</p>
             </div>
-            <ul className="divide-y divide-border/60">
-              {adminRecentActivity.map((item) => (
-                <li key={item.id} className="flex items-start gap-3 px-5 py-3.5">
-                  <span
-                    className={cn(
-                      "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold uppercase",
-                      activityColors[item.type]
-                    )}
-                  >
-                    {item.type.slice(0, 2)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm">{t(item.descriptionKey, { client: item.clientName })}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {formatDate(item.time.split("T")[0], locale)}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {recentActions.length === 0 ? (
+              <div className="px-5 py-8 text-center text-sm text-muted-foreground">
+                {t("noActivity")}
+              </div>
+            ) : (
+              <ul className="divide-y divide-border/60">
+                {recentActions.map((item) => (
+                  <li key={item.id} className="flex items-start gap-3 px-5 py-3.5">
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-[10px] font-bold uppercase text-violet-600">
+                      {item.entityType.slice(0, 2)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">{item.action}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {item.entityType} · {item.entityId.slice(0, 8)}…
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {formatDate(item.createdAt, locale)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
-        <AdminSubscriptionBreakdownChart />
+        <AdminSubscriptionBreakdownChart stats={stats} />
       </div>
 
       <div className="dashboard-card border-primary/10 bg-primary/[0.03] p-5">

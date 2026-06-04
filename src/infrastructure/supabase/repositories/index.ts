@@ -1,0 +1,8 @@
+export { SupabaseReceiptRepository } from "./documents/receipt.repository";
+export { SupabasePaymentVoucherRepository } from "./documents/payment-voucher.repository";
+export { SupabaseInvoiceRepository } from "./documents/invoice.repository";
+export { DocumentNumberRepository } from "./documents/document-number.repository";
+export { ActivityLogRepository } from "./documents/activity-log.repository";
+export { TeamRepository } from "./team/team.repository";
+export { BillingRepository } from "./billing/billing.repository";
+export { PlatformRepository } from "./platform/platform.repository";

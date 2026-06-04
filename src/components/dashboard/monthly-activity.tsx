@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { DashboardSection } from "@/components/dashboard/dashboard-section";
 import { getEmptyChartData } from "@/lib/placeholders/dashboard";
+import type { DashboardStats } from "@/lib/types";
 
 function ChartTooltip({
   active,
@@ -38,17 +39,23 @@ function ChartTooltip({
   );
 }
 
-export function MonthlyActivity({ compact = false }: { compact?: boolean }) {
+export function MonthlyActivity({
+  compact = false,
+  data,
+}: {
+  compact?: boolean;
+  data?: DashboardStats["monthlyActivity"];
+}) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
-  const data = getEmptyChartData(locale);
+  const chartData = data?.length ? data : getEmptyChartData(locale);
   const height = compact ? 220 : 300;
 
   return (
     <DashboardSection title={t("monthlyActivity")} description={t("activityHint")}>
       <div className="dashboard-card p-3 sm:p-4">
         <ResponsiveContainer width="100%" height={height}>
-          <AreaChart data={data} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
             <defs>
               <linearGradient id="homeReceipts" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.2} />

@@ -6,8 +6,9 @@ import {
   Users,
   CreditCard,
   Wallet,
-  MessageSquare,
+  ScrollText,
   Settings,
+  Megaphone,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,8 @@ const navItems = [
   { href: "/admin/clients", labelKey: "clients", icon: Users },
   { href: "/admin/subscriptions", labelKey: "subscriptions", icon: CreditCard },
   { href: "/admin/payments", labelKey: "payments", icon: Wallet },
-  { href: "/admin/messages", labelKey: "messages", icon: MessageSquare },
+  { href: "/admin/actions", labelKey: "actionsNav", icon: ScrollText },
+  { href: "/admin/announcements", labelKey: "announcementsNav", icon: Megaphone },
   { href: "/admin/settings", labelKey: "settings", icon: Settings },
 ] as const;
 

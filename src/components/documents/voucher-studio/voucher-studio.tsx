@@ -107,9 +107,49 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
     !(name === "amount" && !values.amount);
 
   const onSubmit = useCallback(
-    async (_data: VoucherStudioFormData) => {
+    async (data: VoucherStudioFormData) => {
       setLoading(true);
       try {
+        if (config.type === "receipt_voucher" || config.type === "payment_voucher") {
+          const endpoint =
+            config.type === "receipt_voucher" ? "/api/receipts" : "/api/payment-vouchers";
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              date: data.date,
+              amount: Number(data.amount),
+              partyName: data.party_name,
+              description: data.description,
+              notes: data.notes,
+              paymentMethod: data.payment_method,
+              transferNumber: data.transfer_number,
+              bankName: data.bank_name,
+              transferDate: data.transfer_date,
+              referenceNumber: data.reference_number,
+            }),
+          });
+          const payload = await response.json();
+          if (!response.ok) {
+            const code = payload?.error?.code as string | undefined;
+            const message = code === "VALIDATION"
+              ? "Validation error: please check required fields and amount."
+              : code === "FORBIDDEN"
+                ? `You do not have permission to create ${config.type === "receipt_voucher" ? "receipts" : "payment vouchers"}.`
+                : code === "NOT_FOUND"
+                  ? "Tenant context not found. Please refresh and try again."
+                  : code === "CONFLICT"
+                    ? "Document number conflict. Please retry."
+                    : payload?.error?.message || "Supabase/RLS error while creating document.";
+            toast.error(message);
+            return;
+          }
+          clearDraft(config.draftStorageKey);
+          toast.success(t("createSuccess"));
+          router.push(payload.redirectPath ?? config.redirectPath);
+          return;
+        }
+
         await new Promise((r) => setTimeout(r, 900));
         clearDraft(config.draftStorageKey);
         toast.success(t("createSuccess"));

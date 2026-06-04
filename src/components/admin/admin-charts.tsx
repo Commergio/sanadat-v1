@@ -15,7 +15,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { adminRevenueChartData, adminSubscriptionBreakdown } from "@/lib/mock-admin-data";
+import { adminRevenueChartData } from "@/lib/mock-admin-data";
+import type { PlatformDashboardStatsModel } from "@/lib/platform/api-client";
 import { formatCurrency, formatNumber } from "@/lib/format";
 
 export function AdminRevenueChart() {
@@ -70,13 +71,27 @@ export function AdminClientGrowthChart() {
   );
 }
 
-export function AdminSubscriptionBreakdownChart() {
+export function AdminSubscriptionBreakdownChart({
+  stats,
+}: {
+  stats: PlatformDashboardStatsModel;
+}) {
   const t = useTranslations("admin");
   const data = [
-    { name: t("filterActive"), value: adminSubscriptionBreakdown.active, color: "#059669" },
-    { name: t("filterExpiringSoon"), value: adminSubscriptionBreakdown.expiringSoon, color: "#d97706" },
-    { name: t("filterExpired"), value: adminSubscriptionBreakdown.expired, color: "#dc2626" },
-  ];
+    { name: t("filterActive"), value: stats.activeCompanies, color: "#059669" },
+    { name: t("trialing"), value: stats.trialingCompanies, color: "#6366f1" },
+    { name: t("filterExpired"), value: stats.expiredCompanies, color: "#dc2626" },
+    { name: t("suspended"), value: stats.suspendedCompanies, color: "#d97706" },
+  ].filter((d) => d.value > 0);
+
+  if (data.length === 0) {
+    return (
+      <div className="dashboard-card p-5">
+        <p className="mb-4 text-sm font-semibold">{t("subscriptionBreakdown")}</p>
+        <p className="text-sm text-muted-foreground py-8 text-center">{t("noActivity")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-card p-5">

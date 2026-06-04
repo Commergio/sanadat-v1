@@ -7,9 +7,15 @@ export const emptyDashboardStats: DashboardStats = {
   totalReceipts: 0,
   totalPayments: 0,
   totalInvoices: 0,
+  totalReceivedAmount: 0,
+  totalPaidAmount: 0,
+  totalInvoiceAmount: 0,
+  activeDocumentsCount: 0,
+  cancelledDocumentsCount: 0,
   subscriptionStatus: "trialing",
   subscriptionExpiresAt: new Date().toISOString(),
   daysUntilExpiry: 14,
+  monthlyActivity: [],
   recentDocuments: [],
 };
 

@@ -35,6 +35,8 @@ export function DocumentDetailView({
   };
 
   const shareMeta = {
+    documentId: document.id,
+    documentType: document.type,
     documentNumber: document.display_number,
     partyName: document.party_name,
     amountLabel: formatCurrency(amount, locale),

@@ -16,7 +16,30 @@ export function useDocumentActions(
   const company = useDocumentBranding();
 
   const { previewElementId, pdfFilenamePrefix } = exportConfig;
-  const { documentNumber, partyName, amountLabel } = shareMeta;
+  const { documentId, documentType, documentNumber, partyName, amountLabel } = shareMeta;
+
+  const logActivity = useCallback(
+    async (action: "document.exported" | "document.shared") => {
+      if (!documentId || !documentType) return;
+      try {
+        await fetch("/api/documents/activity", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action,
+            entityId: documentId,
+            metadata: {
+              documentType,
+              displayNumber: documentNumber,
+            },
+          }),
+        });
+      } catch {
+        // best-effort only
+      }
+    },
+    [documentId, documentType, documentNumber]
+  );
 
   const pdfFilename = useMemo(
     () => `${pdfFilenamePrefix}-${documentNumber}`,
@@ -31,10 +54,11 @@ export function useDocumentActions(
     try {
       await exportToPdf(previewElementId, pdfFilename);
       toast.success(t("pdfSuccess"));
+      void logActivity("document.exported");
     } catch {
       toast.error(t("pdfFailed"));
     }
-  }, [previewElementId, pdfFilename, t]);
+  }, [previewElementId, pdfFilename, t, logActivity]);
 
   const shareWhatsApp = useCallback(() => {
     const message = t("whatsappMessage", {
@@ -44,7 +68,8 @@ export function useDocumentActions(
       amount: amountLabel,
     });
     window.open(generateWhatsAppLink(resolveWhatsAppPhone(company), message), "_blank");
-  }, [company, documentNumber, partyName, amountLabel, shareMeta.documentTitle, t]);
+    void logActivity("document.shared");
+  }, [company, documentNumber, partyName, amountLabel, shareMeta.documentTitle, t, logActivity]);
 
   return { print, exportPdf, shareWhatsApp };
 }

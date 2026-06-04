@@ -1,13 +1,19 @@
 import createMiddleware from "next-intl/middleware";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
+import { hasPlatformStaffAccess } from "./lib/auth/platform-staff";
+import {
+  buildLoginUrl,
+  resolveAuthenticatedRedirect,
+} from "./lib/auth/post-login-redirect";
 import { isSupabaseConfigured } from "./lib/env";
+import { parseLocalizedPath } from "./lib/middleware/paths";
 import { updateSession } from "./lib/supabase/middleware";
 import { ACTIVE_COMPANY_COOKIE } from "./lib/tenant/constants";
 
 const intlMiddleware = createMiddleware(routing);
 
-const protectedPrefixes = ["/dashboard"];
+const tenantProtectedPrefixes = ["/dashboard"];
 const authRoutes = ["/login", "/register", "/forgot-password"];
 const adminPrefix = "/admin";
 
@@ -20,18 +26,17 @@ function withCookies(target: NextResponse, source: NextResponse) {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const locale = pathname.split("/")[1] || "ar";
-  const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
+  const { locale, pathWithoutLocale } = parseLocalizedPath(pathname);
 
-  const isProtected = protectedPrefixes.some((p) =>
+  const isTenantRoute = tenantProtectedPrefixes.some((p) =>
     pathWithoutLocale.startsWith(p)
   );
   const isAuthRoute = authRoutes.some((r) => pathWithoutLocale.startsWith(r));
   const isAdminRoute = pathWithoutLocale.startsWith(adminPrefix);
 
   if (!isSupabaseConfigured()) {
-    if (isProtected || isAdminRoute) {
-      const loginUrl = new URL(`/${locale}/login`, request.url);
+    if (isTenantRoute || isAdminRoute) {
+      const loginUrl = buildLoginUrl(request.url, locale, pathname);
       loginUrl.searchParams.set("error", "supabase_not_configured");
       return NextResponse.redirect(loginUrl);
     }
@@ -40,48 +45,54 @@ export async function middleware(request: NextRequest) {
 
   const { supabaseResponse, user, supabase } = await updateSession(request);
 
-  if (isProtected && !user) {
+  // ─── Platform admin console (before tenant/dashboard guards) ───────────────
+  if (isAdminRoute) {
+    if (!user) {
+      return withCookies(
+        NextResponse.redirect(buildLoginUrl(request.url, locale, pathname)),
+        supabaseResponse
+      );
+    }
+
+    const isStaff = await hasPlatformStaffAccess(supabase, user.id);
+    if (!isStaff) {
+      return withCookies(
+        NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url)),
+        supabaseResponse
+      );
+    }
+
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-pathname", pathname);
+    const intlResponse = intlMiddleware(
+      new NextRequest(request.url, { headers: requestHeaders })
+    );
+    return withCookies(intlResponse, supabaseResponse);
+  }
+
+  // ─── Tenant dashboard (requires auth + company context in pages/APIs) ──────
+  if (isTenantRoute && !user) {
     const loginUrl = new URL(`/${locale}/login`, request.url);
     loginUrl.searchParams.set("redirect", pathWithoutLocale);
     return withCookies(NextResponse.redirect(loginUrl), supabaseResponse);
   }
 
   if (isAuthRoute && user) {
-    const redirect = request.nextUrl.searchParams.get("redirect");
-    const target = redirect?.startsWith("/")
-      ? redirect.startsWith(`/${locale}`)
-        ? redirect
-        : `/${locale}${redirect}`
-      : `/${locale}/dashboard`;
+    const target = resolveAuthenticatedRedirect(
+      request.nextUrl.searchParams,
+      locale
+    );
     return withCookies(
       NextResponse.redirect(new URL(target, request.url)),
       supabaseResponse
     );
   }
 
-  // P0: platform admin backend not implemented — block /admin
-  if (isAdminRoute) {
-    if (!user) {
-      const loginUrl = new URL(`/${locale}/login`, request.url);
-      return withCookies(NextResponse.redirect(loginUrl), supabaseResponse);
-    }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("platform_role")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.platform_role !== "platform_admin") {
-      return withCookies(
-        NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url)),
-        supabaseResponse
-      );
-    }
-  }
-
-  // Ensure active company cookie when entering dashboard
-  if (isProtected && user && !request.cookies.get(ACTIVE_COMPANY_COOKIE)?.value) {
+  if (
+    isTenantRoute &&
+    user &&
+    !request.cookies.get(ACTIVE_COMPANY_COOKIE)?.value
+  ) {
     const { data: membership } = await supabase
       .from("company_members")
       .select("company_id")

@@ -1,36 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type {
-  AuthSession,
-  CompanyMembership,
-  TenantContext,
-} from "./types";
+import { getAuthSession } from "@/lib/auth/session";
+import type { CompanyMembership, TenantContext } from "./types";
 import { TenantResolutionError } from "./errors";
 import { mapCompanyRow, mapMembershipRow, mapSubscriptionRow } from "./mappers";
 
-/**
- * Loads the authenticated user's session metadata from profiles.
- */
-export async function getAuthSession(
-  supabase: SupabaseClient
-): Promise<AuthSession | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user?.email) return null;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("platform_role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  return {
-    userId: user.id,
-    email: user.email,
-    platformRole: profile?.platform_role ?? null,
-  };
-}
+export { getAuthSession };
 
 /**
  * Lists all company memberships for a user.

@@ -1,21 +1,32 @@
-import { createClient } from "@/lib/supabase/server";
-import { getAuthSession, type AuthSession } from "@/lib/tenant";
-import { isSupabaseConfigured } from "@/lib/env";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { resolvePlatformStaffRole } from "@/lib/auth/platform-staff";
+import type { AuthSession } from "@/lib/tenant/types";
 
 /**
- * Returns the current authenticated session or null.
- * Use in Server Components and Route Handlers.
+ * Auth session for the signed-in user (Supabase Auth + profiles.platform_role).
+ * Does not load tenant/company context.
  */
-export async function getServerAuthSession(): Promise<AuthSession | null> {
-  if (!isSupabaseConfigured()) return null;
-  const supabase = await createClient();
-  return getAuthSession(supabase);
+export async function getAuthSession(
+  supabase: SupabaseClient
+): Promise<AuthSession | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user?.email) return null;
+
+  const platformRole = await resolvePlatformStaffRole(supabase, user.id);
+
+  return {
+    userId: user.id,
+    email: user.email,
+    platformRole,
+  };
 }
 
-/**
- * Returns true when the user has a valid Supabase session.
- */
-export async function isAuthenticated(): Promise<boolean> {
-  const session = await getServerAuthSession();
-  return session !== null;
+/** Server convenience: auth session without tenant context. */
+export async function getServerAuthSession(): Promise<AuthSession | null> {
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  return getAuthSession(supabase);
 }

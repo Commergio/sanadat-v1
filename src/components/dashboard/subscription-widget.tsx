@@ -5,35 +5,43 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
-import { useCompany } from "@/hooks/use-company";
 import { SUBSCRIPTION_PRICE } from "@/lib/constants";
 import { daysUntil } from "@/lib/utils";
 import { isRtlLocale } from "@/i18n/routing";
 import type { SubscriptionStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useBilling } from "@/hooks/use-billing";
 
-interface SubscriptionWidgetProps {
-  daysUntilExpiry: number;
-  status?: SubscriptionStatus;
-}
-
-export function SubscriptionWidget({
-  daysUntilExpiry,
-  status = "active",
-}: SubscriptionWidgetProps) {
+export function SubscriptionWidget() {
   const t = useTranslations("dashboard.subscriptionWidget");
   const ts = useTranslations("dashboard.stats");
   const locale = useLocale();
   const isRtl = isRtlLocale(locale);
   const Chevron = isRtl ? ChevronLeft : ChevronRight;
-  const { subscription } = useCompany();
-  const expiresAt = subscription?.expires_at ?? new Date().toISOString();
-  const days = daysUntilExpiry;
+  const { subscription, loading } = useBilling();
+
+  if (loading) {
+    return (
+      <div className="dashboard-card p-5 sm:p-6">
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  const status: SubscriptionStatus = subscription?.status ?? "trialing";
+  const expiresAtValue = subscription?.expiresAt ?? new Date().toISOString();
+  const days = daysUntil(expiresAtValue);
   const progress = Math.max(0, Math.min(100, ((365 - days) / 365) * 100));
   const isActive = status === "active";
+  const price = subscription && subscription.amount > 0 ? subscription.amount : SUBSCRIPTION_PRICE;
   const statusLabel =
-    status === "active" ? ts("active") : status === "suspended" ? ts("suspended") : ts("expired");
+    status === "active"
+      ? ts("active")
+      : status === "suspended"
+        ? ts("suspended")
+        : ts("expired");
 
   return (
     <div className="dashboard-card relative overflow-hidden p-5 sm:p-6">
@@ -55,9 +63,7 @@ export function SubscriptionWidget({
             <p className="mt-0.5 text-lg font-semibold tracking-tight">{statusLabel}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {ts("expiresIn", { days })}{" "}
-              <span className="text-foreground/80">
-                · {formatDate(expiresAt, locale)}
-              </span>
+              <span className="text-foreground/80">· {formatDate(expiresAtValue, locale)}</span>
             </p>
           </div>
         </div>
@@ -65,12 +71,14 @@ export function SubscriptionWidget({
         <div className="flex items-center gap-4 sm:flex-col sm:items-end">
           <div className="text-end">
             <p className="text-2xl font-bold tabular-nums tracking-tight">
-              {SUBSCRIPTION_PRICE}
+              {price}
               <span className="text-sm font-normal text-muted-foreground ms-1">
                 {locale === "ar" ? "ر.س/سنة" : "SAR/yr"}
               </span>
             </p>
-            <p className="text-[11px] text-muted-foreground">{t("autoRenewOn")}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {subscription?.cancelAtPeriodEnd ? t("autoRenewOff") : t("autoRenewOn")}
+            </p>
           </div>
           <Link href="/dashboard/subscription">
             <Button size="sm" variant="outline" className="gap-1.5 shrink-0 bg-background/60">

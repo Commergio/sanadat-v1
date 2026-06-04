@@ -9,7 +9,10 @@ export type SubscriptionStatus =
   | "active"
   | "expired"
   | "suspended"
-  | "trialing";
+  | "trialing"
+  | "cancelled";
+
+export type BillingCycle = "monthly" | "yearly";
 
 export type DocumentType = "receipt_voucher" | "payment_voucher" | "invoice";
 
@@ -17,7 +20,7 @@ export type DocumentStatus = "active" | "cancelled";
 
 export type PaymentMethod = "cash" | "bank_transfer" | "pos";
 
-export type PaymentGateway = "moyasar" | "hyperpay" | "stc_pay";
+export type PaymentGateway = "moyasar" | "hyperpay" | "stc_pay" | "manual";
 
 export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
 
@@ -54,6 +57,12 @@ export interface Subscription {
   starts_at: string;
   expires_at: string;
   auto_renew: boolean;
+  plan_code?: string;
+  billing_cycle?: BillingCycle;
+  next_renewal_at?: string;
+  cancel_at_period_end?: boolean;
+  cancelled_at?: string;
+  cancelled_by?: string;
   created_at: string;
 }
 
@@ -143,9 +152,20 @@ export interface DashboardStats {
   totalReceipts: number;
   totalPayments: number;
   totalInvoices: number;
+  totalReceivedAmount: number;
+  totalPaidAmount: number;
+  totalInvoiceAmount: number;
+  activeDocumentsCount: number;
+  cancelledDocumentsCount: number;
   subscriptionStatus: SubscriptionStatus;
   subscriptionExpiresAt: string;
   daysUntilExpiry: number;
+  monthlyActivity: Array<{
+    month: string;
+    receipts: number;
+    payments: number;
+    invoices: number;
+  }>;
   recentDocuments: Array<{
     id: string;
     type: DocumentType;

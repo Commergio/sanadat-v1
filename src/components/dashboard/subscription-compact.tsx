@@ -4,30 +4,40 @@ import { CreditCard, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { formatDate } from "@/lib/format";
-import { useCompany } from "@/hooks/use-company";
 import { isRtlLocale } from "@/i18n/routing";
 import type { SubscriptionStatus } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, daysUntil } from "@/lib/utils";
+import { useBilling } from "@/hooks/use-billing";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface SubscriptionCompactProps {
-  daysUntilExpiry: number;
-  status?: SubscriptionStatus;
-}
-
-export function SubscriptionCompact({
-  daysUntilExpiry,
-  status = "active",
-}: SubscriptionCompactProps) {
+export function SubscriptionCompact() {
   const t = useTranslations("dashboard.subscriptionWidget");
   const ts = useTranslations("dashboard.stats");
   const locale = useLocale();
   const isRtl = isRtlLocale(locale);
   const Chevron = isRtl ? ChevronLeft : ChevronRight;
-  const { subscription } = useCompany();
-  const expiresAt = subscription?.expires_at ?? new Date().toISOString();
+  const { subscription, loading } = useBilling();
+
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-border/80 bg-muted/20 px-4 py-3">
+        <Skeleton className="h-16 w-full" />
+      </div>
+    );
+  }
+
+  const status: SubscriptionStatus = subscription?.status ?? "trialing";
+  const expiresAt = subscription?.expiresAt ?? new Date().toISOString();
+  const daysUntilExpiry = daysUntil(expiresAt);
   const isActive = status === "active";
   const statusLabel =
-    status === "active" ? ts("active") : status === "suspended" ? ts("suspended") : ts("expired");
+    status === "active"
+      ? ts("active")
+      : status === "suspended"
+        ? ts("suspended")
+        : status === "cancelled"
+          ? ts("cancelled")
+          : ts("expired");
 
   return (
     <div className="rounded-xl border border-border/80 bg-muted/20 px-4 py-3">

@@ -2,9 +2,12 @@ export type SubscriptionStatus =
   | "active"
   | "expired"
   | "suspended"
-  | "trialing";
+  | "trialing"
+  | "cancelled";
 
-export type PaymentGateway = "moyasar" | "hyperpay" | "stc_pay";
+export type BillingCycle = "monthly" | "yearly";
+
+export type PaymentGateway = "moyasar" | "hyperpay" | "stc_pay" | "manual";
 
 export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
 
@@ -24,13 +27,19 @@ export interface SubscriptionPlan {
 export interface Subscription {
   id: string;
   companyId: string;
-  planId: string;
+  planId?: string;
+  planCode?: string;
+  billingCycle?: BillingCycle;
   status: SubscriptionStatus;
   amount: number;
   currency: string;
   startsAt: string;
   expiresAt: string;
+  nextRenewalAt?: string;
   autoRenew: boolean;
+  cancelAtPeriodEnd?: boolean;
+  cancelledAt?: string;
+  cancelledBy?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -44,6 +53,15 @@ export interface PaymentTransaction {
   currency: string;
   status: PaymentStatus;
   gatewayReference: string | null;
+  providerEventId?: string | null;
+  checkoutSessionId?: string | null;
+  paymentIntentId?: string | null;
+  paidAt?: string | null;
+  failedAt?: string | null;
+  failureCode?: string | null;
+  failureReason?: string | null;
+  periodStart?: string | null;
+  periodEnd?: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
 }

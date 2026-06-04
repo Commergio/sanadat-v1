@@ -307,9 +307,15 @@ export const mockDashboardStats: DashboardStats = {
   totalReceipts: 128,
   totalPayments: 64,
   totalInvoices: 42,
+  totalReceivedAmount: 32200,
+  totalPaidAmount: 20200,
+  totalInvoiceAmount: 74550,
+  activeDocumentsCount: 5,
+  cancelledDocumentsCount: 1,
   subscriptionStatus: "active",
   subscriptionExpiresAt: mockSubscription.expires_at,
   daysUntilExpiry: 85,
+  monthlyActivity: getChartData("ar"),
   recentDocuments: [
     {
       id: "1",

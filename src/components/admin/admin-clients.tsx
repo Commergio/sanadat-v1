@@ -1,13 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Search, Filter } from "lucide-react";
-import { toast } from "sonner";
 import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { AdminTableSkeleton } from "@/components/admin/admin-loading";
-import { useAdminLoading } from "@/components/admin/use-admin-loading";
-import { Badge } from "@/components/ui/badge";
+import { AdminErrorBanner } from "@/components/admin/admin-error-banner";
+import { AdminPagination } from "@/components/admin/admin-pagination";
+import {
+  AccountStatusBadge,
+  SubscriptionStatusBadge,
+} from "@/components/admin/admin-status-badges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,83 +20,107 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { adminClients, type AdminClientStatus } from "@/lib/mock-admin-data";
+import { usePlatformCompanies } from "@/hooks/use-platform-admin";
 import { formatDate } from "@/lib/format";
+import { Link } from "@/i18n/navigation";
+import type { CompanyAccountStatus } from "@/application/platform/types";
+import type { SubscriptionStatus } from "@/lib/types";
 
 export function AdminClientsContent() {
   const t = useTranslations("admin");
-  const ts = useTranslations("dashboard.stats");
   const locale = useLocale();
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const loading = useAdminLoading();
+  const [accountFilter, setAccountFilter] = useState<string>("all");
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
 
-  const filtered = useMemo(() => {
-    return adminClients.filter((c) => {
-      const q = search.toLowerCase();
-      const matchesSearch =
-        !q ||
-        c.name.includes(search) ||
-        c.email.toLowerCase().includes(q) ||
-        c.phone.includes(search);
-      const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [search, statusFilter]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
 
-  const statusLabel = (status: AdminClientStatus) => {
-    if (status === "active") return ts("active");
-    if (status === "expired") return ts("expired");
-    if (status === "expiring_soon") return t("expiringSoon");
-    return t("suspended");
-  };
+  const status =
+    accountFilter === "active" || accountFilter === "suspended"
+      ? (accountFilter as CompanyAccountStatus)
+      : undefined;
 
-  const statusVariant = (status: AdminClientStatus) => {
-    if (status === "active") return "success" as const;
-    if (status === "expired") return "warning" as const;
-    if (status === "expiring_soon") return "warning" as const;
-    return "destructive" as const;
-  };
+  const subscriptionStatus =
+    subscriptionFilter !== "all" ? (subscriptionFilter as SubscriptionStatus) : undefined;
 
-  const handleAction = (action: "activate" | "extend" | "suspend", name: string) => {
-    toast.success(t("actionDemo", { action: t(action), client: name }));
-  };
+  const { data, loading, error, refresh } = usePlatformCompanies({
+    search: search || undefined,
+    status,
+    subscriptionStatus,
+    page,
+    limit: 20,
+  });
 
-  if (loading) return <AdminTableSkeleton rows={6} />;
+  if (loading && !data) return <AdminTableSkeleton rows={6} />;
+
+  const items = data?.items ?? [];
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative max-w-sm flex-1">
+      <AdminErrorBanner error={error} onRetry={() => void refresh()} retryLabel={t("retry")} />
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+        <div className="relative max-w-sm flex-1 min-w-[200px]">
           <Search className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={t("searchClient")}
             className="pe-10"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select
+          value={accountFilter}
+          onValueChange={(v) => {
+            setAccountFilter(v);
+            setPage(1);
+          }}
+        >
           <SelectTrigger className="w-full sm:w-[180px]">
             <Filter className="me-2 h-4 w-4 text-muted-foreground" />
-            <SelectValue placeholder={t("filterStatus")} />
+            <SelectValue placeholder={t("filterAccountStatus")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("filterAll")}</SelectItem>
+            <SelectItem value="active">{t("accountActive")}</SelectItem>
+            <SelectItem value="suspended">{t("suspended")}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={subscriptionFilter}
+          onValueChange={(v) => {
+            setSubscriptionFilter(v);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder={t("filterSubscriptionStatus")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t("filterAll")}</SelectItem>
             <SelectItem value="active">{t("filterActive")}</SelectItem>
-            <SelectItem value="expiring_soon">{t("filterExpiringSoon")}</SelectItem>
+            <SelectItem value="trialing">{t("trialing")}</SelectItem>
             <SelectItem value="expired">{t("filterExpired")}</SelectItem>
             <SelectItem value="suspended">{t("suspended")}</SelectItem>
+            <SelectItem value="cancelled">{t("cancelled")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {filtered.length === 0 ? (
+      {items.length === 0 && !loading ? (
         <AdminEmptyState title={t("noClients")} description={t("noClientsDesc")} />
       ) : (
         <div className="dashboard-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[580px] text-sm">
+            <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-border/80 bg-muted/30">
                   <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
@@ -101,6 +128,9 @@ export function AdminClientsContent() {
                   </th>
                   <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground xl:table-cell">
                     {t("emailCol")}
+                  </th>
+                  <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
+                    {t("accountStatusCol")}
                   </th>
                   <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
                     {t("statusCol")}
@@ -112,59 +142,59 @@ export function AdminClientsContent() {
                     {t("documentsCol")}
                   </th>
                   <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
-                    {t("actionsCol")}
+                    {t("viewCol")}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((c) => (
-                  <tr key={c.id} className="border-b border-border/60 last:border-0 hover:bg-muted/20">
+                {items.map((c) => (
+                  <tr
+                    key={c.companyId}
+                    className="border-b border-border/60 last:border-0 hover:bg-muted/20"
+                  >
                     <td className="max-w-[140px] px-3 py-3 font-medium sm:max-w-none sm:px-4">
-                      <p className="truncate">{c.name}</p>
+                      <p className="truncate">{c.companyName}</p>
                     </td>
                     <td className="hidden px-4 py-3 text-muted-foreground xl:table-cell" dir="ltr">
-                      {c.email}
+                      {c.ownerEmail ?? "—"}
                     </td>
                     <td className="px-3 py-3 sm:px-4">
-                      <Badge variant={statusVariant(c.status)}>{statusLabel(c.status)}</Badge>
+                      <AccountStatusBadge status={c.accountStatus} />
+                    </td>
+                    <td className="px-3 py-3 sm:px-4">
+                      <SubscriptionStatusBadge status={c.subscriptionStatus} />
                     </td>
                     <td className="hidden px-4 py-3 tabular-nums md:table-cell">
-                      {formatDate(c.subscriptionExpires, locale)}
+                      {c.subscriptionExpiresAt
+                        ? formatDate(c.subscriptionExpiresAt, locale)
+                        : "—"}
                     </td>
-                    <td className="hidden px-4 py-3 tabular-nums lg:table-cell">{c.documentsCount}</td>
+                    <td className="hidden px-4 py-3 tabular-nums lg:table-cell">
+                      {c.documentsCount}
+                    </td>
                     <td className="px-3 py-3 sm:px-4">
-                      <div className="flex min-w-[140px] flex-col gap-1 sm:flex-row sm:flex-wrap">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
-                          onClick={() => handleAction("activate", c.name)}
-                        >
-                          {t("activate")}
+                      <Link href={`/admin/clients/${c.companyId}`}>
+                        <Button variant="outline" size="sm">
+                          {t("viewDetail")}
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 px-2 text-xs sm:h-9 sm:px-3 sm:text-sm"
-                          onClick={() => handleAction("extend", c.name)}
-                        >
-                          {t("extend")}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-2 text-xs text-destructive hover:text-destructive sm:h-9 sm:px-3 sm:text-sm"
-                          onClick={() => handleAction("suspend", c.name)}
-                        >
-                          {t("suspend")}
-                        </Button>
-                      </div>
+                      </Link>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {data && (
+            <div className="border-t border-border/80 px-4 py-3">
+              <AdminPagination
+                page={data.page}
+                limit={data.limit}
+                total={data.total}
+                onPageChange={setPage}
+                labels={{ prev: t("pagePrev"), next: t("pageNext"), page: t("pageLabel") }}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

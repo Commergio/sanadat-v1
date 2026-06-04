@@ -28,6 +28,7 @@ const mainNav = [
 const accountNav = [
   { href: "/dashboard/subscription", labelKey: "subscription", icon: CreditCard },
   { href: "/dashboard/settings/company", labelKey: "settings", icon: Settings },
+  { href: "/dashboard/settings/team", labelKey: "team", icon: Settings },
 ] as const;
 
 function NavItem({

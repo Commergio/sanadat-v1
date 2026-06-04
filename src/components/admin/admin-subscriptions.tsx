@@ -1,77 +1,64 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { AdminTableSkeleton } from "@/components/admin/admin-loading";
-import { useAdminLoading } from "@/components/admin/use-admin-loading";
-import { Badge } from "@/components/ui/badge";
+import { AdminErrorBanner } from "@/components/admin/admin-error-banner";
+import { AdminPagination } from "@/components/admin/admin-pagination";
+import { SubscriptionStatusBadge } from "@/components/admin/admin-status-badges";
 import { Button } from "@/components/ui/button";
-import { adminSubscriptions, ADMIN_PLAN_PRICE } from "@/lib/mock-admin-data";
+import { usePlatformSubscriptions } from "@/hooks/use-platform-admin";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
+import { SUBSCRIPTION_PRICE } from "@/lib/constants";
+import type { SubscriptionStatus } from "@/lib/types";
 
-type SubFilter = "all" | "active" | "expired" | "expiring_soon";
+type SubFilter = "all" | SubscriptionStatus;
 
 export function AdminSubscriptionsContent() {
   const t = useTranslations("admin");
-  const ts = useTranslations("dashboard.stats");
   const locale = useLocale();
   const [filter, setFilter] = useState<SubFilter>("all");
-  const loading = useAdminLoading();
+  const [page, setPage] = useState(1);
 
-  const filtered = useMemo(() => {
-    if (filter === "all") return adminSubscriptions;
-    return adminSubscriptions.filter((s) => s.status === filter);
-  }, [filter]);
+  const subscriptionStatus = filter === "all" ? undefined : filter;
 
-  const tabs: { key: SubFilter; label: string; count: number }[] = [
-    { key: "all", label: t("filterAll"), count: adminSubscriptions.length },
-    {
-      key: "active",
-      label: t("filterActive"),
-      count: adminSubscriptions.filter((s) => s.status === "active").length,
-    },
-    {
-      key: "expiring_soon",
-      label: t("filterExpiringSoon"),
-      count: adminSubscriptions.filter((s) => s.status === "expiring_soon").length,
-    },
-    {
-      key: "expired",
-      label: t("filterExpired"),
-      count: adminSubscriptions.filter((s) => s.status === "expired").length,
-    },
+  const { data, loading, error, refresh } = usePlatformSubscriptions({
+    subscriptionStatus,
+    page,
+    limit: 20,
+  });
+
+  const tabs: { key: SubFilter; label: string }[] = [
+    { key: "all", label: t("filterAll") },
+    { key: "active", label: t("filterActive") },
+    { key: "trialing", label: t("trialing") },
+    { key: "expired", label: t("filterExpired") },
+    { key: "suspended", label: t("suspended") },
+    { key: "cancelled", label: t("cancelled") },
   ];
 
-  const statusLabel = (status: string) => {
-    if (status === "active") return ts("active");
-    if (status === "expired") return ts("expired");
-    return t("expiringSoon");
-  };
+  if (loading && !data) return <AdminTableSkeleton rows={5} />;
 
-  if (loading) return <AdminTableSkeleton rows={5} />;
+  const items = data?.items ?? [];
 
   return (
     <div className="space-y-4">
+      <AdminErrorBanner error={error} onRetry={() => void refresh()} retryLabel={t("retry")} />
+
       <div className="flex flex-wrap gap-2">
         {tabs.map((tab) => (
           <Button
             key={tab.key}
             variant={filter === tab.key ? "default" : "outline"}
             size="sm"
-            className="gap-2"
-            onClick={() => setFilter(tab.key)}
+            onClick={() => {
+              setFilter(tab.key);
+              setPage(1);
+            }}
           >
             {tab.label}
-            <span
-              className={cn(
-                "rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
-                filter === tab.key ? "bg-primary-foreground/20" : "bg-muted"
-              )}
-            >
-              {tab.count}
-            </span>
           </Button>
         ))}
       </div>
@@ -82,17 +69,17 @@ export function AdminSubscriptionsContent() {
           <p className="text-xs text-muted-foreground">{t("planDesc")}</p>
         </div>
         <p className="text-xl font-bold tabular-nums text-primary">
-          {formatCurrency(ADMIN_PLAN_PRICE, locale)}
+          {formatCurrency(SUBSCRIPTION_PRICE, locale)}
           <span className="text-xs font-normal text-muted-foreground"> / {t("yearly")}</span>
         </p>
       </div>
 
-      {filtered.length === 0 ? (
+      {items.length === 0 && !loading ? (
         <AdminEmptyState title={t("noSubscriptions")} description={t("noSubscriptionsDesc")} />
       ) : (
         <div className="dashboard-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] text-sm">
+            <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border/80 bg-muted/30">
                   <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
@@ -102,47 +89,70 @@ export function AdminSubscriptionsContent() {
                     {t("statusCol")}
                   </th>
                   <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground md:table-cell">
+                    {t("planCode")}
+                  </th>
+                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground lg:table-cell">
+                    {t("billingCycle")}
+                  </th>
+                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground md:table-cell">
+                    {t("expiryCol")}
+                  </th>
+                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground md:table-cell">
                     {t("renewalDate")}
                   </th>
                   <th className="px-3 py-3 text-start font-medium text-muted-foreground sm:px-4">
                     {t("amountCol")}
                   </th>
-                  <th className="hidden px-4 py-3 text-start font-medium text-muted-foreground lg:table-cell">
-                    {t("autoRenewCol")}
-                  </th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((s) => (
-                  <tr key={s.id} className="border-b border-border/60 last:border-0 hover:bg-muted/20">
-                    <td className="max-w-[140px] px-3 py-3 font-medium sm:max-w-none sm:px-4">
-                      <p className="truncate">{s.clientName}</p>
+                {items.map((s) => (
+                  <tr
+                    key={s.subscriptionId ?? s.companyId}
+                    className="border-b border-border/60 last:border-0 hover:bg-muted/20"
+                  >
+                    <td className="max-w-[160px] px-3 py-3 font-medium sm:px-4">
+                      <Link
+                        href={`/admin/clients/${s.companyId}`}
+                        className="truncate hover:text-primary hover:underline"
+                      >
+                        {s.companyName}
+                      </Link>
                     </td>
                     <td className="px-3 py-3 sm:px-4">
-                      <Badge
-                        variant={
-                          s.status === "active"
-                            ? "success"
-                            : s.status === "expiring_soon"
-                              ? "warning"
-                              : "warning"
-                        }
-                      >
-                        {statusLabel(s.status)}
-                      </Badge>
+                      <SubscriptionStatusBadge status={s.subscriptionStatus} />
+                    </td>
+                    <td className="hidden px-4 py-3 md:table-cell">{s.planCode ?? "—"}</td>
+                    <td className="hidden px-4 py-3 lg:table-cell">{s.billingCycle ?? "—"}</td>
+                    <td className="hidden px-4 py-3 tabular-nums md:table-cell">
+                      {s.subscriptionExpiresAt
+                        ? formatDate(s.subscriptionExpiresAt, locale)
+                        : "—"}
                     </td>
                     <td className="hidden px-4 py-3 tabular-nums md:table-cell">
-                      {formatDate(s.renewalDate, locale)}
+                      {s.nextRenewalAt ? formatDate(s.nextRenewalAt, locale) : "—"}
                     </td>
                     <td className="px-3 py-3 font-semibold tabular-nums sm:px-4">
-                      {formatCurrency(s.planPrice, locale)}
+                      {s.planAmount != null
+                        ? formatCurrency(s.planAmount, locale)
+                        : "—"}
                     </td>
-                    <td className="hidden px-4 py-3 lg:table-cell">{s.autoRenew ? t("yes") : t("no")}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {data && (
+            <div className="border-t border-border/80 px-4 py-3">
+              <AdminPagination
+                page={data.page}
+                limit={data.limit}
+                total={data.total}
+                onPageChange={setPage}
+                labels={{ prev: t("pagePrev"), next: t("pageNext"), page: t("pageLabel") }}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
