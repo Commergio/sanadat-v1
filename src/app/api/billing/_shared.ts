@@ -7,6 +7,7 @@ export function mapBillingStatus(code: string): number {
   if (code === "VALIDATION") return 400;
   if (code === "CONFLICT") return 409;
   if (code === "NOT_IMPLEMENTED") return 501;
+  if (code === "GATEWAY_ERROR") return 502;
   if (code === "ALREADY_PROCESSED") return 409;
   return 500;
 }

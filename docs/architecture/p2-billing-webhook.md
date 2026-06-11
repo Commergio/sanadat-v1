@@ -1,7 +1,8 @@
 # P2.3 Billing Webhook Processing
 
-Manual webhook simulation for payment completion and subscription activation.  
-**No Moyasar/HyperPay integration yet.**
+Payment webhook processing for subscription activation.  
+**Moyasar:** [P2.5.2](./p2-5-2-moyasar-webhook.md) — `POST /api/billing/webhook/moyasar`.  
+**Manual:** internal testing route below.
 
 ---
 

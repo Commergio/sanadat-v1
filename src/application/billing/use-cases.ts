@@ -1,4 +1,5 @@
-import { isServiceRoleConfigured } from "@/lib/env";
+import { isServiceRoleConfigured, validateMoyasarSandboxEnv } from "@/lib/env";
+import { MoyasarGatewayError } from "@/infrastructure/billing/gateways/moyasar.errors";
 import type { TenantContext } from "@/lib/tenant";
 import { RepositoryError } from "@/application/shared/errors";
 import { UseCaseError } from "@/application/shared/use-case-error";
@@ -13,6 +14,12 @@ import { buildPaymentWebhookHandler } from "./webhook-use-cases";
 
 function rethrowBillingError(error: unknown, fallback: string): never {
   if (error instanceof UseCaseError) throw error;
+  if (error instanceof MoyasarGatewayError) {
+    throw new UseCaseError("GATEWAY_ERROR", error.message, {
+      statusCode: error.statusCode,
+      details: error.details,
+    });
+  }
   if (error instanceof RepositoryError) {
     throw new UseCaseError(error.code, error.message, error.causeData);
   }
@@ -76,6 +83,13 @@ export function buildBillingUseCases(deps: BillingUseCaseDeps) {
 
       if (parsed.data.billing_cycle !== plan.billingCycle) {
         throw new UseCaseError("VALIDATION", "Only yearly billing_cycle is supported");
+      }
+
+      if (parsed.data.gateway === "moyasar") {
+        const moyasarEnv = validateMoyasarSandboxEnv();
+        if (!moyasarEnv.ok) {
+          throw new UseCaseError("NOT_IMPLEMENTED", moyasarEnv.message ?? "Moyasar is not configured");
+        }
       }
 
       try {

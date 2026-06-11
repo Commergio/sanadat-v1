@@ -1,6 +1,8 @@
 # P2.2 Billing Checkout Application Layer
 
-Checkout creation without real Moyasar/HyperPay/STC Pay API calls.  
+Checkout creation with gateway adapters.  
+**Moyasar sandbox** (`gateway: "moyasar"`) — see [p2-5-1-moyasar-sandbox.md](./p2-5-1-moyasar-sandbox.md).  
+**Manual stub** (`gateway: "manual"`) remains for local testing.  
 **Webhook activation is the source of truth** — see [p2-billing-webhook.md](./p2-billing-webhook.md) (P2.3).
 
 ---
@@ -73,9 +75,10 @@ src/application/billing/
 
 ```
 src/infrastructure/billing/gateways/
-  types.ts           # CheckoutGatewayPort
-  manual.adapter.ts  # mock session (P2.2)
-  index.ts           # getCheckoutGateway() — all gateways → manual stub
+  types.ts            # CheckoutGatewayPort
+  manual.adapter.ts   # mock session (P2.2)
+  moyasar.adapter.ts  # Moyasar invoice API (P2.5.1 sandbox)
+  index.ts            # getCheckoutGateway() — moyasar | manual
 ```
 
 ```typescript
@@ -88,7 +91,7 @@ interface CheckoutGatewayPort {
 }
 ```
 
-Real Moyasar/HyperPay adapters will implement the same port in a later phase.
+HyperPay/STC Pay adapters will implement the same port in a later phase.
 
 ---
 

@@ -1,7 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { AlertTriangle, CreditCard, Loader2, Lock } from "lucide-react";
 import { useBilling } from "@/hooks/use-billing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +48,7 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
 export function SubscriptionBillingPanel() {
   const t = useTranslations("subscription");
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const {
     subscription,
     payments,
@@ -58,6 +62,15 @@ export function SubscriptionBillingPanel() {
     latestPendingPayment,
     latestFailedPayment,
   } = useBilling();
+
+  useEffect(() => {
+    const checkout = searchParams.get("checkout");
+    if (checkout === "success") {
+      toast.success(t("checkoutReturnSuccess"));
+    } else if (checkout === "cancelled") {
+      toast.message(t("checkoutReturnCancelled"));
+    }
+  }, [searchParams, t]);
 
   const statusLabel = (status: SubscriptionStatus) => {
     const map: Record<SubscriptionStatus, string> = {
@@ -192,7 +205,7 @@ export function SubscriptionBillingPanel() {
 
           {canManage && (
             <>
-              <p className="text-sm text-muted-foreground">{t("checkoutHint")}</p>
+              <p className="text-sm text-muted-foreground">{t("checkoutHintMoyasar")}</p>
               <Button
                 onClick={() => void startCheckout()}
                 disabled={checkoutLoading || loadError?.code === "NOT_IMPLEMENTED"}

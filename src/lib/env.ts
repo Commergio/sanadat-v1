@@ -41,3 +41,76 @@ export function getManualWebhookSecret(): string | null {
 export function isManualWebhookConfigured(): boolean {
   return getManualWebhookSecret() !== null;
 }
+
+/** Moyasar sandbox secret key (`sk_test_...`) — server only. */
+export function getMoyasarSecretKey(): string | null {
+  const key = readEnv(process.env.MOYASAR_SECRET_KEY);
+  if (!key || PLACEHOLDER_VALUES.has(key)) return null;
+  return key;
+}
+
+/** Moyasar sandbox publishable key (`pk_test_...`) — safe for client if needed later. */
+export function getMoyasarPublicKey(): string | null {
+  const key = readEnv(process.env.MOYASAR_PUBLIC_KEY);
+  if (!key || PLACEHOLDER_VALUES.has(key)) return null;
+  return key;
+}
+
+export interface MoyasarEnvValidation {
+  ok: boolean;
+  message?: string;
+}
+
+/**
+ * P2.5.1: only sandbox test keys are allowed.
+ * Rejects missing, placeholder, and live (`sk_live_` / `pk_live_`) keys.
+ */
+export function validateMoyasarSandboxEnv(): MoyasarEnvValidation {
+  const secret = getMoyasarSecretKey();
+  const publicKey = getMoyasarPublicKey();
+
+  if (!secret || !publicKey) {
+    return {
+      ok: false,
+      message: "MOYASAR_SECRET_KEY and MOYASAR_PUBLIC_KEY are required for Moyasar checkout",
+    };
+  }
+
+  if (secret.startsWith("sk_live_") || publicKey.startsWith("pk_live_")) {
+    return {
+      ok: false,
+      message: "Live Moyasar keys are not allowed — use sandbox test keys only (sk_test_ / pk_test_)",
+    };
+  }
+
+  if (!secret.startsWith("sk_test_")) {
+    return {
+      ok: false,
+      message: "MOYASAR_SECRET_KEY must be a sandbox test key (sk_test_...)",
+    };
+  }
+
+  if (!publicKey.startsWith("pk_test_")) {
+    return {
+      ok: false,
+      message: "MOYASAR_PUBLIC_KEY must be a sandbox test key (pk_test_...)",
+    };
+  }
+
+  return { ok: true };
+}
+
+export function isMoyasarSandboxConfigured(): boolean {
+  return validateMoyasarSandboxEnv().ok;
+}
+
+/** Shared secret for Moyasar webhook `secret_token` / signature verification. */
+export function getMoyasarWebhookSecret(): string | null {
+  const secret = readEnv(process.env.MOYASAR_WEBHOOK_SECRET);
+  if (!secret || PLACEHOLDER_VALUES.has(secret)) return null;
+  return secret;
+}
+
+export function isMoyasarWebhookConfigured(): boolean {
+  return getMoyasarWebhookSecret() !== null;
+}

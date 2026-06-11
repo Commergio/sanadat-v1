@@ -8,6 +8,7 @@ export type UseCaseErrorCode =
   | "ALREADY_PROCESSED"
   | "NOT_IMPLEMENTED"
   | "UNAUTHENTICATED"
+  | "GATEWAY_ERROR"
   | "RPC_ERROR";
 
 export class UseCaseError extends Error {

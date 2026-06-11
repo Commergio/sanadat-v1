@@ -83,7 +83,7 @@ export function useBilling() {
         body: JSON.stringify({
           plan_code: "sanadat_annual",
           billing_cycle: "yearly",
-          gateway: "manual",
+          gateway: "moyasar",
         }),
       });
       const payload = await res.json();
@@ -92,8 +92,12 @@ export function useBilling() {
         setCheckoutError(err.code === "FORBIDDEN" ? "FORBIDDEN" : err.message);
         return;
       }
-      setCheckoutResult(payload as CheckoutResultApi);
+      const result = payload as CheckoutResultApi;
+      setCheckoutResult(result);
       await refresh();
+      if (result.checkoutUrl) {
+        window.location.assign(result.checkoutUrl);
+      }
     } catch {
       setCheckoutError("Failed to start checkout");
     } finally {
