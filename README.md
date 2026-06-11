@@ -48,6 +48,10 @@ npm run build
 npm start
 ```
 
+## Deploy on Vercel
+
+See [docs/deployment-vercel.md](docs/deployment-vercel.md) for environment variables, Supabase auth URLs, and Moyasar webhook setup.
+
 ## Architecture
 
 | Doc | Description |

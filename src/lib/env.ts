@@ -27,8 +27,21 @@ export function isServiceRoleConfigured(): boolean {
   return true;
 }
 
+/**
+ * Public app base URL (no trailing slash).
+ * Vercel: set NEXT_PUBLIC_APP_URL to your production domain, or rely on VERCEL_* fallbacks.
+ */
 export function getAppUrl(): string {
-  return readEnv(process.env.NEXT_PUBLIC_APP_URL) || "http://localhost:3000";
+  const explicit = readEnv(process.env.NEXT_PUBLIC_APP_URL);
+  if (explicit) return explicit.replace(/\/$/, "");
+
+  const productionHost = readEnv(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+  if (productionHost) return `https://${productionHost.replace(/\/$/, "")}`;
+
+  const deploymentHost = readEnv(process.env.VERCEL_URL);
+  if (deploymentHost) return `https://${deploymentHost.replace(/\/$/, "")}`;
+
+  return "http://localhost:3000";
 }
 
 /** Shared secret for POST /api/billing/webhook/manual (internal testing only). */
