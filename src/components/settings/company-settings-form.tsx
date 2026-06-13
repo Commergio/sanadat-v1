@@ -87,6 +87,14 @@ export function CompanySettingsForm() {
   const tv = useTranslations("validation");
   const { company, loading, updateCompanyInStore } = useCompany();
   const [saving, setSaving] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    void getSupabaseBrowserClient()
+      .auth.getUser()
+      .then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
 
   const schema = useMemo(() => createCompanySettingsSchema(tv), [tv]);
 
@@ -285,26 +293,33 @@ export function CompanySettingsForm() {
         icon={Palette}
         iconClassName="bg-violet-500/10 text-violet-600"
       >
-        <div className="grid gap-6 lg:grid-cols-3">
-          <CompanyAssetUpload
-            kind="logo"
-            value={company.logo_url}
-            demoMode={false}
-            onChange={(url) => updateAsset("logo_url", url)}
-          />
-          <CompanyAssetUpload
-            kind="signature"
-            value={company.signature_url}
-            demoMode={false}
-            onChange={(url) => updateAsset("signature_url", url)}
-          />
-          <CompanyAssetUpload
-            kind="stamp"
-            value={company.stamp_url}
-            demoMode={false}
-            onChange={(url) => updateAsset("stamp_url", url)}
-          />
-        </div>
+        {userId ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <CompanyAssetUpload
+              kind="logo"
+              value={company.logo_url}
+              companyId={company.id}
+              userId={userId}
+              onChange={(url) => updateAsset("logo_url", url)}
+            />
+            <CompanyAssetUpload
+              kind="signature"
+              value={company.signature_url}
+              companyId={company.id}
+              userId={userId}
+              onChange={(url) => updateAsset("signature_url", url)}
+            />
+            <CompanyAssetUpload
+              kind="stamp"
+              value={company.stamp_url}
+              companyId={company.id}
+              userId={userId}
+              onChange={(url) => updateAsset("stamp_url", url)}
+            />
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("uploadUnavailable")}</p>
+        )}
 
         <div className="flex items-start gap-2 rounded-xl border border-border/80 bg-muted/30 px-4 py-3">
           <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />

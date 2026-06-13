@@ -1,5 +1,7 @@
 # Deploying Sanadat on Vercel
 
+**Production URL:** `https://sanadat-v1-go457cy2u-commergios-projects.vercel.app`
+
 ## 1. Connect repository
 
 - Import [Commergio/sanadat-v1](https://github.com/Commergio/sanadat-v1) in Vercel
@@ -15,7 +17,7 @@ Set these in **Vercel → Project → Settings → Environment Variables**:
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Server only — billing checkout & webhooks |
-| `NEXT_PUBLIC_APP_URL` | ✅ Production | e.g. `https://your-domain.vercel.app` — used for Moyasar callbacks |
+| `NEXT_PUBLIC_APP_URL` | ✅ Production | `https://sanadat-v1-go457cy2u-commergios-projects.vercel.app` |
 | `MOYASAR_SECRET_KEY` | Billing | `sk_test_...` (sandbox) |
 | `MOYASAR_PUBLIC_KEY` | Billing | `pk_test_...` (sandbox) |
 | `MOYASAR_WEBHOOK_SECRET` | Billing | Same secret as Moyasar Dashboard webhook |
@@ -27,15 +29,15 @@ Set these in **Vercel → Project → Settings → Environment Variables**:
 
 In Supabase → **Authentication → URL configuration**, add:
 
-- Site URL: `https://your-production-domain`
-- Redirect URLs: `https://your-production-domain/auth/callback`
+- Site URL: `https://sanadat-v1-go457cy2u-commergios-projects.vercel.app`
+- Redirect URLs: `https://sanadat-v1-go457cy2u-commergios-projects.vercel.app/auth/callback`
 
 ## 4. Moyasar webhooks (production / preview)
 
 Webhook URL:
 
 ```
-https://your-production-domain/api/billing/webhook/moyasar
+https://sanadat-v1-go457cy2u-commergios-projects.vercel.app/api/billing/webhook/moyasar
 ```
 
 Use the **production** domain (not preview URLs) for Moyasar dashboard webhooks.

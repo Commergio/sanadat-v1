@@ -1,22 +1,17 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { Save } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { AdminSettingsSkeleton } from "@/components/admin/admin-loading";
-import { useAdminLoading } from "@/components/admin/use-admin-loading";
+import { AdminReadOnlyHint } from "@/components/admin/admin-read-only-hint";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function AdminSettingsContent() {
   const t = useTranslations("admin");
-  const loading = useAdminLoading();
-
-  if (loading) return <AdminSettingsSkeleton />;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <AdminReadOnlyHint />
+
       <section className="dashboard-card overflow-hidden">
         <div className="border-b border-border/80 px-5 py-4">
           <p className="text-sm font-semibold">{t("settingsPlatform")}</p>
@@ -25,15 +20,27 @@ export function AdminSettingsContent() {
         <div className="space-y-4 px-5 py-5">
           <div className="space-y-2">
             <Label>{t("platformName")}</Label>
-            <Input defaultValue="سندات" />
+            <Input defaultValue="سندات" readOnly disabled />
           </div>
           <div className="space-y-2">
             <Label>{t("supportEmail")}</Label>
-            <Input defaultValue="support@sanadat.sa" dir="ltr" className="text-start" />
+            <Input
+              defaultValue="support@sanadat.sa"
+              dir="ltr"
+              className="text-start"
+              readOnly
+              disabled
+            />
           </div>
           <div className="space-y-2">
             <Label>{t("supportPhone")}</Label>
-            <Input defaultValue="966500000000" dir="ltr" className="text-start font-mono" />
+            <Input
+              defaultValue="966500000000"
+              dir="ltr"
+              className="text-start font-mono"
+              readOnly
+              disabled
+            />
           </div>
         </div>
       </section>
@@ -43,27 +50,22 @@ export function AdminSettingsContent() {
           <p className="text-sm font-semibold">{t("settingsNotifications")}</p>
         </div>
         <div className="space-y-4 px-5 py-5">
-          <label className="flex cursor-pointer items-center justify-between gap-4">
+          <label className="flex cursor-not-allowed items-center justify-between gap-4 opacity-60">
             <div>
               <p className="text-sm font-medium">{t("expiryNotify")}</p>
               <p className="text-xs text-muted-foreground">{t("expiryAuto")}</p>
             </div>
-            <input type="checkbox" defaultChecked className="h-4 w-4 accent-primary" />
+            <input type="checkbox" defaultChecked disabled className="h-4 w-4 accent-primary" />
           </label>
-          <label className="flex cursor-pointer items-center justify-between gap-4">
+          <label className="flex cursor-not-allowed items-center justify-between gap-4 opacity-60">
             <div>
               <p className="text-sm font-medium">{t("paymentNotify")}</p>
               <p className="text-xs text-muted-foreground">{t("paymentNotifyDesc")}</p>
             </div>
-            <input type="checkbox" defaultChecked className="h-4 w-4 accent-primary" />
+            <input type="checkbox" defaultChecked disabled className="h-4 w-4 accent-primary" />
           </label>
         </div>
       </section>
-
-      <Button className="gap-2" onClick={() => toast.success(t("settingsSaved"))}>
-        <Save className="h-4 w-4" />
-        {t("saveSettings")}
-      </Button>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { getSupabaseBrowserClient } from "@/lib/auth/client";
+import { isSupabaseConfigured } from "@/lib/env";
 import {
   removeCompanyLogo,
   uploadCompanyLogo,
@@ -19,14 +20,12 @@ import { cn } from "@/lib/utils";
 interface CompanyLogoUploadProps {
   company: Company;
   userId: string;
-  demoMode?: boolean;
   onUpdated: (logoUrl: string | null) => void;
 }
 
 export function CompanyLogoUpload({
   company,
   userId,
-  demoMode = false,
   onUpdated,
 }: CompanyLogoUploadProps) {
   const t = useTranslations("settings");
@@ -42,25 +41,12 @@ export function CompanyLogoUpload({
       return;
     }
 
-    setUploading(true);
-
-    if (demoMode) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
-        setPreview(dataUrl);
-        onUpdated(dataUrl);
-        toast.success(t("logoDemo"));
-        setUploading(false);
-      };
-      reader.onerror = () => {
-        toast.error(t("readFileFailed"));
-        setUploading(false);
-      };
-      reader.readAsDataURL(file);
+    if (!isSupabaseConfigured()) {
+      toast.error(t("uploadUnavailable"));
       return;
     }
 
+    setUploading(true);
     const localPreview = URL.createObjectURL(file);
     setPreview(localPreview);
 
@@ -89,15 +75,13 @@ export function CompanyLogoUpload({
   };
 
   const handleRemove = async () => {
+    if (!isSupabaseConfigured()) {
+      toast.error(t("uploadUnavailable"));
+      return;
+    }
+
     setRemoving(true);
     try {
-      if (demoMode) {
-        setPreview(null);
-        onUpdated(null);
-        toast.success(t("logoRemoved"));
-        return;
-      }
-
       const supabase = getSupabaseBrowserClient();
       await removeCompanyLogo(supabase, userId, company.id);
       setPreview(null);
@@ -146,7 +130,7 @@ export function CompanyLogoUpload({
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) handleFile(file);
+            if (file) void handleFile(file);
             e.target.value = "";
           }}
         />
@@ -175,7 +159,7 @@ export function CompanyLogoUpload({
               size="sm"
               className="gap-2 text-destructive hover:text-destructive"
               disabled={uploading || removing}
-              onClick={handleRemove}
+              onClick={() => void handleRemove()}
             >
               {removing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

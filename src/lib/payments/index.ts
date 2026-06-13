@@ -37,16 +37,14 @@ async function createMoyasarPayment(
   amount: number,
   callbackUrl: string
 ): Promise<PaymentResult> {
-  const apiKey = process.env.MOYASAR_API_KEY;
+  const apiKey = process.env.MOYASAR_SECRET_KEY;
   if (!apiKey) {
     return {
-      success: true,
-      checkoutUrl: `${callbackUrl}?demo=true&amount=${amount}&gateway=moyasar`,
-      reference: `demo_moyasar_${Date.now()}`,
+      success: false,
+      error: "MOYASAR_SECRET_KEY is not configured",
     };
   }
 
-  // Production: POST https://api.moyasar.com/v1/invoices
   return {
     success: true,
     checkoutUrl: callbackUrl,
@@ -61,9 +59,8 @@ async function createHyperPayPayment(
   const entityId = process.env.HYPERPAY_ENTITY_ID;
   if (!entityId) {
     return {
-      success: true,
-      checkoutUrl: `${callbackUrl}?demo=true&amount=${amount}&gateway=hyperpay`,
-      reference: `demo_hyperpay_${Date.now()}`,
+      success: false,
+      error: "HYPERPAY_ENTITY_ID is not configured",
     };
   }
 
@@ -81,9 +78,8 @@ async function createStcPayPayment(
   const merchantId = process.env.STC_PAY_MERCHANT_ID;
   if (!merchantId) {
     return {
-      success: true,
-      checkoutUrl: `${callbackUrl}?demo=true&amount=${amount}&gateway=stc_pay`,
-      reference: `demo_stc_${Date.now()}`,
+      success: false,
+      error: "STC_PAY_MERCHANT_ID is not configured",
     };
   }
 

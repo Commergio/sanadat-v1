@@ -7,15 +7,21 @@ import { Building2, Loader2, PenLine, Stamp, Trash2, Upload } from "lucide-react
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { validateLogoFile } from "@/lib/storage/company-logo";
+import { getSupabaseBrowserClient } from "@/lib/auth/client";
+import { isSupabaseConfigured } from "@/lib/env";
+import {
+  removeCompanyAsset,
+  uploadCompanyAsset,
+  validateLogoFile,
+  type CompanyAssetKind,
+} from "@/lib/storage/company-logo";
 import { cn } from "@/lib/utils";
-
-export type CompanyAssetKind = "logo" | "signature" | "stamp";
 
 interface CompanyAssetUploadProps {
   kind: CompanyAssetKind;
   value?: string | null;
-  demoMode?: boolean;
+  companyId: string;
+  userId: string;
   onChange: (url: string | null) => void;
   className?: string;
 }
@@ -29,7 +35,8 @@ const kindIcons = {
 export function CompanyAssetUpload({
   kind,
   value,
-  demoMode = true,
+  companyId,
+  userId,
   onChange,
   className,
 }: CompanyAssetUploadProps) {
@@ -54,35 +61,58 @@ export function CompanyAssetUpload({
       return;
     }
 
-    setUploading(true);
-
-    if (demoMode) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
-        setPreview(dataUrl);
-        onChange(dataUrl);
-        toast.success(t("assetDemoSuccess", { asset: t(labelKey) }));
-        setUploading(false);
-      };
-      reader.onerror = () => {
-        toast.error(t("readFileFailed"));
-        setUploading(false);
-      };
-      reader.readAsDataURL(file);
+    if (!isSupabaseConfigured()) {
+      toast.error(t("uploadUnavailable"));
       return;
     }
 
-    toast.error(t("demoOnlyUpload"));
-    setUploading(false);
+    setUploading(true);
+    const localPreview = URL.createObjectURL(file);
+    setPreview(localPreview);
+
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { publicUrl } = await uploadCompanyAsset(
+        supabase,
+        userId,
+        companyId,
+        kind,
+        file
+      );
+      setPreview(publicUrl);
+      onChange(publicUrl);
+      toast.success(t("assetSuccess", { asset: t(labelKey) }));
+    } catch (err) {
+      setPreview(value ?? null);
+      const msg =
+        err instanceof Error && (err.message === "invalidFormat" || err.message === "maxSize")
+          ? t(err.message)
+          : t("uploadFailed");
+      toast.error(msg);
+    } finally {
+      setUploading(false);
+      URL.revokeObjectURL(localPreview);
+    }
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
+    if (!isSupabaseConfigured()) {
+      toast.error(t("uploadUnavailable"));
+      return;
+    }
+
     setRemoving(true);
-    setPreview(null);
-    onChange(null);
-    toast.success(t("assetRemoved", { asset: t(labelKey) }));
-    setRemoving(false);
+    try {
+      const supabase = getSupabaseBrowserClient();
+      await removeCompanyAsset(supabase, userId, companyId, kind);
+      setPreview(null);
+      onChange(null);
+      toast.success(t("assetRemoved", { asset: t(labelKey) }));
+    } catch {
+      toast.error(t("uploadFailed"));
+    } finally {
+      setRemoving(false);
+    }
   };
 
   const previewBoxClass =
@@ -165,7 +195,7 @@ export function CompanyAssetUpload({
               size="sm"
               className="gap-2 text-destructive hover:text-destructive"
               disabled={uploading || removing}
-              onClick={handleRemove}
+              onClick={() => void handleRemove()}
             >
               {removing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

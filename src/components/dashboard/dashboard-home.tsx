@@ -29,7 +29,7 @@ export function DashboardHome({ stats, loadError = false }: DashboardHomeProps) 
 
   if (loadError) {
     return (
-      <main className="flex-1 space-y-8 bg-muted/20 p-4 lg:p-8">
+      <main className="flex-1 space-y-8 bg-muted/20 p-4 lg:p-8 min-w-0">
         <EmptyState
           title="Unable to load dashboard"
           description="Could not load tenant dashboard data from Supabase. Please refresh and try again."
@@ -42,7 +42,7 @@ export function DashboardHome({ stats, loadError = false }: DashboardHomeProps) 
   }
 
   return (
-    <main className="flex-1 space-y-8 bg-muted/20 p-4 lg:p-8">
+    <main className="flex-1 space-y-8 bg-muted/20 p-4 lg:p-8 min-w-0">
       <AnnouncementBanners />
       <SubscriptionAlert />
 

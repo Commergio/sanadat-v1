@@ -1,4 +1,5 @@
 import { IBM_Plex_Sans_Arabic, Inter } from "next/font/google";
+import type { Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -19,6 +20,12 @@ const inter = Inter({
   variable: "--font-sans-en",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export async function generateMetadata({
   params,

@@ -11,6 +11,19 @@ const ALLOWED_TYPES = [
 ];
 
 export type LogoValidationKey = "invalidFormat" | "maxSize";
+export type CompanyAssetKind = "logo" | "signature" | "stamp";
+
+const ASSET_DB_FIELDS: Record<CompanyAssetKind, "logo_url" | "signature_url" | "stamp_url"> = {
+  logo: "logo_url",
+  signature: "signature_url",
+  stamp: "stamp_url",
+};
+
+const ASSET_FILE_BASE: Record<CompanyAssetKind, string> = {
+  logo: "logo",
+  signature: "signature",
+  stamp: "stamp",
+};
 
 export function validateLogoFile(file: File): LogoValidationKey | null {
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -41,17 +54,19 @@ export function getLogoPublicUrl(
   return `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${userId}/logo.${ext}`;
 }
 
-export async function uploadCompanyLogo(
+export async function uploadCompanyAsset(
   supabase: SupabaseClient,
   userId: string,
   companyId: string,
+  kind: CompanyAssetKind,
   file: File
 ): Promise<{ publicUrl: string }> {
   const validationKey = validateLogoFile(file);
   if (validationKey) throw new Error(validationKey);
 
   const ext = getExtension(file);
-  const path = `${userId}/logo.${ext}`;
+  const fileBase = ASSET_FILE_BASE[kind];
+  const path = `${userId}/${fileBase}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
@@ -68,10 +83,11 @@ export async function uploadCompanyLogo(
   } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
   const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+  const dbField = ASSET_DB_FIELDS[kind];
 
   const { error: updateError } = await supabase
     .from("companies")
-    .update({ logo_url: urlWithCacheBust })
+    .update({ [dbField]: urlWithCacheBust })
     .eq("id", companyId)
     .eq("user_id", userId);
 
@@ -80,23 +96,47 @@ export async function uploadCompanyLogo(
   return { publicUrl: urlWithCacheBust };
 }
 
+export async function removeCompanyAsset(
+  supabase: SupabaseClient,
+  userId: string,
+  companyId: string,
+  kind: CompanyAssetKind
+): Promise<void> {
+  const fileBase = ASSET_FILE_BASE[kind];
+  const { data: files } = await supabase.storage.from(BUCKET).list(userId);
+
+  if (files?.length) {
+    const paths = files
+      .filter((f) => f.name.startsWith(`${fileBase}.`))
+      .map((f) => `${userId}/${f.name}`);
+    if (paths.length) {
+      await supabase.storage.from(BUCKET).remove(paths);
+    }
+  }
+
+  const dbField = ASSET_DB_FIELDS[kind];
+  const { error } = await supabase
+    .from("companies")
+    .update({ [dbField]: null })
+    .eq("id", companyId)
+    .eq("user_id", userId);
+
+  if (error) throw error;
+}
+
+export async function uploadCompanyLogo(
+  supabase: SupabaseClient,
+  userId: string,
+  companyId: string,
+  file: File
+): Promise<{ publicUrl: string }> {
+  return uploadCompanyAsset(supabase, userId, companyId, "logo", file);
+}
+
 export async function removeCompanyLogo(
   supabase: SupabaseClient,
   userId: string,
   companyId: string
 ): Promise<void> {
-  const { data: files } = await supabase.storage.from(BUCKET).list(userId);
-
-  if (files?.length) {
-    const paths = files.map((f) => `${userId}/${f.name}`);
-    await supabase.storage.from(BUCKET).remove(paths);
-  }
-
-  const { error } = await supabase
-    .from("companies")
-    .update({ logo_url: null })
-    .eq("id", companyId)
-    .eq("user_id", userId);
-
-  if (error) throw error;
+  return removeCompanyAsset(supabase, userId, companyId, "logo");
 }
