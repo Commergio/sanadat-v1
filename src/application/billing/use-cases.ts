@@ -15,9 +15,14 @@ import { buildPaymentWebhookHandler } from "./webhook-use-cases";
 function rethrowBillingError(error: unknown, fallback: string): never {
   if (error instanceof UseCaseError) throw error;
   if (error instanceof MoyasarGatewayError) {
+    const validation =
+      error.details && typeof error.details === "object"
+        ? (error.details as { type?: string; errors?: Record<string, string[] | string> })
+        : undefined;
     throw new UseCaseError("GATEWAY_ERROR", error.message, {
       statusCode: error.statusCode,
-      details: error.details,
+      ...(validation?.errors ? { errors: validation.errors } : {}),
+      ...(validation?.type ? { type: validation.type } : {}),
     });
   }
   if (error instanceof RepositoryError) {

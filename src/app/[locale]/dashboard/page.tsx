@@ -26,7 +26,13 @@ export default async function DashboardPage({
       loadErrorCode = err.code;
     }
     if (process.env.NODE_ENV === "development") {
-      console.error("[dashboard] load failed:", err);
+      const detail =
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" && err !== null && "message" in err
+            ? String((err as { message: unknown }).message)
+            : String(err);
+      console.error("[dashboard] load failed:", detail, err);
     }
   }
 

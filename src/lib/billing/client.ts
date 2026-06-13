@@ -46,11 +46,39 @@ export interface CheckoutResultApi {
 }
 
 export function mapBillingError(
-  payload: { error?: { code?: string; message?: string } } | null,
+  payload: {
+    error?: {
+      code?: string;
+      message?: string;
+      details?: { errors?: Record<string, string[] | string>; type?: string };
+    };
+  } | null,
   fallback: string
 ): { code: string; message: string } {
-  return {
-    code: payload?.error?.code ?? "INTERNAL",
-    message: payload?.error?.message ?? fallback,
-  };
+  const code = payload?.error?.code ?? "INTERNAL";
+  const baseMessage = payload?.error?.message ?? fallback;
+  const errors = payload?.error?.details?.errors;
+
+  if (!errors || typeof errors !== "object") {
+    return { code, message: baseMessage };
+  }
+
+  const parts: string[] = [];
+  for (const [field, value] of Object.entries(errors)) {
+    if (Array.isArray(value)) {
+      for (const item of value) parts.push(`${field}: ${String(item)}`);
+    } else if (value != null) {
+      parts.push(`${field}: ${String(value)}`);
+    }
+  }
+
+  if (parts.length === 0) {
+    return { code, message: baseMessage };
+  }
+
+  if (baseMessage.includes(parts[0]!)) {
+    return { code, message: baseMessage };
+  }
+
+  return { code, message: `${baseMessage} (${parts.join("; ")})` };
 }

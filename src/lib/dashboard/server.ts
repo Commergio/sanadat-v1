@@ -48,16 +48,18 @@ async function sumColumn(
   column: "amount" | "total",
   companyId: string
 ): Promise<number> {
+  // PostgREST on this project rejects `.sum()` aggregates (PGRST123); sum rows in app.
   const { data, error } = await supabase
     .from(table)
-    .select(`total:${column}.sum()`)
+    .select(column)
     .eq("company_id", companyId);
 
   if (error) throw error;
 
-  // PostgREST returns [] when no rows match — not a single { total: null } row.
-  const row = (data?.[0] ?? null) as { total?: number | null } | null;
-  return Number(row?.total ?? 0);
+  return (data ?? []).reduce(
+    (sum, row) => sum + Number((row as Record<string, number>)[column] ?? 0),
+    0
+  );
 }
 
 async function fetchCountsAndSums(supabase: SupabaseClient, companyId: string) {
