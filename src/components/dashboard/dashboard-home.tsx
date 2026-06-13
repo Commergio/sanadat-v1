@@ -14,6 +14,7 @@ import type { DashboardStats } from "@/lib/types";
 interface DashboardHomeProps {
   stats: DashboardStats;
   loadError?: boolean;
+  loadErrorCode?: string;
 }
 
 function hasAnyDocuments(stats: DashboardStats): boolean {
@@ -25,16 +26,23 @@ function hasAnyDocuments(stats: DashboardStats): boolean {
   );
 }
 
-export function DashboardHome({ stats, loadError = false }: DashboardHomeProps) {
+export function DashboardHome({ stats, loadError = false, loadErrorCode }: DashboardHomeProps) {
   const t = useTranslations("dashboard");
   const showTimeline = hasAnyDocuments(stats);
 
   if (loadError) {
+    const description =
+      loadErrorCode === "NO_MEMBERSHIP"
+        ? t("loadErrorNoMembership")
+        : loadErrorCode === "UNAUTHENTICATED"
+          ? t("loadErrorAuth")
+          : t("loadErrorDesc");
+
     return (
       <main className="flex-1 space-y-8 bg-muted/20 p-4 lg:p-8 min-w-0">
         <EmptyState
           title={t("loadErrorTitle")}
-          description={t("loadErrorDesc")}
+          description={description}
           variant="documents"
           actionLabel={t("loadErrorRetry")}
           actionHref="/dashboard"

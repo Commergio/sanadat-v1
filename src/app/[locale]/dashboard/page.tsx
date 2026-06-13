@@ -4,6 +4,7 @@ import { emptyDashboardStats } from "@/lib/placeholders/dashboard";
 import { requireTenantContext } from "@/lib/auth/require-tenant";
 import { createClient } from "@/lib/supabase/server";
 import { getTenantDashboardStats } from "@/lib/dashboard/server";
+import { TenantResolutionError } from "@/lib/tenant/errors";
 
 export default async function DashboardPage({
   params,
@@ -13,19 +14,26 @@ export default async function DashboardPage({
   const { locale } = await params;
   let stats = emptyDashboardStats;
   let loadError = false;
+  let loadErrorCode: string | undefined;
 
   try {
     const ctx = await requireTenantContext();
     const supabase = await createClient();
     stats = await getTenantDashboardStats(supabase, ctx, locale);
-  } catch {
+  } catch (err) {
     loadError = true;
+    if (err instanceof TenantResolutionError) {
+      loadErrorCode = err.code;
+    }
+    if (process.env.NODE_ENV === "development") {
+      console.error("[dashboard] load failed:", err);
+    }
   }
 
   return (
     <>
       <DashboardPageHeader />
-      <DashboardHome stats={stats} loadError={loadError} />
+      <DashboardHome stats={stats} loadError={loadError} loadErrorCode={loadErrorCode} />
     </>
   );
 }

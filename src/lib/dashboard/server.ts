@@ -42,6 +42,24 @@ function monthKeyFromDate(input: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+async function sumColumn(
+  supabase: SupabaseClient,
+  table: "receipt_vouchers" | "payment_vouchers" | "invoices",
+  column: "amount" | "total",
+  companyId: string
+): Promise<number> {
+  const { data, error } = await supabase
+    .from(table)
+    .select(`total:${column}.sum()`)
+    .eq("company_id", companyId);
+
+  if (error) throw error;
+
+  // PostgREST returns [] when no rows match — not a single { total: null } row.
+  const row = (data?.[0] ?? null) as { total?: number | null } | null;
+  return Number(row?.total ?? 0);
+}
+
 async function fetchCountsAndSums(supabase: SupabaseClient, companyId: string) {
   const [receiptsCountRes, paymentsCountRes, invoicesCountRes] = await Promise.all([
     supabase.from("receipt_vouchers").select("id", { count: "exact", head: true }).eq("company_id", companyId),
@@ -72,21 +90,18 @@ async function fetchCountsAndSums(supabase: SupabaseClient, companyId: string) {
   if (cancelledInvoicesRes.error) throw cancelledInvoicesRes.error;
 
   const [receiptsSumRes, paymentsSumRes, invoicesSumRes] = await Promise.all([
-    supabase.from("receipt_vouchers").select("total:amount.sum()").eq("company_id", companyId).single(),
-    supabase.from("payment_vouchers").select("total:amount.sum()").eq("company_id", companyId).single(),
-    supabase.from("invoices").select("total:amount.sum()").eq("company_id", companyId).single(),
+    sumColumn(supabase, "receipt_vouchers", "amount", companyId),
+    sumColumn(supabase, "payment_vouchers", "amount", companyId),
+    sumColumn(supabase, "invoices", "total", companyId),
   ]);
-  if (receiptsSumRes.error) throw receiptsSumRes.error;
-  if (paymentsSumRes.error) throw paymentsSumRes.error;
-  if (invoicesSumRes.error) throw invoicesSumRes.error;
 
   return {
     totalReceipts: receiptsCountRes.count ?? 0,
     totalPayments: paymentsCountRes.count ?? 0,
     totalInvoices: invoicesCountRes.count ?? 0,
-    totalReceivedAmount: Number((receiptsSumRes.data as { total?: number } | null)?.total ?? 0),
-    totalPaidAmount: Number((paymentsSumRes.data as { total?: number } | null)?.total ?? 0),
-    totalInvoiceAmount: Number((invoicesSumRes.data as { total?: number } | null)?.total ?? 0),
+    totalReceivedAmount: receiptsSumRes,
+    totalPaidAmount: paymentsSumRes,
+    totalInvoiceAmount: invoicesSumRes,
     activeDocumentsCount:
       (activeReceiptsRes.count ?? 0) + (activePaymentsRes.count ?? 0) + (activeInvoicesRes.count ?? 0),
     cancelledDocumentsCount:
