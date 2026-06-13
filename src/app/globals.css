@@ -252,6 +252,8 @@ body {
 }
 
 .dashboard-shell {
+  width: 100%;
+  min-width: 0;
   background:
     radial-gradient(ellipse 120% 80% at 100% -20%, color-mix(in srgb, var(--primary) 6%, transparent), transparent),
     var(--background);

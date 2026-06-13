@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { QuickActionsHero } from "@/components/dashboard/quick-actions-hero";
 import { DocumentsTimeline } from "@/components/dashboard/documents-timeline";
 import { FirstDocumentOnboarding } from "@/components/dashboard/first-document-onboarding";
@@ -25,16 +26,17 @@ function hasAnyDocuments(stats: DashboardStats): boolean {
 }
 
 export function DashboardHome({ stats, loadError = false }: DashboardHomeProps) {
+  const t = useTranslations("dashboard");
   const showTimeline = hasAnyDocuments(stats);
 
   if (loadError) {
     return (
       <main className="flex-1 space-y-8 bg-muted/20 p-4 lg:p-8 min-w-0">
         <EmptyState
-          title="Unable to load dashboard"
-          description="Could not load tenant dashboard data from Supabase. Please refresh and try again."
+          title={t("loadErrorTitle")}
+          description={t("loadErrorDesc")}
           variant="documents"
-          actionLabel="Refresh"
+          actionLabel={t("loadErrorRetry")}
           actionHref="/dashboard"
         />
       </main>

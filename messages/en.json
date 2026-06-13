@@ -270,6 +270,9 @@
     "emptySearchDesc": "Try a different search term or clear your filters.",
     "emptyDocsTitle": "No documents in this list",
     "emptyDocsDesc": "Start by creating your first document — it only takes a minute.",
+    "loadErrorTitle": "Unable to load dashboard",
+    "loadErrorDesc": "We could not load your company data. Refresh the page or sign in again.",
+    "loadErrorRetry": "Refresh",
     "nav": {
       "main": "Main",
       "account": "Account"

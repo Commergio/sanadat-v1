@@ -87,12 +87,14 @@ export function DashboardSidebar() {
         <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={close}
+          aria-hidden
         />
       )}
       <aside
         className={cn(
-          "fixed top-0 end-0 z-50 flex h-full w-[260px] flex-col border-s border-border bg-card/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:z-auto lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "translate-x-full rtl:-translate-x-full lg:translate-x-0"
+          "flex h-full w-[260px] shrink-0 flex-col border-e border-border bg-card/95 backdrop-blur-xl",
+          "max-lg:fixed max-lg:inset-y-0 max-lg:inset-inline-start-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300",
+          sidebarOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
         )}
       >
         <div className="flex h-14 items-center justify-between border-b border-border/80 px-4">

@@ -19,9 +19,9 @@ export default async function AdminLayout({
   await requirePlatformPageAccess(locale as Locale, returnTo);
 
   return (
-    <div className="flex min-h-screen min-w-0 overflow-x-hidden">
+    <div className="flex min-h-screen w-full min-w-0 overflow-x-hidden">
       <AdminSidebar />
-      <div className="dashboard-shell flex min-w-0 flex-1 flex-col">
+      <div className="dashboard-shell flex w-full min-w-0 flex-1 flex-col">
         {children}
         <AppFooterBar showAdminLink={false} />
       </div>
