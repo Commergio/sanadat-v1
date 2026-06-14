@@ -9,4 +9,5 @@ export type {
   PlatformPaymentModel,
   PlatformAdminActionModel,
   PlatformListResult,
+  PlatformStaffModel,
 } from "./types";

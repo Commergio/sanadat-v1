@@ -91,8 +91,12 @@ Configure Supabase Auth:
 - **Redirect URLs:** `{NEXT_PUBLIC_APP_URL}/auth/callback`
 - Signup `emailRedirectTo`: `{APP_URL}/auth/callback?next=/ar/dashboard`
 
-## Manual platform admin (optional)
+## Manual platform admin (bootstrap)
+
+First admin must be promoted via SQL (see [pA6-platform-staff-management.md](./pA6-platform-staff-management.md)):
 
 ```sql
 UPDATE profiles SET platform_role = 'platform_admin' WHERE email = 'you@example.com';
 ```
+
+Additional staff can be managed at `/admin/staff` (platform admins only).

@@ -6,8 +6,10 @@ import type {
   PlatformDashboardStatsModel,
   PlatformListResult,
   PlatformPaymentModel,
+  PlatformStaffModel,
   SetCompanyStatusResult,
 } from "./types";
+import type { PlatformRole } from "@/lib/types";
 import type { CompanyAccountStatus } from "./types";
 
 export interface PlatformRepositoryPort {
@@ -31,4 +33,8 @@ export interface PlatformRepositoryPort {
   listAdminActions(
     query: PlatformListQuery
   ): Promise<PlatformListResult<PlatformAdminActionModel>>;
+  listStaff(query: PlatformListQuery): Promise<PlatformListResult<PlatformStaffModel>>;
+  addStaff(email: string, role: PlatformRole): Promise<PlatformStaffModel>;
+  changeStaffRole(profileId: string, role: PlatformRole): Promise<PlatformStaffModel>;
+  removeStaff(profileId: string): Promise<{ ok: boolean; profileId: string }>;
 }

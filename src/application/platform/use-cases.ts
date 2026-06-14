@@ -5,6 +5,8 @@ import { assertPlatformAdmin, assertPlatformStaff } from "./authorization";
 import type { PlatformListQuery } from "./query";
 import type { PlatformRepositoryPort } from "./repository-ports";
 import {
+  addPlatformStaffInputSchema,
+  changePlatformStaffRoleInputSchema,
   extendSubscriptionInputSchema,
   setCompanyStatusInputSchema,
 } from "./schemas";
@@ -17,7 +19,9 @@ function rethrowPlatformError(error: unknown, fallback: string): never {
         ? "RPC_ERROR"
         : error.code === "UNAUTHENTICATED"
           ? "UNAUTHENTICATED"
-          : error.code;
+          : error.code === "CONFLICT"
+            ? "CONFLICT"
+            : error.code;
     throw new UseCaseError(code as UseCaseError["code"], error.message, error.causeData);
   }
   throw new UseCaseError("RPC_ERROR", fallback);
@@ -135,6 +139,59 @@ export function buildPlatformUseCases(deps: PlatformUseCaseDeps) {
         return await deps.repository.listAdminActions(query);
       } catch (error) {
         rethrowPlatformError(error, "Failed to list platform actions");
+      }
+    },
+
+    async listStaff(ctx: PlatformContext, query: PlatformListQuery) {
+      assertPlatformStaff(ctx);
+      try {
+        return await deps.repository.listStaff(query);
+      } catch (error) {
+        rethrowPlatformError(error, "Failed to list platform staff");
+      }
+    },
+
+    async addStaff(ctx: PlatformContext, input: unknown) {
+      assertPlatformAdmin(ctx);
+      const parsed = addPlatformStaffInputSchema.safeParse(input);
+      if (!parsed.success) {
+        throw new UseCaseError("VALIDATION", "Invalid staff payload", parsed.error.flatten());
+      }
+      try {
+        const staff = await deps.repository.addStaff(
+          parsed.data.email.trim().toLowerCase(),
+          parsed.data.platform_role
+        );
+        return { staff };
+      } catch (error) {
+        rethrowPlatformError(error, "Failed to add platform staff");
+      }
+    },
+
+    async changeStaffRole(ctx: PlatformContext, profileId: string, input: unknown) {
+      assertPlatformAdmin(ctx);
+      const parsed = changePlatformStaffRoleInputSchema.safeParse(input);
+      if (!parsed.success) {
+        throw new UseCaseError("VALIDATION", "Invalid role payload", parsed.error.flatten());
+      }
+      try {
+        const staff = await deps.repository.changeStaffRole(
+          profileId,
+          parsed.data.platform_role
+        );
+        return { staff };
+      } catch (error) {
+        rethrowPlatformError(error, "Failed to change platform staff role");
+      }
+    },
+
+    async removeStaff(ctx: PlatformContext, profileId: string) {
+      assertPlatformAdmin(ctx);
+      try {
+        const result = await deps.repository.removeStaff(profileId);
+        return result;
+      } catch (error) {
+        rethrowPlatformError(error, "Failed to remove platform staff");
       }
     },
   };

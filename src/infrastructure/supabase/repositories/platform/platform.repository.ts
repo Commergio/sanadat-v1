@@ -9,16 +9,38 @@ import type {
   PlatformDashboardStatsModel,
   PlatformListResult,
   PlatformPaymentModel,
+  PlatformStaffModel,
   SetCompanyStatusResult,
 } from "@/application/platform/types";
 import { RepositoryError } from "@/application/shared/errors";
 import { toRepositoryError } from "../shared/errors";
 import { toRpcRepositoryError } from "./rpc-errors";
-import type { PaymentGateway, PaymentStatus, SubscriptionStatus } from "@/lib/types";
+import type { PaymentGateway, PaymentStatus, PlatformRole, SubscriptionStatus } from "@/lib/types";
 
 type CompanyRow = Record<string, unknown>;
 type PaymentRow = Record<string, unknown>;
 type ActionRow = Record<string, unknown>;
+type StaffRow = Record<string, unknown>;
+
+function mapStaffRow(row: StaffRow): PlatformStaffModel {
+  return {
+    profileId: String(row.id),
+    email: String(row.email),
+    fullName: (row.full_name as string | null) ?? null,
+    platformRole: row.platform_role as PlatformRole,
+    createdAt: String(row.created_at),
+  };
+}
+
+function mapStaffFromRpc(payload: Record<string, unknown>): PlatformStaffModel {
+  return {
+    profileId: String(payload.profile_id),
+    email: String(payload.email),
+    fullName: (payload.full_name as string | null) ?? null,
+    platformRole: payload.platform_role as PlatformRole,
+    createdAt: String(payload.created_at),
+  };
+}
 
 function mapCompanyRow(row: CompanyRow): CompanySubscriptionCurrentModel {
   return {
@@ -312,6 +334,77 @@ export class PlatformRepository implements PlatformRepositoryPort {
       page: query.page,
       limit: query.limit,
       total: count ?? 0,
+    };
+  }
+
+  async listStaff(
+    query: PlatformListQuery
+  ): Promise<PlatformListResult<PlatformStaffModel>> {
+    const from = (query.page - 1) * query.limit;
+    const to = from + query.limit - 1;
+
+    let builder = this.supabase
+      .from("profiles")
+      .select("id, email, full_name, platform_role, created_at", { count: "exact" })
+      .not("platform_role", "is", null)
+      .order("created_at", { ascending: false });
+
+    if (query.search) {
+      const term = query.search.replace(/[%]/g, "");
+      builder = builder.or(`email.ilike.%${term}%,full_name.ilike.%${term}%`);
+    }
+
+    const { data, error, count } = await builder.range(from, to);
+
+    if (error) throw toRepositoryError(error, "Failed to list platform staff");
+
+    return {
+      items: ((data ?? []) as StaffRow[]).map(mapStaffRow),
+      page: query.page,
+      limit: query.limit,
+      total: count ?? 0,
+    };
+  }
+
+  async addStaff(email: string, role: PlatformRole): Promise<PlatformStaffModel> {
+    const { data, error } = await this.supabase.rpc("platform_add_staff", {
+      p_email: email,
+      p_platform_role: role,
+    });
+
+    if (error) throw toRpcRepositoryError(error, "Failed to add platform staff");
+    if (!data || typeof data !== "object") {
+      throw new RepositoryError("RPC_ERROR", "Invalid add staff response");
+    }
+
+    return mapStaffFromRpc(data as Record<string, unknown>);
+  }
+
+  async changeStaffRole(profileId: string, role: PlatformRole): Promise<PlatformStaffModel> {
+    const { data, error } = await this.supabase.rpc("platform_change_staff_role", {
+      p_profile_id: profileId,
+      p_platform_role: role,
+    });
+
+    if (error) throw toRpcRepositoryError(error, "Failed to change platform staff role");
+    if (!data || typeof data !== "object") {
+      throw new RepositoryError("RPC_ERROR", "Invalid change staff role response");
+    }
+
+    return mapStaffFromRpc(data as Record<string, unknown>);
+  }
+
+  async removeStaff(profileId: string): Promise<{ ok: boolean; profileId: string }> {
+    const { data, error } = await this.supabase.rpc("platform_remove_staff", {
+      p_profile_id: profileId,
+    });
+
+    if (error) throw toRpcRepositoryError(error, "Failed to remove platform staff");
+    const payload = data as Record<string, unknown> | null;
+
+    return {
+      ok: Boolean(payload?.ok),
+      profileId: String(payload?.profile_id ?? profileId),
     };
   }
 }

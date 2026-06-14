@@ -1,4 +1,5 @@
 import type { PaymentGateway, PaymentStatus, SubscriptionStatus } from "@/lib/types";
+import type { PlatformRole } from "@/lib/types";
 
 export type CompanyAccountStatus = "active" | "suspended";
 
@@ -87,4 +88,12 @@ export interface ExtendSubscriptionResult {
   companyId: string;
   status: SubscriptionStatus;
   expiresAt: string;
+}
+
+export interface PlatformStaffModel {
+  profileId: string;
+  email: string;
+  fullName: string | null;
+  platformRole: PlatformRole;
+  createdAt: string;
 }

@@ -7,6 +7,7 @@ function mapRpcMessage(message: string): RepositoryErrorCode {
   if (upper.includes("FORBIDDEN")) return "FORBIDDEN";
   if (upper.includes("NOT_FOUND")) return "NOT_FOUND";
   if (upper.includes("VALIDATION")) return "VALIDATION";
+  if (upper.includes("CONFLICT")) return "CONFLICT";
   return "RPC_ERROR";
 }
 

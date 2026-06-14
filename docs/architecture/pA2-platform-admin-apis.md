@@ -172,6 +172,17 @@ Response:
 |--------|------|--------|-------|
 | GET | `/api/platform/actions` | staff | `platform_admin_actions` |
 
+### Platform staff
+
+| Method | Path | Access | Notes |
+|--------|------|--------|-------|
+| GET | `/api/platform/staff` | staff | Profiles with `platform_role` set |
+| POST | `/api/platform/staff` | admin | Assign role by email (user must exist) |
+| PATCH | `/api/platform/staff/[profileId]` | admin | Change role |
+| DELETE | `/api/platform/staff/[profileId]` | admin | Remove platform access |
+
+See [pA6-platform-staff-management.md](./pA6-platform-staff-management.md).
+
 ---
 
 ## Permission matrix
@@ -185,6 +196,8 @@ Response:
 | POST extend subscription | ✅ | ❌ 403 | ❌ |
 | GET payments | ✅ | ✅ | ❌ |
 | GET actions | ✅ | ✅ | ❌ |
+| GET staff | ✅ | ✅ | ❌ |
+| POST/PATCH/DELETE staff | ✅ | ❌ 403 | ❌ |
 
 ---
 
