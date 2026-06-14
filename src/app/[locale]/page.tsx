@@ -1,6 +1,7 @@
 import { MarketingHeader } from "@/components/layout/marketing-header";
 import { MarketingFooter } from "@/components/layout/marketing-footer";
 import { HeroSection } from "@/components/landing/hero-section";
+import { FloatingDocumentsSection } from "@/components/landing/floating-documents-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works";
 import { ShowcaseSection } from "@/components/landing/showcase-section";
@@ -16,6 +17,7 @@ export default function LandingPage() {
       <MarketingHeader />
       <main className="marketing-shell min-w-0">
         <HeroSection />
+        <FloatingDocumentsSection />
         <FeaturesSection />
         <HowItWorksSection />
         <ShowcaseSection />

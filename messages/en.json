@@ -56,6 +56,19 @@
       "invoiceLabel": "Non-tax invoice"
     }
   },
+  "floatingDocs": {
+    "label": "Our vision",
+    "title": "Your documents — trusted and professional",
+    "subtitle": "Receipts, payments, and non-tax invoices — organized, verified, and ready for growth",
+    "quote1": "From paper to digital — your business future starts here",
+    "quote1Hint": "Leave messy paper vouchers behind and move to a verified digital system in minutes",
+    "quote2": "Professional A4 invoices — print-ready and shareable",
+    "quote2Hint": "Consistent branding with logo, signature, and stamp on every document",
+    "quote3": "Receipt and payment vouchers with secure sequential numbering",
+    "quote3Hint": "Every document has a unique ID and audit trail — full financial transparency",
+    "quote4": "Future-ready for Ministry of Commerce compliance",
+    "quote4Hint": "A Saudi platform that grows with you — toward easier compliance and faster growth"
+  },
   "features": {
     "label": "Features",
     "title": "Everything your business needs",
