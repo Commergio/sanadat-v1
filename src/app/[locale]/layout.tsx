@@ -72,7 +72,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
-        className={`${fontClass} min-h-screen bg-background font-sans antialiased`}
+        className={`${fontClass} min-h-screen min-w-0 bg-background font-sans antialiased`}
       >
         <ThemeProvider
           attribute="class"

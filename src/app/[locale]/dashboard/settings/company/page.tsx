@@ -10,7 +10,7 @@ export default function CompanySettingsPage() {
   return (
     <>
       <DashboardHeader title={t("title")} />
-      <main className="flex-1 p-4 pb-24 lg:p-8 lg:pb-8">
+      <main className="flex-1 min-w-0 p-4 pb-24 app-safe-bottom lg:p-8 lg:pb-8">
         <CompanySettingsForm />
       </main>
     </>

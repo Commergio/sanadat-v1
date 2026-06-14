@@ -260,6 +260,22 @@ body {
   overflow-x: hidden;
 }
 
+.dashboard-shell main,
+.dashboard-shell > div > main {
+  min-width: 0;
+  width: 100%;
+}
+
+.app-safe-bottom {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+
+.marketing-shell {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
 .landing-section {
   padding-block: 5.5rem;
 }

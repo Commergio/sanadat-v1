@@ -23,8 +23,8 @@ export default function OnboardingPage() {
   const NextChevron = locale === "ar" ? ChevronLeft : ChevronRight;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 auth-gradient">
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen min-w-0 overflow-x-hidden flex flex-col items-center justify-center p-4 sm:p-6 auth-gradient app-safe-bottom">
+      <div className="w-full max-w-lg min-w-0">
         <div className="mb-8 flex justify-center">
           <Logo href="/" />
         </div>
@@ -37,7 +37,7 @@ export default function OnboardingPage() {
             exit={{ opacity: 0, x: -20 }}
           >
             <Card>
-              <CardContent className="p-8">
+              <CardContent className="p-5 sm:p-8">
                 {step === 0 && (
                   <div className="space-y-4">
                     <h2 className="text-xl font-bold">{t("completeCompany")}</h2>
@@ -68,14 +68,14 @@ export default function OnboardingPage() {
                     <p className="text-sm text-muted-foreground">{t("allSetHint")}</p>
                   </div>
                 )}
-                <div className="mt-8 flex justify-between">
+                <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
                   {step > 0 && (
-                    <Button variant="outline" onClick={() => setStep(step - 1)}>
+                    <Button variant="outline" onClick={() => setStep(step - 1)} className="min-w-[7rem]">
                       {t("prev")}
                     </Button>
                   )}
                   <Button
-                    className="ms-auto gap-2"
+                    className="ms-auto min-w-[7rem] gap-2"
                     onClick={() =>
                       step < 2 ? setStep(step + 1) : router.push("/dashboard")
                     }

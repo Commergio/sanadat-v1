@@ -14,7 +14,7 @@ export default function LandingPage() {
   return (
     <>
       <MarketingHeader />
-      <main>
+      <main className="marketing-shell min-w-0">
         <HeroSection />
         <FeaturesSection />
         <HowItWorksSection />

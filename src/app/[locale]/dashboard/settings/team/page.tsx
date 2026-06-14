@@ -18,7 +18,7 @@ export default function TeamSettingsPage() {
             : "Manage company members, invitations, and roles"
         }
       />
-      <main className="flex-1 p-4 pb-24 lg:p-8 lg:pb-8">
+      <main className="flex-1 min-w-0 p-4 pb-24 app-safe-bottom lg:p-8 lg:pb-8">
         <TeamManagementPanel />
       </main>
     </>

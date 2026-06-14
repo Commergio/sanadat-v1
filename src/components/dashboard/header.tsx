@@ -43,8 +43,8 @@ export function DashboardHeader({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1">
-          <LocaleSwitcher variant="compact" className="hidden md:flex" />
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+          <LocaleSwitcher variant="compact" className="hidden sm:flex" />
           <Button
             variant="ghost"
             size="icon"
@@ -55,7 +55,7 @@ export function DashboardHeader({
             <Sun className="h-4 w-4 dark:hidden" />
             <Moon className="hidden h-4 w-4 dark:block" />
           </Button>
-          <Button variant="ghost" size="icon" className="relative h-9 w-9">
+          <Button variant="ghost" size="icon" className="relative hidden h-9 w-9 sm:inline-flex">
             <Bell className="h-4 w-4" />
             <span className="absolute top-2 end-2 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-background" />
           </Button>

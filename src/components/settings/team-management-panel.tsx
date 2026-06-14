@@ -375,8 +375,64 @@ export function TeamManagementPanel() {
         {members.length === 0 ? (
           <p className="px-5 py-6 text-sm text-muted-foreground sm:px-6">{strings.emptyMembers}</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-sm">
+          <>
+            <div className="divide-y divide-border/60 md:hidden">
+              {members.map((member) => {
+                const isOwner = member.role === "owner";
+                const isSelf = (member.email ?? "").toLowerCase() === currentUserEmail;
+                const canAct = canManage && !isOwner && !isSelf;
+                return (
+                  <div key={member.id} className="space-y-3 px-4 py-4 sm:px-6">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{member.email ?? "—"}</p>
+                        {isSelf ? (
+                          <Badge variant="outline" className="mt-1 text-[10px]">
+                            {strings.self}
+                          </Badge>
+                        ) : null}
+                      </div>
+                      <Badge variant={roleBadgeVariant(member.role)}>{roleLabel(member.role)}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {strings.joinedAt}: {formatDate(member.acceptedAt ?? member.createdAt, locale)}
+                    </p>
+                    {canAct && ROLE_OPTIONS.includes(member.role as ManageRole) ? (
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <Select
+                          value={member.role as ManageRole}
+                          onValueChange={(v: ManageRole) => void changeRole(member.id, v)}
+                          disabled={busyId === member.id}
+                        >
+                          <SelectTrigger className="h-9 w-full sm:w-[140px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ROLE_OPTIONS.map((role) => (
+                              <SelectItem key={role} value={role}>
+                                {roleLabel(role)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 text-destructive sm:w-auto"
+                          onClick={() => void removeMember(member.id)}
+                          disabled={busyId === member.id}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {strings.remove}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/80 bg-muted/30 text-xs text-muted-foreground">
                   <th className="px-4 py-3 text-start font-medium">{strings.email}</th>
@@ -451,7 +507,8 @@ export function TeamManagementPanel() {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </section>
 
@@ -465,8 +522,42 @@ export function TeamManagementPanel() {
         ) : openInvitations.length === 0 ? (
           <p className="px-5 py-6 text-sm text-muted-foreground sm:px-6">{strings.emptyInvites}</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-sm">
+          <>
+            <div className="divide-y divide-border/60 md:hidden">
+              {openInvitations.map((inv) => {
+                const status = resolveInvitationStatus(inv);
+                const canRevoke =
+                  canManage && !inv.acceptedAt && !inv.revokedAt && !isInvitationExpired(inv);
+                return (
+                  <div key={inv.id} className="space-y-3 px-4 py-4 sm:px-6">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <p className="min-w-0 truncate font-medium">{inv.email}</p>
+                      <Badge variant={roleBadgeVariant(inv.role)}>{roleLabel(inv.role)}</Badge>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span>
+                        {strings.expiresAt}: {formatDate(inv.expiresAt, locale)}
+                      </span>
+                      <Badge variant={status === strings.pending ? "warning" : "outline"}>{status}</Badge>
+                    </div>
+                    {canRevoke ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 text-destructive"
+                        onClick={() => void revokeInvitation(inv.id)}
+                        disabled={busyId === inv.id}
+                      >
+                        <Shield className="h-3.5 w-3.5" />
+                        {strings.revoke}
+                      </Button>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/80 bg-muted/30 text-xs text-muted-foreground">
                   <th className="px-4 py-3 text-start font-medium">{strings.email}</th>
@@ -512,7 +603,8 @@ export function TeamManagementPanel() {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </section>
     </div>

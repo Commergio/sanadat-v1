@@ -51,7 +51,7 @@ export function HeroSection() {
             </FadeUp>
 
             <FadeUp delay={0.06}>
-              <h1 className="max-w-none text-[2rem] font-bold leading-[1.08] tracking-tight sm:max-w-[18ch] sm:text-5xl lg:max-w-[14ch] lg:text-[3.5rem] xl:text-[4rem]">
+              <h1 className="max-w-none text-[2rem] font-bold leading-[1.08] tracking-tight sm:max-w-[18ch] sm:text-5xl lg:text-[3.5rem] xl:text-[4rem]">
                 {t("title1")}{" "}
                 <span className="bg-gradient-to-l from-primary via-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-indigo-300 dark:via-primary dark:to-violet-400">
                   {t("title1Highlight")}

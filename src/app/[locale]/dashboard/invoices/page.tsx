@@ -35,7 +35,7 @@ export default async function InvoicesPage() {
   return (
     <>
       <DashboardHeader title={t("invoices")} />
-      <main className="flex-1 space-y-4 p-4 lg:p-8">
+      <main className="flex-1 min-w-0 space-y-4 p-4 lg:p-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-md flex-1" />
           <Link href="/dashboard/invoices/new">
@@ -73,14 +73,18 @@ export default async function InvoicesPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-sm">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border/80 bg-muted/30 text-xs text-muted-foreground">
                     <th className="px-4 py-3 text-start font-medium">{t("table.number")}</th>
                     <th className="px-4 py-3 text-start font-medium">{t("invoiceTable.client")}</th>
                     <th className="px-4 py-3 text-start font-medium">{t("table.amount")}</th>
-                    <th className="px-4 py-3 text-start font-medium">{t("invoiceTable.paymentStatus")}</th>
-                    <th className="px-4 py-3 text-start font-medium">{t("table.date")}</th>
+                    <th className="hidden px-4 py-3 text-start font-medium sm:table-cell">
+                      {t("invoiceTable.paymentStatus")}
+                    </th>
+                    <th className="hidden px-4 py-3 text-start font-medium md:table-cell">
+                      {t("table.date")}
+                    </th>
                     <th className="w-12 px-2" />
                   </tr>
                 </thead>
@@ -91,13 +95,13 @@ export default async function InvoicesPage() {
                       className="group border-b border-border/50 last:border-0 hover:bg-muted/40"
                     >
                       <td className="px-4 py-3 font-medium">{inv.display_number}</td>
-                      <td className="max-w-[200px] px-4 py-3">
+                      <td className="max-w-[140px] px-4 py-3 sm:max-w-[200px]">
                         <p className="truncate">{inv.party_name}</p>
                       </td>
                       <td className="px-4 py-3 font-semibold tabular-nums">
                         {formatCurrency(inv.amount, locale)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 sm:table-cell">
                         <Badge
                           variant={inv.payment_status === "paid" ? "success" : "warning"}
                           className="text-[10px] font-medium"
@@ -107,7 +111,7 @@ export default async function InvoicesPage() {
                             : t("invoiceTable.unpaid")}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">
                         {formatDate(inv.date, locale)}
                       </td>
                       <td className="px-2 py-3">

@@ -18,8 +18,8 @@ export function MarketingHeader() {
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Logo />
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6 lg:px-8">
+        <Logo className="min-w-0 shrink" />
 
         <nav className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map((link) => (
@@ -33,11 +33,12 @@ export function MarketingHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <LocaleSwitcher variant="compact" className="hidden sm:flex" />
           <Button
             variant="ghost"
             size="icon"
+            className="h-9 w-9 shrink-0"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             aria-label={t("toggleTheme")}
           >
@@ -49,7 +50,7 @@ export function MarketingHeader() {
               {t("login")}
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href="/register" className="hidden sm:block">
             <Button size="sm" className="px-3 text-xs sm:px-4 sm:text-sm">
               {t("register")}
             </Button>

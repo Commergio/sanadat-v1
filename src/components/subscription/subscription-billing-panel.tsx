@@ -325,17 +325,48 @@ function PaymentHistoryTable({
   }
 
   return (
-    <div className="overflow-x-auto -mx-1">
-      <table className="w-full min-w-[720px] text-sm">
+    <>
+      <div className="space-y-3 md:hidden">
+        {payments.map((p) => (
+          <div
+            key={p.id}
+            className="rounded-lg border border-border/70 bg-muted/20 p-3 text-sm space-y-2"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-semibold tabular-nums">
+                {formatCurrency(p.amount, locale)} {p.currency}
+              </span>
+              <Badge variant={paymentBadgeVariant(p.status)} className="font-normal">
+                {paymentStatusLabel(p.status)}
+              </Badge>
+            </div>
+            <div className="grid gap-1 text-xs text-muted-foreground">
+              <p>
+                {labels.gateway}: {p.gateway}
+              </p>
+              <p>
+                {labels.paidAt}: {p.paidAt ? formatDate(p.paidAt, locale) : "—"}
+              </p>
+              {p.gatewayReference ? (
+                <p className="break-all">
+                  {labels.gatewayReference}: {p.gatewayReference}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="hidden overflow-x-auto md:block">
+      <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border text-muted-foreground">
             <th className="py-2 pe-3 text-start font-medium">{labels.amount}</th>
             <th className="py-2 pe-3 text-start font-medium">{labels.currency}</th>
             <th className="py-2 pe-3 text-start font-medium">{labels.gateway}</th>
             <th className="py-2 pe-3 text-start font-medium">{labels.status}</th>
-            <th className="py-2 pe-3 text-start font-medium">{labels.paidAt}</th>
-            <th className="py-2 pe-3 text-start font-medium">{labels.failedAt}</th>
-            <th className="py-2 text-start font-medium">{labels.gatewayReference}</th>
+            <th className="hidden py-2 pe-3 text-start font-medium lg:table-cell">{labels.paidAt}</th>
+            <th className="hidden py-2 pe-3 text-start font-medium xl:table-cell">{labels.failedAt}</th>
+            <th className="hidden py-2 text-start font-medium lg:table-cell">{labels.gatewayReference}</th>
           </tr>
         </thead>
         <tbody>
@@ -349,13 +380,13 @@ function PaymentHistoryTable({
                   {paymentStatusLabel(p.status)}
                 </Badge>
               </td>
-              <td className={cn("py-2.5 pe-3 text-muted-foreground", !p.paidAt && "text-foreground/40")}>
+              <td className={cn("hidden py-2.5 pe-3 text-muted-foreground lg:table-cell", !p.paidAt && "text-foreground/40")}>
                 {p.paidAt ? formatDate(p.paidAt, locale) : "—"}
               </td>
-              <td className={cn("py-2.5 pe-3 text-muted-foreground", !p.failedAt && "text-foreground/40")}>
+              <td className={cn("hidden py-2.5 pe-3 text-muted-foreground xl:table-cell", !p.failedAt && "text-foreground/40")}>
                 {p.failedAt ? formatDate(p.failedAt, locale) : "—"}
               </td>
-              <td className="py-2.5">
+              <td className="hidden py-2.5 lg:table-cell">
                 <code className="text-xs break-all text-muted-foreground">
                   {p.gatewayReference ?? "—"}
                 </code>
@@ -364,6 +395,7 @@ function PaymentHistoryTable({
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }

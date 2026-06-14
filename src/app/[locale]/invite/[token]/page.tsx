@@ -124,8 +124,8 @@ export default function AcceptInvitationPage({
   };
 
   return (
-    <main className="flex min-h-[70vh] items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
+    <main className="flex min-h-[70vh] min-w-0 items-center justify-center p-4 app-safe-bottom">
+      <Card className="w-full max-w-lg min-w-0">
         <CardHeader>
           <CardTitle>{s.title}</CardTitle>
           <p className="text-sm text-muted-foreground">{s.subtitle}</p>
@@ -136,7 +136,7 @@ export default function AcceptInvitationPage({
           ) : !loggedIn ? (
             <>
               <p className="text-sm text-muted-foreground">{s.loginFirst}</p>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <Button
                   onClick={() =>
                     router.push(`/login?redirect=/${locale}${inviteRedirect}`)
@@ -155,7 +155,7 @@ export default function AcceptInvitationPage({
               </div>
             </>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Button onClick={() => void onAccept()} disabled={accepting || resolved || !token}>
                 {accepting ? s.accepting : s.accept}
               </Button>

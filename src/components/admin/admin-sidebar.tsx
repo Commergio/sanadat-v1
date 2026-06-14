@@ -97,7 +97,9 @@ export function AdminSidebar() {
         className={cn(
           "flex h-full w-[260px] shrink-0 flex-col border-e border-border bg-card/95 backdrop-blur-xl",
           "max-lg:fixed max-lg:inset-y-0 max-lg:inset-inline-start-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300",
-          sidebarOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
+          sidebarOpen
+            ? "max-lg:translate-x-0"
+            : "max-lg:-translate-x-full rtl:max-lg:translate-x-full"
         )}
       >
         {content}
