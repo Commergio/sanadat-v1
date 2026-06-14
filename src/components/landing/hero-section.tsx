@@ -14,7 +14,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { FadeUp } from "@/components/motion/fade-up";
-import { HeroVisualShowcase } from "@/components/landing/hero/hero-visual-showcase";
+import { HeroIntroVideo } from "@/components/landing/hero/hero-intro-video";
 import { isRtlLocale } from "@/i18n/routing";
 
 const trustItems = [
@@ -128,7 +128,7 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.12 }}
           >
-            <HeroVisualShowcase className="mx-auto max-w-[440px] lg:max-w-none" />
+            <HeroIntroVideo className="mx-auto max-w-[440px] lg:max-w-none" />
           </motion.div>
         </div>
       </div>
