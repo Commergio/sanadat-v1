@@ -30,9 +30,12 @@ export function HeroIntroVideo({ className }: HeroIntroVideoProps) {
   }, []);
 
   return (
-    <div className={cn("relative mx-auto w-full max-w-[560px] lg:max-w-[620px]", className)}>
+    <div className={cn("relative mx-auto w-full max-w-[520px] lg:max-w-[580px]", className)}>
+      {/* Ambient tech glow */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-1/2 left-1/2 h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/15 blur-[90px]" />
+        <div className="absolute top-1/2 left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/12 blur-[100px]" />
+        <div className="absolute top-1/4 end-0 h-40 w-40 rounded-full bg-violet-500/10 blur-[80px]" />
+        <div className="absolute bottom-1/4 start-0 h-32 w-32 rounded-full bg-cyan-400/10 blur-[70px]" />
       </div>
 
       <motion.div
@@ -41,15 +44,33 @@ export function HeroIntroVideo({ className }: HeroIntroVideoProps) {
         transition={{ duration: 0.75, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
         className="relative"
       >
-        {/* Laptop screen */}
-        <div className="rounded-[1.25rem] border border-zinc-700/80 bg-gradient-to-b from-zinc-800 to-zinc-900 p-2.5 shadow-2xl shadow-zinc-900/25 sm:p-3.5 dark:border-zinc-600/60">
-          <div className="mb-2.5 flex items-center justify-center gap-1.5 sm:mb-3">
-            <span className="h-2.5 w-2.5 rounded-full bg-zinc-600/90" aria-hidden />
-            <span className="h-1.5 w-1.5 rounded-full bg-zinc-500/80" aria-hidden />
+        {/* Animated gradient ring — high-tech accent outside the frame */}
+        <div
+          className="pointer-events-none absolute -inset-[1px] rounded-[2rem] bg-gradient-to-br from-primary/40 via-violet-500/20 to-cyan-400/30 opacity-60 blur-sm sm:rounded-[2.25rem]"
+          aria-hidden
+        />
+        <motion.div
+          className="pointer-events-none absolute -inset-3 rounded-[2.2rem] border border-primary/15 sm:-inset-4 sm:rounded-[2.5rem]"
+          animate={{ opacity: [0.35, 0.65, 0.35] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          aria-hidden
+        />
+
+        {/* Tablet body — light frame wraps outside video area */}
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-white/40 bg-gradient-to-b from-white/90 via-slate-50/95 to-slate-100/90 p-3 shadow-[0_24px_64px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:rounded-[2rem] sm:p-4 dark:border-white/10 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-950/90 dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.45)]">
+          {/* Top bezel — outside video */}
+          <div className="mb-3 flex items-center justify-center sm:mb-3.5">
+            <span className="h-1 w-10 rounded-full bg-slate-300/80 dark:bg-zinc-600/70" aria-hidden />
+            <span
+              className="mx-auto h-2 w-2 rounded-full bg-slate-300 ring-2 ring-slate-200/80 dark:bg-zinc-600 dark:ring-zinc-700/80"
+              aria-hidden
+            />
+            <span className="h-1 w-10 rounded-full bg-transparent" aria-hidden />
           </div>
 
-          <div className="relative overflow-hidden rounded-xl border border-zinc-950/40 bg-black shadow-inner">
-            <div className="aspect-[16/10] w-full">
+          {/* Video viewport — inset from tablet frame */}
+          <div className="relative overflow-hidden rounded-[1.1rem] bg-black shadow-inner ring-1 ring-slate-900/5 sm:rounded-[1.25rem] dark:ring-white/5">
+            <div className="aspect-[4/3] w-full sm:aspect-[16/10]">
               <video
                 ref={videoRef}
                 className="h-full w-full object-cover object-top"
@@ -64,27 +85,29 @@ export function HeroIntroVideo({ className }: HeroIntroVideoProps) {
                 <source src={INTRO_VIDEO_SRC} type="video/mp4" />
               </video>
             </div>
-            <div
-              className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-white/10"
+          </div>
+
+          {/* Bottom bezel — home indicator, outside video */}
+          <div className="mt-3 flex justify-center sm:mt-3.5">
+            <span
+              className="h-1 w-16 rounded-full bg-slate-300/70 dark:bg-zinc-600/60"
               aria-hidden
             />
           </div>
         </div>
 
-        {/* Laptop hinge + keyboard base */}
+        {/* Side accent lines — tech feel */}
         <div
-          className="relative mx-auto h-2.5 w-[98%] rounded-b-sm bg-gradient-to-b from-zinc-600 to-zinc-700 shadow-md"
+          className="pointer-events-none absolute top-1/4 -start-6 hidden h-16 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent lg:block"
           aria-hidden
         />
         <div
-          className="relative mx-auto h-5 w-[108%] max-w-none -translate-x-[4%] rounded-b-[1.1rem] bg-gradient-to-b from-zinc-700 via-zinc-800 to-zinc-900 shadow-xl sm:h-6"
+          className="pointer-events-none absolute bottom-1/4 -end-6 hidden h-16 w-px bg-gradient-to-b from-transparent via-violet-500/30 to-transparent lg:block"
           aria-hidden
-        >
-          <div className="absolute top-0 left-1/2 h-1 w-14 -translate-x-1/2 rounded-b-md bg-zinc-600/80 sm:w-20" />
-        </div>
+        />
 
         <div
-          className="mx-auto mt-5 h-5 w-[72%] rounded-full bg-zinc-900/15 blur-xl dark:bg-black/30"
+          className="mx-auto mt-6 h-4 w-[65%] rounded-full bg-slate-900/10 blur-xl dark:bg-black/35"
           aria-hidden
         />
       </motion.div>
