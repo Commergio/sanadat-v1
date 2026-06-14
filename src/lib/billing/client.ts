@@ -43,6 +43,7 @@ export interface CheckoutResultApi {
   planCode: string;
   billingCycle: "yearly";
   gateway: string;
+  reusedPending?: boolean;
 }
 
 export function mapBillingError(

@@ -1,6 +1,6 @@
 import type { TenantContext } from "@/lib/tenant";
 import type { PaymentWebhookRecord } from "./webhook-types";
-import type { BillingGateway, PaymentModel, SubscriptionModel } from "./types";
+import type { BillingGateway, PaymentModel, StartCheckoutResult, SubscriptionModel } from "./types";
 import type { PaymentGateway } from "@/lib/types";
 
 export interface BillingRepositoryPort {
@@ -35,6 +35,19 @@ export interface BillingRepositoryPort {
     gateway: PaymentGateway,
     gatewayReference: string
   ): Promise<PaymentWebhookRecord | null>;
+  findPendingCheckoutPayment(
+    ctx: TenantContext,
+    input: {
+      gateway: BillingGateway;
+      amount: number;
+      currency: string;
+      planCode: string;
+    }
+  ): Promise<
+    | { kind: "reuse"; result: StartCheckoutResult }
+    | { kind: "blocked" }
+    | null
+  >;
   completePaymentWebhook(input: {
     paymentId: string;
     companyId: string;

@@ -5,6 +5,7 @@ import type {
   BillingRepositoryPort,
   PaymentModel,
   PaymentWebhookRecord,
+  StartCheckoutResult,
   SubscriptionModel,
 } from "@/application/billing";
 import type { PaymentGateway } from "@/lib/types";
@@ -224,6 +225,68 @@ export class BillingRepository implements BillingRepositoryPort {
     if (error) throw toRepositoryError(error, "Failed to lookup payment by reference");
     if (!data) return null;
     return mapPaymentWebhook(data as Row);
+  }
+
+  async findPendingCheckoutPayment(
+    ctx: TenantContext,
+    input: {
+      gateway: BillingGateway;
+      amount: number;
+      currency: string;
+      planCode: string;
+    }
+  ): Promise<
+    | { kind: "reuse"; result: StartCheckoutResult }
+    | { kind: "blocked" }
+    | null
+  > {
+    const { data, error } = await this.readClient
+      .from("payments")
+      .select(
+        "id, amount, currency, gateway, gateway_reference, checkout_session_id, gateway_response, metadata"
+      )
+      .eq("company_id", ctx.companyId)
+      .eq("status", "pending")
+      .eq("gateway", mapDbGateway(input.gateway))
+      .eq("amount", input.amount)
+      .eq("currency", input.currency)
+      .eq("metadata->>plan_code", input.planCode)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw toRepositoryError(error, "Failed to lookup pending checkout payment");
+    if (!data) return null;
+
+    const row = data as Row;
+    const gatewayResponse = (row.gateway_response as Record<string, unknown> | null) ?? {};
+    const checkoutUrl =
+      typeof gatewayResponse.mock_checkout_url === "string"
+        ? gatewayResponse.mock_checkout_url
+        : "";
+
+    const checkoutSessionId = (row.checkout_session_id as string | null) ?? "";
+    const gatewayReference = (row.gateway_reference as string | null) ?? "";
+
+    if (!checkoutUrl || !checkoutSessionId || !gatewayReference) {
+      return { kind: "blocked" };
+    }
+
+    return {
+      kind: "reuse",
+      result: {
+        paymentId: String(row.id),
+        checkoutUrl,
+        checkoutSessionId,
+        gatewayReference,
+        amount: Number(row.amount),
+        currency: String(row.currency ?? input.currency),
+        planCode: input.planCode,
+        billingCycle: "yearly",
+        gateway: input.gateway,
+        reusedPending: true,
+      },
+    };
   }
 
   async completePaymentWebhook(input: {

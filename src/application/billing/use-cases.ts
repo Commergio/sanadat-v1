@@ -99,6 +99,25 @@ export function buildBillingUseCases(deps: BillingUseCaseDeps) {
 
       try {
         const subscription = await deps.repository.getSubscription(ctx);
+
+        const pendingLookup = await deps.repository.findPendingCheckoutPayment(ctx, {
+          gateway: parsed.data.gateway,
+          amount: plan.amount,
+          currency: plan.currency,
+          planCode: parsed.data.plan_code,
+        });
+
+        if (pendingLookup?.kind === "reuse") {
+          return pendingLookup.result;
+        }
+
+        if (pendingLookup?.kind === "blocked") {
+          throw new UseCaseError(
+            "CONFLICT",
+            "لديك دفعة قيد الانتظار، أكملها أو انتظر انتهاء صلاحيتها قبل إنشاء دفعة جديدة."
+          );
+        }
+
         const paymentId = await deps.repository.createPendingPayment(ctx, {
           subscriptionId: subscription?.id ?? null,
           gateway: parsed.data.gateway,

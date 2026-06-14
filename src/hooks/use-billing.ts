@@ -72,7 +72,7 @@ export function useBilling() {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [refresh]);
 
-  const startCheckout = useCallback(async () => {
+  const startCheckout = useCallback(async (): Promise<CheckoutResultApi | undefined> => {
     setCheckoutLoading(true);
     setCheckoutError(null);
     setCheckoutResult(null);
@@ -95,9 +95,13 @@ export function useBilling() {
       const result = payload as CheckoutResultApi;
       setCheckoutResult(result);
       await refresh();
+      if (result.reusedPending) {
+        return result;
+      }
       if (result.checkoutUrl) {
         window.location.assign(result.checkoutUrl);
       }
+      return result;
     } catch {
       setCheckoutError("Failed to start checkout");
     } finally {
@@ -105,8 +109,11 @@ export function useBilling() {
     }
   }, [refresh]);
 
-  const latestPendingPayment = payments.find((p) => p.status === "pending");
-  const latestFailedPayment = payments.find((p) => p.status === "failed");
+  const latestPayment = payments[0] ?? null;
+  const latestPendingPayment =
+    latestPayment?.status === "pending" ? latestPayment : undefined;
+  const latestFailedPayment =
+    latestPayment?.status === "failed" ? latestPayment : undefined;
 
   return {
     subscription,
@@ -119,6 +126,7 @@ export function useBilling() {
     checkoutError,
     startCheckout,
     refresh,
+    latestPayment,
     latestPendingPayment,
     latestFailedPayment,
   };

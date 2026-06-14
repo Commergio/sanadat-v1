@@ -1,11 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { AlertTriangle, CreditCard, Loader2, Lock } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CreditCard, Loader2, Lock } from "lucide-react";
 import { useBilling } from "@/hooks/use-billing";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,18 +59,47 @@ export function SubscriptionBillingPanel() {
     checkoutLoading,
     checkoutError,
     startCheckout,
+    refresh,
     latestPendingPayment,
     latestFailedPayment,
   } = useBilling();
 
+  const checkoutReturn = searchParams.get("checkout");
+  const isCheckoutSuccess = checkoutReturn === "success";
+  const isSubscriptionActive = subscription?.status === "active";
+
   useEffect(() => {
-    const checkout = searchParams.get("checkout");
-    if (checkout === "success") {
-      toast.success(t("checkoutReturnSuccess"));
-    } else if (checkout === "cancelled") {
+    if (checkoutReturn === "cancelled") {
       toast.message(t("checkoutReturnCancelled"));
     }
-  }, [searchParams, t]);
+  }, [checkoutReturn, t]);
+
+  useEffect(() => {
+    if (!isCheckoutSuccess || loading) return;
+
+    void refresh();
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 3000);
+    const timeout = window.setTimeout(() => {
+      window.clearInterval(interval);
+    }, 30000);
+
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(timeout);
+    };
+  }, [isCheckoutSuccess, loading, refresh]);
+
+  const handleStartCheckout = useCallback(async () => {
+    const result = await startCheckout();
+    if (result?.reusedPending) {
+      toast.message(t("pendingPaymentExists"));
+      if (result.checkoutUrl) {
+        window.location.assign(result.checkoutUrl);
+      }
+    }
+  }, [startCheckout, t]);
 
   const statusLabel = (status: SubscriptionStatus) => {
     const map: Record<SubscriptionStatus, string> = {
@@ -132,7 +161,25 @@ export function SubscriptionBillingPanel() {
         </div>
       )}
 
-      {latestPendingPayment && (
+      {isCheckoutSuccess && isSubscriptionActive && subscription && (
+        <div className="flex gap-3 rounded-xl border border-emerald-200/80 bg-emerald-50/90 p-4 text-sm dark:border-emerald-900/60 dark:bg-emerald-950/40">
+          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
+          <p className="font-medium text-emerald-800 dark:text-emerald-200">
+            {t("checkoutRenewedSuccess", {
+              expiresAt: formatDate(subscription.expiresAt, locale),
+            })}
+          </p>
+        </div>
+      )}
+
+      {isCheckoutSuccess && !isSubscriptionActive && !loading && (
+        <div className="flex gap-3 rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm">
+          <Loader2 className="h-5 w-5 shrink-0 animate-spin text-primary" />
+          <p className="font-medium text-foreground">{t("checkoutActivating")}</p>
+        </div>
+      )}
+
+      {latestPendingPayment && !(isCheckoutSuccess && isSubscriptionActive) && (
         <div className="flex gap-3 rounded-xl border border-amber-200/80 bg-amber-50/90 p-4 text-sm dark:border-amber-900/60 dark:bg-amber-950/40">
           <Loader2 className="h-5 w-5 shrink-0 animate-spin text-amber-600" />
           <div>
@@ -207,7 +254,7 @@ export function SubscriptionBillingPanel() {
             <>
               <p className="text-sm text-muted-foreground">{t("checkoutHintMoyasar")}</p>
               <Button
-                onClick={() => void startCheckout()}
+                onClick={() => void handleStartCheckout()}
                 disabled={checkoutLoading || loadError?.code === "NOT_IMPLEMENTED"}
               >
                 {checkoutLoading ? (
@@ -344,9 +391,19 @@ function PaymentHistoryTable({
               <p>
                 {labels.gateway}: {p.gateway}
               </p>
-              <p>
-                {labels.paidAt}: {p.paidAt ? formatDate(p.paidAt, locale) : "—"}
-              </p>
+              {p.status === "completed" && p.paidAt ? (
+                <p>
+                  {labels.paidAt}: {formatDate(p.paidAt, locale)}
+                </p>
+              ) : null}
+              {p.status === "failed" && p.failedAt ? (
+                <p>
+                  {labels.failedAt}: {formatDate(p.failedAt, locale)}
+                </p>
+              ) : null}
+              {p.status === "pending" ? (
+                <p>{labels.status}: {paymentStatusLabel(p.status)}</p>
+              ) : null}
               {p.gatewayReference ? (
                 <p className="break-all">
                   {labels.gatewayReference}: {p.gatewayReference}

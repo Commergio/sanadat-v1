@@ -49,4 +49,5 @@ export interface StartCheckoutResult {
   planCode: string;
   billingCycle: "yearly";
   gateway: BillingGateway;
+  reusedPending?: boolean;
 }

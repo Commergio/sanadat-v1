@@ -80,11 +80,17 @@ SUPABASE_SERVICE_ROLE_KEY=...
 
 ## Idempotency
 
-Handled by existing P2.3 logic:
+Handled by P2.3 logic + P2.5 Final QA hardening:
 
-- Duplicate `provider_event_id` → `{ ok: true, duplicate: true }`
-- Already `completed` payment for same `gateway_reference` → `409 ALREADY_PROCESSED`
+- Duplicate `provider_event_id` → HTTP **200** `{ ok: true, duplicate: true }`
+- Replay webhook for already **completed** or **failed** payment (same `gateway_reference`) → HTTP **200** `{ ok: true, duplicate: true }` — subscription is **not** extended twice
 - DB unique indexes on `(gateway, provider_event_id)` and `(gateway, gateway_reference)`
+
+---
+
+## Duplicate pending checkout (P2.5 Final QA)
+
+See [P2.5 Final QA](./p2-5-final-qa.md). Checkout reuses an existing pending Moyasar session when plan/amount/currency match.
 
 ---
 

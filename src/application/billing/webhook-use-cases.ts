@@ -78,18 +78,15 @@ export function buildPaymentWebhookHandler(deps: {
           throw new UseCaseError("NOT_FOUND", "Invalid gateway_reference");
         }
 
-        if (payment.status === "completed") {
-          throw new UseCaseError(
-            "ALREADY_PROCESSED",
-            "Payment for this gateway_reference is already completed"
-          );
-        }
-
         if (payment.status !== "pending") {
-          throw new UseCaseError(
-            "ALREADY_PROCESSED",
-            `Payment is not pending (current status: ${payment.status})`
-          );
+          return {
+            ok: true,
+            duplicate: true,
+            paymentId: payment.id,
+            companyId: payment.companyId,
+            subscriptionId: payment.subscriptionId,
+            status: payment.status === "failed" ? "failed" : "completed",
+          };
         }
 
         if (!amountsMatch(payment.amount, parsed.data.amount)) {
