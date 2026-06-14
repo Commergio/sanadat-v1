@@ -11,7 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
 import { createForgotPasswordSchema } from "@/lib/validations";
 import { getAuthErrorMessage, getSupabaseBrowserClient } from "@/lib/auth/client";
+import { buildAuthCallbackUrl } from "@/lib/auth/callback-url";
 import { isSupabaseConfigured } from "@/lib/env";
+import type { Locale } from "@/i18n/routing";
 import type { z } from "zod";
 
 export function ForgotPasswordForm() {
@@ -45,7 +47,10 @@ export function ForgotPasswordForm() {
       const { error } = await supabase.auth.resetPasswordForEmail(
         data.email.trim().toLowerCase(),
         {
-          redirectTo: `${window.location.origin}/auth/callback?next=/${locale}/dashboard/settings`,
+          redirectTo: buildAuthCallbackUrl(
+            `/${locale}/dashboard/settings`,
+            locale as Locale
+          ),
         }
       );
 

@@ -10,9 +10,25 @@ Sanadat requires **Supabase** for authentication and multi-tenant data.
 2. Copy `.env.example` to `.env.local` and set:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_APP_URL`
-3. In Supabase Auth → URL configuration, add redirect: `{APP_URL}/auth/callback`
-4. `npm run dev` → register a company → sign in
+   - `NEXT_PUBLIC_APP_URL` — your public site origin **without** a locale path (e.g. `https://sanadat.sa` or `http://localhost:3000`, not `…/ar`)
+
+### Supabase Auth URL configuration
+
+In **Supabase Dashboard → Authentication → URL configuration**:
+
+| Setting | Value |
+|---------|--------|
+| **Site URL** | `{NEXT_PUBLIC_APP_URL}` (e.g. `https://sanadat.sa`) |
+| **Redirect URLs** | `{NEXT_PUBLIC_APP_URL}/auth/callback` |
+| | `http://localhost:3000/auth/callback` (local dev) |
+
+Signup and password reset pass `emailRedirectTo` / `redirectTo` as:
+
+`{APP_URL}/auth/callback?next=/ar/dashboard` (or `/en/dashboard` based on locale)
+
+**Email templates:** Supabase sends messages from Supabase by default (sender/branding in Dashboard → Authentication → Email templates). The confirmation link must land on `/auth/callback`; our app handles PKCE `code`, `token_hash`, and hash `access_token` flows and redirects to `next` or login with a success message — never a blank page.
+
+3. `npm run dev` → register a company → confirm email → land on dashboard (or login with “email confirmed” if session is not established)
 
 P1 is now wired to real Supabase data:
 - Tenant-aware create/list/detail for receipts, payments, invoices

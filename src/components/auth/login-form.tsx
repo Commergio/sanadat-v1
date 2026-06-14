@@ -28,7 +28,11 @@ export function LoginForm() {
 
   useEffect(() => {
     const error = searchParams.get("error");
-    if (error === "auth_callback") {
+    const message = searchParams.get("message");
+
+    if (message === "email-confirmed-login-required") {
+      toast.success(t("emailConfirmedLoginRequired"));
+    } else if (error === "auth_callback") {
       toast.error(t("callbackError"));
     } else if (error === "supabase_not_configured") {
       toast.error(t("authNotConfigured"));

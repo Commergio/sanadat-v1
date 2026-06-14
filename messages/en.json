@@ -215,6 +215,7 @@
     "logoutSuccess": "Signed out successfully",
     "logoutFailed": "Sign out failed",
     "callbackError": "Account verification failed — try signing in again",
+    "emailConfirmedLoginRequired": "Email confirmed — sign in to continue to Sanadat",
     "authNotConfigured": "Authentication is not configured — contact support",
     "errors": {
       "invalid_credentials": "Invalid email or password",

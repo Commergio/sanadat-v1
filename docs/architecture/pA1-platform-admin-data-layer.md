@@ -12,6 +12,7 @@
 | `012_pA1_company_account_status.sql` | `company_account_status` enum + `companies` suspend columns |
 | `013_pA1_platform_admin_actions.sql` | `platform_admin_actions` audit table + RLS |
 | `014_pA1_platform_views_rpcs_rls.sql` | View, RPCs, `is_platform_staff()`, activity_logs RLS fix |
+| `018_pA1_company_subscription_current_security_invoker.sql` | View `security_invoker = true` (RLS parity fix) |
 
 ---
 
@@ -71,7 +72,16 @@ One row per company — latest subscription by `created_at DESC`.
 SELECT * FROM company_subscription_current ORDER BY company_created_at DESC;
 ```
 
-Granted to `authenticated` (RLS on underlying tables applies).
+Granted to `authenticated`. The view uses **`security_invoker = true`** (migration `018`) so row access is enforced by RLS on underlying tables — not by view-owner bypass.
+
+| Caller | Effective access |
+|--------|------------------|
+| `platform_admin` / `platform_support` | All companies (RLS OR clauses on `companies`, `subscriptions`, documents, etc.) |
+| Regular tenant | Only rows for `company_id IN user_company_ids()` — no cross-tenant platform metrics |
+
+**Why Security Advisor flagged “Security Definer View”:** views owned by `postgres` default to running as the owner, which bypasses RLS. That was never intentional; the view was not given an explicit `SECURITY DEFINER` attribute — it inherited owner privileges. **`security_invoker` is required for the documented RLS model; it is not optional.**
+
+**Application access:** consumed only via platform admin APIs (`PlatformRepository` → `/api/platform/companies`, `/api/platform/subscriptions`, `/api/platform/companies/[id]`) and internally by `platform_dashboard_stats()` (which checks `is_platform_staff()` before querying). Tenants must not use this view for product features; direct Supabase client queries are limited to their own company row(s) by RLS.
 
 ---
 

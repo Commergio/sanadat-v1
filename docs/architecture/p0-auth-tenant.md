@@ -50,7 +50,7 @@ Apply in order after `001`–`003`:
 
 **Middleware:** Requires Supabase for `/dashboard`; sets active company cookie; blocks `/admin` unless `profiles.platform_role = platform_admin`.
 
-**Callback:** `/auth/callback` sets active company cookie after email confirm / OAuth.
+**Callback:** `/auth/callback` (client page) handles PKCE `code`, `token_hash`, and hash tokens; sets active company cookie via `POST /api/auth/post-callback`; redirects to `next` or login with `message=email-confirmed-login-required`.
 
 ### Tenant roles
 
@@ -85,7 +85,11 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Configure Supabase Auth redirect URL: `{APP_URL}/auth/callback`
+Configure Supabase Auth:
+
+- **Site URL:** `{NEXT_PUBLIC_APP_URL}` (no `/ar` suffix)
+- **Redirect URLs:** `{NEXT_PUBLIC_APP_URL}/auth/callback`
+- Signup `emailRedirectTo`: `{APP_URL}/auth/callback?next=/ar/dashboard`
 
 ## Manual platform admin (optional)
 

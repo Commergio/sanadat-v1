@@ -215,6 +215,7 @@
     "logoutSuccess": "تم تسجيل الخروج",
     "logoutFailed": "فشل تسجيل الخروج",
     "callbackError": "فشل تأكيد الحساب — حاول تسجيل الدخول مجدداً",
+    "emailConfirmedLoginRequired": "تم تأكيد البريد — سجّل الدخول للمتابعة إلى سندات",
     "authNotConfigured": "نظام المصادقة غير مُعدّ — تواصل مع الدعم",
     "errors": {
       "invalid_credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",

@@ -14,7 +14,9 @@ import {
   getAuthErrorMessage,
   getSupabaseBrowserClient,
 } from "@/lib/auth/client";
+import { buildAuthCallbackUrl } from "@/lib/auth/callback-url";
 import { isSupabaseConfigured } from "@/lib/env";
+import type { Locale } from "@/i18n/routing";
 
 export function RegisterForm() {
   const t = useTranslations("auth");
@@ -40,7 +42,6 @@ export function RegisterForm() {
       }
 
       const supabase = getSupabaseBrowserClient();
-      const origin = window.location.origin;
 
       const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email.trim().toLowerCase(),
@@ -50,7 +51,7 @@ export function RegisterForm() {
             company_name: data.companyName.trim(),
             phone: data.phone.trim(),
           },
-          emailRedirectTo: `${origin}/auth/callback?next=/${locale}/onboarding`,
+          emailRedirectTo: buildAuthCallbackUrl(`/${locale}/dashboard`, locale as Locale),
         },
       });
 
