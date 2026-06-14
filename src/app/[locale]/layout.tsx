@@ -38,8 +38,13 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("description"),
+    icons: {
+      icon: "/logo.png",
+      apple: "/logo.png",
+    },
     openGraph: {
       locale: locale === "ar" ? "ar_SA" : "en_US",
+      images: [{ url: "/logo.png", alt: t("title") }],
     },
   };
 }
