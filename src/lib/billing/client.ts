@@ -31,6 +31,9 @@ export interface BillingPaymentApi {
   paidAt: string | null;
   failedAt: string | null;
   createdAt: string;
+  couponCode?: string | null;
+  originalAmount?: number | null;
+  discountAmount?: number | null;
 }
 
 export interface CheckoutResultApi {
@@ -44,6 +47,46 @@ export interface CheckoutResultApi {
   billingCycle: "yearly";
   gateway: string;
   reusedPending?: boolean;
+  couponCode?: string;
+  originalAmount?: number;
+  discountAmount?: number;
+}
+
+export function mapPaymentFromApi(row: Record<string, unknown>): BillingPaymentApi {
+  const metadata =
+    row.metadata && typeof row.metadata === "object"
+      ? (row.metadata as Record<string, unknown>)
+      : {};
+
+  return {
+    id: String(row.id),
+    companyId: String(row.companyId ?? row.company_id ?? ""),
+    subscriptionId: (row.subscriptionId ?? row.subscription_id ?? null) as string | null,
+    gateway: row.gateway as PaymentGateway,
+    amount: Number(row.amount),
+    currency: String(row.currency ?? "SAR"),
+    status: row.status as PaymentStatus,
+    gatewayReference: (row.gatewayReference ?? row.gateway_reference ?? null) as string | null,
+    checkoutSessionId: (row.checkoutSessionId ?? row.checkout_session_id ?? null) as string | null,
+    paidAt: (row.paidAt ?? row.paid_at ?? null) as string | null,
+    failedAt: (row.failedAt ?? row.failed_at ?? null) as string | null,
+    createdAt: String(row.createdAt ?? row.created_at ?? ""),
+    couponCode:
+      (row.couponCode as string | undefined) ??
+      (typeof metadata.coupon_code === "string" ? metadata.coupon_code : null),
+    originalAmount:
+      row.originalAmount != null
+        ? Number(row.originalAmount)
+        : metadata.original_amount != null
+          ? Number(metadata.original_amount)
+          : null,
+    discountAmount:
+      row.discountAmount != null
+        ? Number(row.discountAmount)
+        : metadata.discount_amount != null
+          ? Number(metadata.discount_amount)
+          : null,
+  };
 }
 
 export function mapBillingError(

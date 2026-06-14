@@ -11,7 +11,8 @@ export type DocumentActivityAction =
   | "team.member_removed"
   | "team.invite_revoked"
   | "billing.payment_completed"
-  | "billing.payment_failed";
+  | "billing.payment_failed"
+  | "coupon.applied";
 
 export interface ActivityLogPort {
   log(

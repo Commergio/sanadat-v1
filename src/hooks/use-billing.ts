@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { hasMinimumTenantRole } from "@/lib/tenant/roles";
 import type { TenantRole } from "@/lib/tenant/types";
-import type {
-  BillingPaymentApi,
-  BillingSubscriptionApi,
-  CheckoutResultApi,
+import {
+  mapBillingError,
+  mapPaymentFromApi,
+  type BillingPaymentApi,
+  type BillingSubscriptionApi,
+  type CheckoutResultApi,
 } from "@/lib/billing/client";
-import { mapBillingError } from "@/lib/billing/client";
+import { validateBillingCoupon, type CouponValidateResponse } from "@/hooks/use-coupons";
 import { useCompany } from "@/hooks/use-company";
 
 export function useBilling() {
@@ -20,6 +22,10 @@ export function useBilling() {
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResultApi | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponValidateResponse | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   const canManage =
     tenantRole != null && hasMinimumTenantRole(tenantRole as TenantRole, "admin");
@@ -47,7 +53,8 @@ export function useBilling() {
         setLoadError((prev) => prev ?? mapBillingError(payPayload, "Failed to load payments"));
         setPayments([]);
       } else {
-        setPayments((payPayload.items as BillingPaymentApi[]) ?? []);
+        const rawItems = (payPayload.items ?? []) as Record<string, unknown>[];
+        setPayments(rawItems.map(mapPaymentFromApi));
       }
     } catch {
       setLoadError({ code: "INTERNAL", message: "Failed to load billing data" });
@@ -72,19 +79,63 @@ export function useBilling() {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [refresh]);
 
+  const applyCoupon = useCallback(async (): Promise<boolean> => {
+    const code = couponInput.trim();
+    if (!code) {
+      setCouponError(null);
+      setAppliedCoupon(null);
+      return false;
+    }
+
+    setCouponLoading(true);
+    setCouponError(null);
+    try {
+      const result = await validateBillingCoupon({
+        code,
+        plan_code: "sanadat_annual",
+        billing_cycle: "yearly",
+      });
+      if (!result.valid) {
+        setAppliedCoupon(null);
+        setCouponError(result.message);
+        return false;
+      }
+      setAppliedCoupon(result);
+      setCouponInput(result.coupon_code ?? code.toUpperCase());
+      return true;
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponError((err as Error).message);
+      return false;
+    } finally {
+      setCouponLoading(false);
+    }
+  }, [couponInput]);
+
+  const clearCoupon = useCallback(() => {
+    setCouponInput("");
+    setAppliedCoupon(null);
+    setCouponError(null);
+  }, []);
+
   const startCheckout = useCallback(async (): Promise<CheckoutResultApi | undefined> => {
     setCheckoutLoading(true);
     setCheckoutError(null);
     setCheckoutResult(null);
     try {
+      const body: Record<string, string> = {
+        plan_code: "sanadat_annual",
+        billing_cycle: "yearly",
+        gateway: "moyasar",
+      };
+      if (appliedCoupon?.valid && appliedCoupon.coupon_code) {
+        body.coupon_code = appliedCoupon.coupon_code;
+      }
+
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan_code: "sanadat_annual",
-          billing_cycle: "yearly",
-          gateway: "moyasar",
-        }),
+        body: JSON.stringify(body),
       });
       const payload = await res.json();
       if (!res.ok) {
@@ -107,7 +158,7 @@ export function useBilling() {
     } finally {
       setCheckoutLoading(false);
     }
-  }, [refresh]);
+  }, [appliedCoupon, refresh]);
 
   const latestPayment = payments[0] ?? null;
   const latestPendingPayment =
@@ -124,6 +175,13 @@ export function useBilling() {
     checkoutResult,
     checkoutLoading,
     checkoutError,
+    couponInput,
+    setCouponInput,
+    appliedCoupon,
+    couponLoading,
+    couponError,
+    applyCoupon,
+    clearCoupon,
     startCheckout,
     refresh,
     latestPayment,

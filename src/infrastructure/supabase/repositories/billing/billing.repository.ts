@@ -55,6 +55,7 @@ function mapPaymentWebhook(row: Row): PaymentWebhookRecord {
 }
 
 function mapPayment(row: Row): PaymentModel {
+  const metadata = (row.metadata as Record<string, unknown> | null) ?? {};
   return {
     id: String(row.id),
     companyId: String(row.company_id),
@@ -72,6 +73,12 @@ function mapPayment(row: Row): PaymentModel {
     periodEnd: (row.period_end as string | null) ?? null,
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
+    couponCode:
+      typeof metadata.coupon_code === "string" ? metadata.coupon_code : null,
+    originalAmount:
+      metadata.original_amount != null ? Number(metadata.original_amount) : null,
+    discountAmount:
+      metadata.discount_amount != null ? Number(metadata.discount_amount) : null,
   };
 }
 
@@ -101,7 +108,7 @@ export class BillingRepository implements BillingRepositoryPort {
     const { data, error } = await this.readClient
       .from("payments")
       .select(
-        "id, company_id, subscription_id, gateway, amount, currency, status, gateway_reference, checkout_session_id, payment_intent_id, paid_at, failed_at, period_start, period_end, created_at, updated_at"
+        "id, company_id, subscription_id, gateway, amount, currency, status, gateway_reference, checkout_session_id, payment_intent_id, paid_at, failed_at, period_start, period_end, metadata, created_at, updated_at"
       )
       .eq("company_id", ctx.companyId)
       .order("created_at", { ascending: false });
@@ -119,8 +126,32 @@ export class BillingRepository implements BillingRepositoryPort {
       currency: string;
       planCode: string;
       billingCycle: "yearly";
+      originalAmount?: number;
+      discountAmount?: number;
+      couponCode?: string;
+      couponId?: string;
     }
   ): Promise<string> {
+    const metadata: Record<string, unknown> = {
+      plan_code: input.planCode,
+      billing_cycle: input.billingCycle,
+      initiated_by: ctx.userId,
+      checkout_gateway: input.gateway,
+    };
+
+    if (input.originalAmount != null) {
+      metadata.original_amount = input.originalAmount;
+    }
+    if (input.discountAmount != null) {
+      metadata.discount_amount = input.discountAmount;
+    }
+    if (input.couponCode) {
+      metadata.coupon_code = input.couponCode;
+    }
+    if (input.couponId) {
+      metadata.coupon_id = input.couponId;
+    }
+
     const { data, error } = await this.writeClient
       .from("payments")
       .insert({
@@ -130,12 +161,7 @@ export class BillingRepository implements BillingRepositoryPort {
         amount: input.amount,
         currency: input.currency,
         status: "pending",
-        metadata: {
-          plan_code: input.planCode,
-          billing_cycle: input.billingCycle,
-          initiated_by: ctx.userId,
-          checkout_gateway: input.gateway,
-        },
+        metadata,
       })
       .select("id")
       .single();
@@ -234,13 +260,14 @@ export class BillingRepository implements BillingRepositoryPort {
       amount: number;
       currency: string;
       planCode: string;
+      couponCode?: string | null;
     }
   ): Promise<
     | { kind: "reuse"; result: StartCheckoutResult }
     | { kind: "blocked" }
     | null
   > {
-    const { data, error } = await this.readClient
+    let query = this.readClient
       .from("payments")
       .select(
         "id, amount, currency, gateway, gateway_reference, checkout_session_id, gateway_response, metadata"
@@ -250,7 +277,16 @@ export class BillingRepository implements BillingRepositoryPort {
       .eq("gateway", mapDbGateway(input.gateway))
       .eq("amount", input.amount)
       .eq("currency", input.currency)
-      .eq("metadata->>plan_code", input.planCode)
+      .eq("metadata->>plan_code", input.planCode);
+
+    const normalizedCoupon = input.couponCode?.trim().toUpperCase() ?? null;
+    if (normalizedCoupon) {
+      query = query.eq("metadata->>coupon_code", normalizedCoupon);
+    } else {
+      query = query.or("metadata->>coupon_code.is.null,metadata->>coupon_code.eq.");
+    }
+
+    const { data, error } = await query
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -272,6 +308,14 @@ export class BillingRepository implements BillingRepositoryPort {
       return { kind: "blocked" };
     }
 
+    const metadata = (row.metadata as Record<string, unknown> | null) ?? {};
+    const couponCode =
+      typeof metadata.coupon_code === "string" ? metadata.coupon_code : undefined;
+    const originalAmount =
+      metadata.original_amount != null ? Number(metadata.original_amount) : undefined;
+    const discountAmount =
+      metadata.discount_amount != null ? Number(metadata.discount_amount) : undefined;
+
     return {
       kind: "reuse",
       result: {
@@ -285,6 +329,9 @@ export class BillingRepository implements BillingRepositoryPort {
         billingCycle: "yearly",
         gateway: input.gateway,
         reusedPending: true,
+        couponCode,
+        originalAmount,
+        discountAmount,
       },
     };
   }

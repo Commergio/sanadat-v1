@@ -7,6 +7,7 @@ export interface CreateCheckoutSessionInput {
   currency: string;
   planCode: string;
   gateway: BillingGateway;
+  couponCode?: string;
 }
 
 export interface CheckoutSessionResult {

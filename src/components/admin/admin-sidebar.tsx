@@ -11,6 +11,7 @@ import {
   Megaphone,
   LifeBuoy,
   X,
+  TicketPercent,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/admin/clients", labelKey: "clients", icon: Users },
   { href: "/admin/subscriptions", labelKey: "subscriptions", icon: CreditCard },
   { href: "/admin/payments", labelKey: "payments", icon: Wallet },
+  { href: "/admin/coupons", labelKey: "couponsNav", icon: TicketPercent },
   { href: "/admin/actions", labelKey: "actionsNav", icon: ScrollText },
   { href: "/admin/announcements", labelKey: "announcementsNav", icon: Megaphone },
   { href: "/admin/support", labelKey: "supportNav", icon: LifeBuoy },

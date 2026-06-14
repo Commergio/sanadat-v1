@@ -12,6 +12,7 @@ Checkout creation with gateway adapters.
 | Method | Path | Role | Description |
 |--------|------|------|-------------|
 | `POST` | `/api/billing/checkout` | owner/admin | Start checkout → pending payment + mock session |
+| `POST` | `/api/billing/coupons/validate` | all members | Validate coupon for plan (preview discount) |
 | `GET` | `/api/billing/subscription` | all members | Current company subscription |
 | `GET` | `/api/billing/payments` | all members | Billing payment journal for company |
 
@@ -21,9 +22,12 @@ Checkout creation with gateway adapters.
 {
   "plan_code": "sanadat_annual",
   "billing_cycle": "yearly",
-  "gateway": "manual"
+  "gateway": "manual",
+  "coupon_code": "SAVE20"
 }
 ```
+
+`coupon_code` is optional. When present, the server validates the coupon, charges the **discounted final amount**, and stores discount metadata on the payment. See [p2-6-1-discount-coupons.md](./p2-6-1-discount-coupons.md).
 
 `gateway`: `moyasar` | `hyperpay` | `stcpay` | `manual`
 
@@ -142,4 +146,6 @@ A mock checkout URL does not prove payment — only a signed webhook (or manual 
 ## Related files
 
 - Migration `011` — `manual` on `payment_gateway` enum
+- Migration `017` — discount coupons (P2.6.1)
+- [p2-6-1-discount-coupons.md](./p2-6-1-discount-coupons.md) — coupon lifecycle & rules
 - [p2-billing-data-layer.md](./p2-billing-data-layer.md) — schema & RLS

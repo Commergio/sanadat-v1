@@ -87,12 +87,15 @@ export class MoyasarCheckoutGateway implements CheckoutGatewayPort {
       throw new MoyasarGatewayError("Moyasar currency must be a 3-letter ISO-4217 code");
     }
 
-    const description = `Sanadat subscription - ${input.planCode}`.slice(0, 255);
+    const description = input.couponCode
+      ? `Sanadat subscription - ${input.planCode} - Coupon ${input.couponCode}`
+      : `Sanadat subscription - ${input.planCode}`;
+    const trimmedDescription = description.slice(0, 255);
 
     const body: Record<string, string | number> = {
       amount: toMoyasarAmount(input.amount, currency),
       currency,
-      description,
+      description: trimmedDescription,
       success_url: buildSubscriptionRedirectUrl(origin, locale, "success"),
       back_url: buildSubscriptionRedirectUrl(origin, locale, "cancelled"),
     };

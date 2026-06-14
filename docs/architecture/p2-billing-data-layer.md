@@ -137,6 +137,7 @@ Signup still creates trial subscriptions via `handle_new_user()` (`SECURITY DEFI
 | 004 | `trialing` on `subscription_status` |
 | 006 / 010 | Signup trial + plan fields |
 | 010 | **P2.1** full hardening |
+| 017 | **P2.6.1** discount coupons + redemptions — see [p2-6-1-discount-coupons.md](./p2-6-1-discount-coupons.md) |
 
 ---
 

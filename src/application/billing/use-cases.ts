@@ -7,10 +7,14 @@ import { getCheckoutGateway } from "@/infrastructure/billing/gateways";
 import { assertCanReadBilling, assertCanStartCheckout } from "./authorization";
 import { resolvePlanPrice } from "./constants";
 import type { ActivityLogPort } from "@/application/documents";
+import type { CouponDiscountBreakdown } from "@/application/coupons/types";
+import type { buildCouponUseCases } from "@/application/coupons/use-cases";
 import type { BillingRepositoryPort } from "./repository-ports";
 import { startCheckoutInputSchema } from "./schemas";
 import type { PaymentModel, StartCheckoutResult, SubscriptionModel } from "./types";
 import { buildPaymentWebhookHandler } from "./webhook-use-cases";
+
+type CouponCheckoutService = ReturnType<typeof buildCouponUseCases>;
 
 function rethrowBillingError(error: unknown, fallback: string): never {
   if (error instanceof UseCaseError) throw error;
@@ -34,6 +38,7 @@ function rethrowBillingError(error: unknown, fallback: string): never {
 interface BillingUseCaseDeps {
   repository: BillingRepositoryPort;
   activityLog?: ActivityLogPort;
+  coupons?: CouponCheckoutService;
 }
 
 export function buildBillingUseCases(deps: BillingUseCaseDeps) {
@@ -100,11 +105,38 @@ export function buildBillingUseCases(deps: BillingUseCaseDeps) {
       try {
         const subscription = await deps.repository.getSubscription(ctx);
 
+        let checkoutAmount = plan.amount;
+        let couponBreakdown: CouponDiscountBreakdown | null = null;
+
+        if (parsed.data.coupon_code) {
+          if (!deps.coupons) {
+            throw new UseCaseError(
+              "NOT_IMPLEMENTED",
+              "Coupon checkout requires SUPABASE_SERVICE_ROLE_KEY on the server"
+            );
+          }
+
+          couponBreakdown = await deps.coupons.validateForCheckoutByCode(ctx, {
+            code: parsed.data.coupon_code,
+            planCode: parsed.data.plan_code,
+            billingCycle: "yearly",
+          });
+          checkoutAmount = couponBreakdown.finalAmount;
+
+          if (checkoutAmount < 1 && parsed.data.gateway === "moyasar") {
+            throw new UseCaseError(
+              "VALIDATION",
+              "Amount after discount is below the minimum for card checkout"
+            );
+          }
+        }
+
         const pendingLookup = await deps.repository.findPendingCheckoutPayment(ctx, {
           gateway: parsed.data.gateway,
-          amount: plan.amount,
+          amount: checkoutAmount,
           currency: plan.currency,
           planCode: parsed.data.plan_code,
+          couponCode: couponBreakdown?.couponCode ?? null,
         });
 
         if (pendingLookup?.kind === "reuse") {
@@ -121,20 +153,46 @@ export function buildBillingUseCases(deps: BillingUseCaseDeps) {
         const paymentId = await deps.repository.createPendingPayment(ctx, {
           subscriptionId: subscription?.id ?? null,
           gateway: parsed.data.gateway,
-          amount: plan.amount,
+          amount: checkoutAmount,
           currency: plan.currency,
           planCode: parsed.data.plan_code,
           billingCycle: "yearly",
+          originalAmount: couponBreakdown?.originalAmount ?? plan.amount,
+          discountAmount: couponBreakdown?.discountAmount ?? 0,
+          couponCode: couponBreakdown?.couponCode,
+          couponId: couponBreakdown?.couponId,
         });
+
+        if (couponBreakdown && deps.coupons) {
+          await deps.coupons.recordCheckoutRedemption(
+            ctx,
+            couponBreakdown,
+            paymentId,
+            subscription?.id ?? null
+          );
+
+          if (deps.activityLog) {
+            await deps.activityLog.log(ctx, "coupon.applied", paymentId, {
+              coupon_code: couponBreakdown.couponCode,
+              coupon_id: couponBreakdown.couponId,
+              original_amount: couponBreakdown.originalAmount,
+              discount_amount: couponBreakdown.discountAmount,
+              final_amount: couponBreakdown.finalAmount,
+              plan_code: parsed.data.plan_code,
+              gateway: parsed.data.gateway,
+            });
+          }
+        }
 
         const gateway = getCheckoutGateway(parsed.data.gateway);
         const session = await gateway.createCheckoutSession({
           companyId: ctx.companyId,
           paymentId,
-          amount: plan.amount,
+          amount: checkoutAmount,
           currency: plan.currency,
           planCode: parsed.data.plan_code,
           gateway: parsed.data.gateway,
+          couponCode: couponBreakdown?.couponCode,
         });
 
         await deps.repository.attachCheckoutSession(ctx.companyId, paymentId, {
@@ -149,11 +207,14 @@ export function buildBillingUseCases(deps: BillingUseCaseDeps) {
           checkoutUrl: session.checkoutUrl,
           checkoutSessionId: session.checkoutSessionId,
           gatewayReference: session.gatewayReference,
-          amount: plan.amount,
+          amount: checkoutAmount,
           currency: plan.currency,
           planCode: parsed.data.plan_code,
           billingCycle: "yearly",
           gateway: parsed.data.gateway,
+          couponCode: couponBreakdown?.couponCode,
+          originalAmount: couponBreakdown?.originalAmount ?? plan.amount,
+          discountAmount: couponBreakdown?.discountAmount ?? 0,
         };
       } catch (error) {
         rethrowBillingError(error, "Failed to start checkout");

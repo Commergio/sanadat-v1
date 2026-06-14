@@ -58,6 +58,13 @@ export function SubscriptionBillingPanel() {
     checkoutResult,
     checkoutLoading,
     checkoutError,
+    couponInput,
+    setCouponInput,
+    appliedCoupon,
+    couponLoading,
+    couponError,
+    applyCoupon,
+    clearCoupon,
     startCheckout,
     refresh,
     latestPendingPayment,
@@ -90,6 +97,13 @@ export function SubscriptionBillingPanel() {
       window.clearTimeout(timeout);
     };
   }, [isCheckoutSuccess, loading, refresh]);
+
+  const handleApplyCoupon = useCallback(async () => {
+    const ok = await applyCoupon();
+    if (ok) {
+      toast.success(t("couponAppliedSuccess"));
+    }
+  }, [applyCoupon, t]);
 
   const handleStartCheckout = useCallback(async () => {
     const result = await startCheckout();
@@ -233,6 +247,9 @@ export function SubscriptionBillingPanel() {
               paidAt: t("colPaidAt"),
               failedAt: t("colFailedAt"),
               gatewayReference: t("colGatewayReference"),
+              couponCode: t("colCouponCode"),
+              discountAmount: t("colDiscountAmount"),
+              finalAmount: t("colFinalAmount"),
             }}
           />
         </CardContent>
@@ -253,6 +270,75 @@ export function SubscriptionBillingPanel() {
           {canManage && (
             <>
               <p className="text-sm text-muted-foreground">{t("checkoutHintMoyasar")}</p>
+
+              <div className="rounded-lg border border-border/80 bg-muted/20 p-4 space-y-3">
+                <p className="font-medium text-foreground">{t("couponSectionTitle")}</p>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                  <div className="flex-1 space-y-1">
+                    <label htmlFor="coupon-code" className="text-xs text-muted-foreground">
+                      {t("couponCodeLabel")}
+                    </label>
+                    <input
+                      id="coupon-code"
+                      dir="ltr"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 font-mono text-sm uppercase"
+                      value={couponInput}
+                      disabled={couponLoading || checkoutLoading}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      placeholder={t("couponCodePlaceholder")}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={couponLoading || checkoutLoading || !couponInput.trim()}
+                      onClick={() => void handleApplyCoupon()}
+                    >
+                      {couponLoading ? (
+                        <>
+                          <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                          {t("couponApplying")}
+                        </>
+                      ) : (
+                        t("couponApply")
+                      )}
+                    </Button>
+                    {appliedCoupon?.valid && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={couponLoading || checkoutLoading}
+                        onClick={clearCoupon}
+                      >
+                        {t("couponClear")}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {couponError && (
+                  <p className="text-sm text-destructive">{couponError}</p>
+                )}
+
+                {appliedCoupon?.valid && (
+                  <div className="grid gap-2 rounded-md border border-emerald-200/70 bg-emerald-50/80 p-3 text-sm dark:border-emerald-900/50 dark:bg-emerald-950/30 sm:grid-cols-3">
+                    <DetailRow
+                      label={t("couponOriginalAmount")}
+                      value={formatCurrency(appliedCoupon.original_amount ?? 0, locale)}
+                    />
+                    <DetailRow
+                      label={t("couponDiscountAmount")}
+                      value={formatCurrency(appliedCoupon.discount_amount ?? 0, locale)}
+                    />
+                    <DetailRow
+                      label={t("couponFinalAmount")}
+                      value={formatCurrency(appliedCoupon.final_amount ?? 0, locale)}
+                    />
+                  </div>
+                )}
+              </div>
+
               <Button
                 onClick={() => void handleStartCheckout()}
                 disabled={checkoutLoading || loadError?.code === "NOT_IMPLEMENTED"}
@@ -371,6 +457,10 @@ function PaymentHistoryTable({
     return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
   }
 
+  const showCouponColumns = payments.some(
+    (p) => p.couponCode || p.discountAmount || p.originalAmount
+  );
+
   return (
     <>
       <div className="space-y-3 md:hidden">
@@ -391,6 +481,21 @@ function PaymentHistoryTable({
               <p>
                 {labels.gateway}: {p.gateway}
               </p>
+              {showCouponColumns && p.couponCode ? (
+                <p>
+                  {labels.couponCode}: {p.couponCode}
+                </p>
+              ) : null}
+              {showCouponColumns && p.discountAmount != null && p.discountAmount > 0 ? (
+                <p>
+                  {labels.discountAmount}: {formatCurrency(p.discountAmount, locale)}
+                </p>
+              ) : null}
+              {showCouponColumns ? (
+                <p>
+                  {labels.finalAmount}: {formatCurrency(p.amount, locale)}
+                </p>
+              ) : null}
               {p.status === "completed" && p.paidAt ? (
                 <p>
                   {labels.paidAt}: {formatDate(p.paidAt, locale)}
@@ -418,6 +523,13 @@ function PaymentHistoryTable({
         <thead>
           <tr className="border-b border-border text-muted-foreground">
             <th className="py-2 pe-3 text-start font-medium">{labels.amount}</th>
+            {showCouponColumns ? (
+              <>
+                <th className="py-2 pe-3 text-start font-medium">{labels.couponCode}</th>
+                <th className="py-2 pe-3 text-start font-medium">{labels.discountAmount}</th>
+                <th className="py-2 pe-3 text-start font-medium">{labels.finalAmount}</th>
+              </>
+            ) : null}
             <th className="py-2 pe-3 text-start font-medium">{labels.currency}</th>
             <th className="py-2 pe-3 text-start font-medium">{labels.gateway}</th>
             <th className="py-2 pe-3 text-start font-medium">{labels.status}</th>
@@ -429,7 +541,22 @@ function PaymentHistoryTable({
         <tbody>
           {payments.map((p) => (
             <tr key={p.id} className="border-b border-border/60 last:border-0">
-              <td className="py-2.5 pe-3 tabular-nums">{formatCurrency(p.amount, locale)}</td>
+              <td className="py-2.5 pe-3 tabular-nums">
+                {p.originalAmount != null && p.originalAmount > p.amount
+                  ? formatCurrency(p.originalAmount, locale)
+                  : formatCurrency(p.amount, locale)}
+              </td>
+              {showCouponColumns ? (
+                <>
+                  <td className="py-2.5 pe-3 font-mono text-xs">{p.couponCode ?? "—"}</td>
+                  <td className="py-2.5 pe-3 tabular-nums">
+                    {p.discountAmount != null && p.discountAmount > 0
+                      ? formatCurrency(p.discountAmount, locale)
+                      : "—"}
+                  </td>
+                  <td className="py-2.5 pe-3 tabular-nums">{formatCurrency(p.amount, locale)}</td>
+                </>
+              ) : null}
               <td className="py-2.5 pe-3">{p.currency}</td>
               <td className="py-2.5 pe-3">{p.gateway}</td>
               <td className="py-2.5 pe-3">

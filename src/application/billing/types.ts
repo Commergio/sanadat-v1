@@ -37,6 +37,9 @@ export interface PaymentModel {
   periodEnd: string | null;
   createdAt: string;
   updatedAt: string;
+  couponCode?: string | null;
+  originalAmount?: number | null;
+  discountAmount?: number | null;
 }
 
 export interface StartCheckoutResult {
@@ -50,4 +53,7 @@ export interface StartCheckoutResult {
   billingCycle: "yearly";
   gateway: BillingGateway;
   reusedPending?: boolean;
+  couponCode?: string;
+  originalAmount?: number;
+  discountAmount?: number;
 }

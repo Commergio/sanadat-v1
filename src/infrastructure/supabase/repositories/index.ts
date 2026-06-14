@@ -5,4 +5,5 @@ export { DocumentNumberRepository } from "./documents/document-number.repository
 export { ActivityLogRepository } from "./documents/activity-log.repository";
 export { TeamRepository } from "./team/team.repository";
 export { BillingRepository } from "./billing/billing.repository";
+export { CouponRepository } from "./coupons/coupon.repository";
 export { PlatformRepository } from "./platform/platform.repository";

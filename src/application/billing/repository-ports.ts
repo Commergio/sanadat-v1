@@ -15,6 +15,10 @@ export interface BillingRepositoryPort {
       currency: string;
       planCode: string;
       billingCycle: "yearly";
+      originalAmount?: number;
+      discountAmount?: number;
+      couponCode?: string;
+      couponId?: string;
     }
   ): Promise<string>;
   attachCheckoutSession(
@@ -42,6 +46,7 @@ export interface BillingRepositoryPort {
       amount: number;
       currency: string;
       planCode: string;
+      couponCode?: string | null;
     }
   ): Promise<
     | { kind: "reuse"; result: StartCheckoutResult }
