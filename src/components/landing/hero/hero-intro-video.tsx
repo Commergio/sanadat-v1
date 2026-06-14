@@ -30,7 +30,7 @@ export function HeroIntroVideo({ className }: HeroIntroVideoProps) {
   }, []);
 
   return (
-    <div className={cn("relative mx-auto w-full max-w-[520px] lg:max-w-[580px]", className)}>
+    <div className={cn("relative mx-auto w-full max-w-[640px] lg:max-w-[720px]", className)}>
       {/* Ambient tech glow */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute top-1/2 left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/12 blur-[100px]" />
@@ -57,23 +57,23 @@ export function HeroIntroVideo({ className }: HeroIntroVideoProps) {
         />
 
         {/* Tablet body — light frame wraps outside video area */}
-        <div className="relative overflow-hidden rounded-[1.75rem] border border-white/40 bg-gradient-to-b from-white/90 via-slate-50/95 to-slate-100/90 p-3 shadow-[0_24px_64px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:rounded-[2rem] sm:p-4 dark:border-white/10 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-950/90 dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.45)]">
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-white/40 bg-gradient-to-b from-white/90 via-slate-50/95 to-slate-100/90 p-2 shadow-[0_24px_64px_-16px_rgba(15,23,42,0.18)] backdrop-blur-xl sm:rounded-[2rem] sm:p-2.5 dark:border-white/10 dark:from-zinc-900/90 dark:via-zinc-900/80 dark:to-zinc-950/90 dark:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.45)]">
           {/* Top bezel — outside video */}
-          <div className="mb-3 flex items-center justify-center sm:mb-3.5">
-            <span className="h-1 w-10 rounded-full bg-slate-300/80 dark:bg-zinc-600/70" aria-hidden />
+          <div className="mb-2 flex items-center justify-center sm:mb-2">
+            <span className="h-1 w-8 rounded-full bg-slate-300/80 dark:bg-zinc-600/70" aria-hidden />
             <span
-              className="mx-auto h-2 w-2 rounded-full bg-slate-300 ring-2 ring-slate-200/80 dark:bg-zinc-600 dark:ring-zinc-700/80"
+              className="mx-auto h-1.5 w-1.5 rounded-full bg-slate-300 ring-2 ring-slate-200/80 dark:bg-zinc-600 dark:ring-zinc-700/80"
               aria-hidden
             />
-            <span className="h-1 w-10 rounded-full bg-transparent" aria-hidden />
+            <span className="h-1 w-8 rounded-full bg-transparent" aria-hidden />
           </div>
 
-          {/* Video viewport — inset from tablet frame */}
-          <div className="relative overflow-hidden rounded-[1.1rem] bg-black shadow-inner ring-1 ring-slate-900/5 sm:rounded-[1.25rem] dark:ring-white/5">
-            <div className="aspect-[4/3] w-full sm:aspect-[16/10]">
+          {/* Video viewport — wide landscape screen matching 16:9 recording */}
+          <div className="relative overflow-hidden rounded-[0.9rem] bg-black shadow-inner ring-1 ring-slate-900/5 sm:rounded-[1rem] dark:ring-white/5">
+            <div className="aspect-video w-full">
               <video
                 ref={videoRef}
-                className="h-full w-full object-cover object-top"
+                className="h-full w-full object-cover object-center"
                 autoPlay
                 loop
                 muted
@@ -88,9 +88,9 @@ export function HeroIntroVideo({ className }: HeroIntroVideoProps) {
           </div>
 
           {/* Bottom bezel — home indicator, outside video */}
-          <div className="mt-3 flex justify-center sm:mt-3.5">
+          <div className="mt-2 flex justify-center sm:mt-2">
             <span
-              className="h-1 w-16 rounded-full bg-slate-300/70 dark:bg-zinc-600/60"
+              className="h-0.5 w-12 rounded-full bg-slate-300/70 dark:bg-zinc-600/60"
               aria-hidden
             />
           </div>

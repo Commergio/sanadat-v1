@@ -128,7 +128,7 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.12 }}
           >
-            <HeroIntroVideo className="mx-auto max-w-[440px] lg:max-w-none" />
+            <HeroIntroVideo className="mx-auto w-full max-w-[min(100%,720px)]" />
           </motion.div>
         </div>
       </div>
