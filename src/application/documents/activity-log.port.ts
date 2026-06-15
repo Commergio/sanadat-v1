@@ -2,9 +2,17 @@ import type { TenantContext } from "@/domain";
 
 export type DocumentActivityAction =
   | "document.created"
+  | "document.draft_created"
+  | "document.approval_sent"
+  | "document.approved"
+  | "document.rejected"
+  | "document.issued"
+  | "document.approval_recalled"
   | "document.cancelled"
   | "document.exported"
   | "document.shared"
+  | "customer.created"
+  | "customer.updated"
   | "team.invited"
   | "team.invite_accepted"
   | "team.role_changed"

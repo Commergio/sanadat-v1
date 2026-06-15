@@ -10,6 +10,7 @@ import {
   CreditCard,
   X,
   LifeBuoy,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
@@ -23,6 +24,7 @@ const mainNav = [
   { href: "/dashboard/receipts", labelKey: "receipts", icon: ArrowDownLeft },
   { href: "/dashboard/payments", labelKey: "payments", icon: ArrowUpRight },
   { href: "/dashboard/invoices", labelKey: "invoices", icon: FileText },
+  { href: "/dashboard/customers", labelKey: "customers", icon: Users },
 ] as const;
 
 const accountNav = [

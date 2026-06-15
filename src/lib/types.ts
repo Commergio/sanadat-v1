@@ -18,6 +18,14 @@ export type DocumentType = "receipt_voucher" | "payment_voucher" | "invoice";
 
 export type DocumentStatus = "active" | "cancelled";
 
+export type DocumentLifecycleStatus =
+  | "draft"
+  | "pending_approval"
+  | "approved"
+  | "issued"
+  | "rejected"
+  | "cancelled";
+
 export type PaymentMethod = "cash" | "bank_transfer" | "pos";
 
 export type PaymentGateway = "moyasar" | "hyperpay" | "stc_pay" | "manual";
@@ -113,6 +121,21 @@ export interface Invoice extends DocumentBase {
   total: number;
   payment_status: InvoicePaymentStatus;
   linked_receipt_id?: string;
+}
+
+export interface Customer {
+  id: string;
+  company_id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  national_id?: string;
+  default_signature_path?: string;
+  is_verified: boolean;
+  verified_at?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PaymentTransaction {

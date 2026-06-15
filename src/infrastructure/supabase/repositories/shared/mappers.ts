@@ -1,8 +1,35 @@
 import type { Invoice, InvoiceItem } from "@/domain/documents/invoice/entity";
 import type { PaymentVoucher } from "@/domain/documents/payment/entity";
 import type { ReceiptVoucher } from "@/domain/documents/receipt/entity";
+import type { DocumentLifecycleStatus } from "@/domain/documents/shared/types";
 
 type Row = Record<string, unknown>;
+
+function mapApprovalFields(row: Row) {
+  const lifecycleStatus =
+    (row.lifecycle_status as DocumentLifecycleStatus | undefined) ?? "issued";
+
+  return {
+    lifecycleStatus,
+    customerId: (row.customer_id as string | null) ?? null,
+    approvalTokenHash: (row.approval_token_hash as string | null) ?? null,
+    approvalSentAt: (row.approval_sent_at as string | null) ?? null,
+    approvalExpiresAt: (row.approval_expires_at as string | null) ?? null,
+    approvalTokenUsedAt: (row.approval_token_used_at as string | null) ?? null,
+    approvedAt: (row.approved_at as string | null) ?? null,
+    approvedByName: (row.approved_by_name as string | null) ?? null,
+    approvedByPhone: (row.approved_by_phone as string | null) ?? null,
+    customerSignaturePath: (row.customer_signature_path as string | null) ?? null,
+    approvalIp: (row.approval_ip as string | null) ?? null,
+    approvalUserAgent: (row.approval_user_agent as string | null) ?? null,
+    rejectionReason: (row.rejection_reason as string | null) ?? null,
+    rejectedAt: (row.rejected_at as string | null) ?? null,
+    issuedAt: (row.issued_at as string | null) ?? null,
+    issuedBy: (row.issued_by as string | null) ?? null,
+    approvalSnapshotVersion: Number(row.approval_snapshot_version ?? 1),
+    contentLockedAt: (row.content_locked_at as string | null) ?? null,
+  };
+}
 
 function mapBase(row: Row) {
   return {
@@ -25,6 +52,7 @@ function mapBase(row: Row) {
     createdBy: (row.created_by as string | null) ?? null,
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
+    ...mapApprovalFields(row),
   };
 }
 

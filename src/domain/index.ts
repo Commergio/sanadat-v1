@@ -30,10 +30,19 @@ export type {
   CompanyRepository,
 } from "./company/entity";
 
+// Customers
+export type {
+  Customer,
+  CreateCustomerInput,
+  UpdateCustomerInput,
+} from "./customers/entity";
+
 // Documents — shared
 export type {
   DocumentType,
   DocumentStatus,
+  DocumentLifecycleStatus,
+  DocumentApprovalFields,
   PaymentMethod,
   InvoicePaymentStatus,
   DocumentBase,
@@ -41,6 +50,10 @@ export type {
   NextDocumentNumber,
   DocumentTypeDefinition,
 } from "./documents/shared/types";
+export type {
+  DocumentApprovalSnapshot,
+  DocumentApprovalToken,
+} from "./documents/shared/approval-types";
 export {
   DOCUMENT_TYPE_DEFINITIONS,
   getDocumentTypeDefinition,

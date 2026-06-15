@@ -1,8 +1,13 @@
+import type { DocumentApprovalFields } from "./approval-types";
+
+export type { DocumentLifecycleStatus, DocumentApprovalFields } from "./approval-types";
+
 export type DocumentType =
   | "receipt_voucher"
   | "payment_voucher"
   | "invoice";
 
+/** @deprecated Use lifecycleStatus; kept for backward compatibility */
 export type DocumentStatus = "active" | "cancelled";
 
 export type PaymentMethod = "cash" | "bank_transfer" | "pos";
@@ -10,7 +15,7 @@ export type PaymentMethod = "cash" | "bank_transfer" | "pos";
 export type InvoicePaymentStatus = "paid" | "unpaid" | "partial";
 
 /** Shared immutable fields across all document types */
-export interface DocumentBase {
+export interface DocumentBase extends DocumentApprovalFields {
   id: string;
   companyId: string;
   type: DocumentType;
