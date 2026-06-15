@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fetchCustomer, updateCustomer } from "@/hooks/use-customers";
+import { fetchCustomer, updateCustomer, sendCustomerVerification } from "@/hooks/use-customers";
 import { useCompany } from "@/hooks/use-company";
 import { hasMinimumTenantRole } from "@/lib/tenant/roles";
 import type { Customer } from "@/lib/types";
 import { isRtlLocale } from "@/i18n/routing";
 import { useLocale } from "next-intl";
+import { generateWhatsAppLink } from "@/lib/utils";
+import { resolveWhatsAppPhone } from "@/lib/phone/whatsapp";
 
 export default function CustomerDetailPage() {
   const params = useParams<{ id: string }>();
@@ -32,13 +34,14 @@ export default function CustomerDetailPage() {
   const isRtl = isRtlLocale(locale);
   const BackChevron = isRtl ? ChevronRight : ArrowRight;
   const t = useTranslations("dashboard.customers");
-  const { tenantRole } = useCompany();
+  const { tenantRole, company } = useCompany();
   const canWrite = tenantRole != null && hasMinimumTenantRole(tenantRole, "accountant");
 
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [sendingVerification, setSendingVerification] = useState(false);
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -96,6 +99,27 @@ export default function CustomerDetailPage() {
     }
   };
 
+  const handleSendVerification = async () => {
+    if (!customer || !canWrite) return;
+    setSendingVerification(true);
+    try {
+      const { verificationUrl } = await sendCustomerVerification(customer.id, locale);
+      const message = t("whatsappVerificationMessage", {
+        name: customer.name,
+        company: company?.name ?? t("companyFallback"),
+        link: verificationUrl,
+      });
+      window.open(generateWhatsAppLink(resolveWhatsAppPhone(customer.phone), message), "_blank");
+      toast.success(t("verificationSent"));
+      const refreshed = await fetchCustomer(customer.id);
+      setCustomer(refreshed);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("verificationSendFailed"));
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
   return (
     <>
       <DashboardHeader title={customer?.name ?? t("profile")} description={t("profileSubtitle")} />
@@ -112,6 +136,8 @@ export default function CustomerDetailPage() {
           <CustomerProfileCard
             customer={customer}
             onEdit={canWrite ? () => setEditOpen(true) : undefined}
+            onSendVerification={canWrite ? () => void handleSendVerification() : undefined}
+            sendingVerification={sendingVerification}
           />
         ) : null}
       </main>

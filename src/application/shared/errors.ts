@@ -4,6 +4,7 @@ export type RepositoryErrorCode =
   | "VALIDATION"
   | "CONFLICT"
   | "EXPIRED_INVITATION"
+  | "EXPIRED"
   | "ALREADY_ACCEPTED"
   | "ALREADY_PROCESSED"
   | "UNAUTHENTICATED"

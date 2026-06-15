@@ -133,6 +133,9 @@ export interface Customer {
   default_signature_path?: string;
   is_verified: boolean;
   verified_at?: string;
+  verification_sent_at?: string;
+  verification_expires_at?: string;
+  signature_preview_url?: string;
   created_by?: string;
   created_at: string;
   updated_at: string;

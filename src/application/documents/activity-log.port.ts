@@ -13,6 +13,8 @@ export type DocumentActivityAction =
   | "document.shared"
   | "customer.created"
   | "customer.updated"
+  | "customer.verification_sent"
+  | "customer.verified"
   | "team.invited"
   | "team.invite_accepted"
   | "team.role_changed"

@@ -356,7 +356,14 @@
       "loadFailed": "Could not load customer",
       "emptyTitle": "No customers yet",
       "emptyDescription": "Add customers to link them when sending documents for approval",
-      "backToList": "Back to customers"
+      "backToList": "Back to customers",
+      "sendVerificationLink": "Send signature link",
+      "verifiedBadge": "Verified",
+      "verificationSent": "Verification link created",
+      "verificationSendFailed": "Could not send verification link",
+      "signaturePreview": "Signature preview",
+      "companyFallback": "your company",
+      "whatsappVerificationMessage": "Hello {name}, please confirm your details and signature for documents with {company}: {link}"
     },
     "support": {
       "title": "Support",
@@ -1148,6 +1155,26 @@
     "itemRequired": "Add at least one line item",
     "descriptionRequired": "Description is required",
     "cancelReason": "Cancellation reason is required"
+  },
+  "customerVerification": {
+    "title": "Confirm your details and signature",
+    "subtitle": "Requested by {company} to verify your profile",
+    "customerName": "Customer name",
+    "customerPhone": "Phone",
+    "company": "Company",
+    "terms": "By approving, I confirm my details are correct and my signature may be used on documents with this company.",
+    "signatureLabel": "Signature",
+    "clearSignature": "Clear signature",
+    "approve": "Approve and sign",
+    "signatureRequired": "Please add your signature",
+    "approveSuccess": "Verification completed",
+    "approveFailed": "Could not complete verification",
+    "invalidTitle": "Invalid link",
+    "invalidDesc": "This link does not exist or is no longer valid.",
+    "expiredTitle": "Link expired",
+    "expiredDesc": "Please request a new link from the company.",
+    "verifiedTitle": "Verified",
+    "verifiedDesc": "Thank you — your details and signature were saved successfully."
   },
   "errors": {
     "unexpected": "An unexpected error occurred",

@@ -356,7 +356,14 @@
       "loadFailed": "تعذّر تحميل العميل",
       "emptyTitle": "لا يوجد عملاء بعد",
       "emptyDescription": "أضف عملاءك لاستخدامهم عند إرسال السندات للموافقة لاحقاً",
-      "backToList": "العودة للعملاء"
+      "backToList": "العودة للعملاء",
+      "sendVerificationLink": "إرسال رابط التوقيع",
+      "verifiedBadge": "تم التحقق",
+      "verificationSent": "تم إنشاء رابط التحقق",
+      "verificationSendFailed": "تعذّر إرسال رابط التحقق",
+      "signaturePreview": "معاينة التوقيع",
+      "companyFallback": "منشأتك",
+      "whatsappVerificationMessage": "مرحباً {name}، يرجى تأكيد بياناتك وتوقيعك لاستخدامها في سندات التعامل مع {company}: {link}"
     },
     "support": {
       "title": "الدعم",
@@ -1153,6 +1160,26 @@
     "itemRequired": "أضف بنداً واحداً على الأقل",
     "descriptionRequired": "الوصف مطلوب",
     "cancelReason": "سبب الإلغاء مطلوب"
+  },
+  "customerVerification": {
+    "title": "تأكيد بيانات العميل والتوقيع",
+    "subtitle": "طلب من {company} لتأكيد بياناتك وتوقيعك",
+    "customerName": "اسم العميل",
+    "customerPhone": "رقم الجوال",
+    "company": "المنشأة",
+    "terms": "بالموافقة أقرّ أن بياناتي صحيحة وأن توقيعي يُستخدم في سندات التعامل مع المنشأة المذكورة.",
+    "signatureLabel": "التوقيع",
+    "clearSignature": "مسح التوقيع",
+    "approve": "موافقة وتوقيع",
+    "signatureRequired": "يرجى إضافة التوقيع",
+    "approveSuccess": "تم التحقق بنجاح",
+    "approveFailed": "تعذّر إتمام التحقق",
+    "invalidTitle": "رابط غير صالح",
+    "invalidDesc": "هذا الرابط غير موجود أو لم يعد صالحاً.",
+    "expiredTitle": "انتهت صلاحية الرابط",
+    "expiredDesc": "يرجى طلب رابط جديد من المنشأة.",
+    "verifiedTitle": "تم التحقق",
+    "verifiedDesc": "شكراً — تم حفظ بياناتك وتوقيعك بنجاح."
   },
   "errors": {
     "unexpected": "حدث خطأ غير متوقع",

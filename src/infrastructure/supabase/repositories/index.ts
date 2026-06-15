@@ -8,3 +8,4 @@ export { BillingRepository } from "./billing/billing.repository";
 export { CouponRepository } from "./coupons/coupon.repository";
 export { PlatformRepository } from "./platform/platform.repository";
 export { CustomerRepository } from "./customers/customer.repository";
+export { CustomerVerificationRepository } from "./customers/customer-verification.repository";

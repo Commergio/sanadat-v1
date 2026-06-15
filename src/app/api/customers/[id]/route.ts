@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { buildCustomerApp, toCustomerRow } from "@/application/customers";
+import { buildCustomerApp } from "@/application/customers";
+import { enrichCustomerRow } from "@/application/customers/enrich-customer";
 import { UseCaseError } from "@/application/shared/use-case-error";
 import { requireTenantContext } from "@/lib/auth/require-tenant";
 import { createClient } from "@/lib/supabase/server";
@@ -22,7 +23,7 @@ export async function GET(
     const supabase = await createClient();
     const app = buildCustomerApp(supabase);
     const customer = await app.getCustomer(ctx, id);
-    return NextResponse.json(toCustomerRow(customer));
+    return NextResponse.json(await enrichCustomerRow(customer));
   } catch (error) {
     if (error instanceof UseCaseError) {
       return NextResponse.json(
@@ -48,7 +49,7 @@ export async function PATCH(
     const supabase = await createClient();
     const app = buildCustomerApp(supabase);
     const updated = await app.updateCustomer(ctx, id, body);
-    return NextResponse.json(toCustomerRow(updated));
+    return NextResponse.json(await enrichCustomerRow(updated));
   } catch (error) {
     if (error instanceof UseCaseError) {
       return NextResponse.json(

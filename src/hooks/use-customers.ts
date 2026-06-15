@@ -95,3 +95,19 @@ export async function updateCustomer(
   }
   return data as Customer;
 }
+
+export async function sendCustomerVerification(
+  customerId: string,
+  locale: string
+): Promise<{ verificationUrl: string; expiresAt: string }> {
+  const res = await fetch(`/api/customers/${customerId}/send-verification`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ locale }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data?.error?.message ?? "Failed to send verification link");
+  }
+  return data as { verificationUrl: string; expiresAt: string };
+}

@@ -9,6 +9,12 @@ export interface Customer {
   defaultSignaturePath: string | null;
   isVerified: boolean;
   verifiedAt: string | null;
+  verificationTokenHash: string | null;
+  verificationSentAt: string | null;
+  verificationExpiresAt: string | null;
+  verificationTokenUsedAt: string | null;
+  verifiedIp: string | null;
+  verifiedUserAgent: string | null;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;

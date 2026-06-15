@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, Plus, Eye, Pencil, UserCircle2 } from "lucide-react";
+import { Search, Plus, Eye, Pencil, UserCircle2, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Link } from "@/i18n/navigation";
@@ -17,12 +17,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/dashboard/empty-state";
-import { useCustomers, createCustomer, updateCustomer } from "@/hooks/use-customers";
+import { useCustomers, createCustomer, updateCustomer, sendCustomerVerification } from "@/hooks/use-customers";
 import { useCompany } from "@/hooks/use-company";
 import { hasMinimumTenantRole } from "@/lib/tenant/roles";
 import type { Customer } from "@/lib/types";
 import { formatDate } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { cn, generateWhatsAppLink } from "@/lib/utils";
+import { resolveWhatsAppPhone } from "@/lib/phone/whatsapp";
 import { useLocale } from "next-intl";
 
 type FormMode = "create" | "edit" | null;
@@ -52,13 +53,15 @@ function customerToForm(customer: Customer): CustomerFormState {
 
 export function CustomersPanel() {
   const t = useTranslations("dashboard.customers");
-  const { tenantRole } = useCompany();
+  const locale = useLocale();
+  const { tenantRole, company } = useCompany();
   const canWrite = tenantRole != null && hasMinimumTenantRole(tenantRole, "accountant");
   const [search, setSearch] = useState("");
   const [formMode, setFormMode] = useState<FormMode>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [form, setForm] = useState<CustomerFormState>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [sendingId, setSendingId] = useState<string | null>(null);
 
   const { customers, loading, error, refresh } = useCustomers(search);
 
@@ -114,6 +117,26 @@ export function CustomersPanel() {
   };
 
   const filteredCount = useMemo(() => customers.length, [customers]);
+
+  const handleSendVerification = async (customer: Customer) => {
+    if (!canWrite) return;
+    setSendingId(customer.id);
+    try {
+      const { verificationUrl } = await sendCustomerVerification(customer.id, locale);
+      const message = t("whatsappVerificationMessage", {
+        name: customer.name,
+        company: company?.name ?? t("companyFallback"),
+        link: verificationUrl,
+      });
+      window.open(generateWhatsAppLink(resolveWhatsAppPhone(customer.phone), message), "_blank");
+      toast.success(t("verificationSent"));
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("verificationSendFailed"));
+    } finally {
+      setSendingId(null);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -184,11 +207,25 @@ export function CustomersPanel() {
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={customer.is_verified ? "default" : "outline"}>
-                        {customer.is_verified ? t("verified") : t("unverified")}
+                        {customer.is_verified ? t("verifiedBadge") : t("unverified")}
                       </Badge>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
+                        {canWrite ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            disabled={sendingId === customer.id}
+                            onClick={() => void handleSendVerification(customer)}
+                            title={t("sendVerificationLink")}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                            <span className="sr-only">{t("sendVerificationLink")}</span>
+                          </Button>
+                        ) : null}
                         <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                           <Link href={`/dashboard/customers/${customer.id}`}>
                             <Eye className="h-4 w-4" />
@@ -232,10 +269,23 @@ export function CustomersPanel() {
                     ) : null}
                   </div>
                   <Badge variant={customer.is_verified ? "default" : "outline"}>
-                    {customer.is_verified ? t("verified") : t("unverified")}
+                    {customer.is_verified ? t("verifiedBadge") : t("unverified")}
                   </Badge>
                 </div>
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {canWrite ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 gap-2 min-w-[140px]"
+                      disabled={sendingId === customer.id}
+                      onClick={() => void handleSendVerification(customer)}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      {t("sendVerificationLink")}
+                    </Button>
+                  ) : null}
                   <Button variant="outline" size="sm" className="flex-1 gap-2" asChild>
                     <Link href={`/dashboard/customers/${customer.id}`}>
                       <Eye className="h-4 w-4" />
@@ -332,10 +382,14 @@ export function CustomersPanel() {
 export function CustomerProfileCard({
   customer,
   onEdit,
+  onSendVerification,
+  sendingVerification,
   className,
 }: {
   customer: Customer;
   onEdit?: () => void;
+  onSendVerification?: () => void;
+  sendingVerification?: boolean;
   className?: string;
 }) {
   const t = useTranslations("dashboard.customers");
@@ -353,20 +407,51 @@ export function CustomerProfileCard({
             <p className="mt-1 text-sm text-muted-foreground tabular-nums" dir="ltr">
               {customer.phone}
             </p>
-            <div className="mt-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               <Badge variant={customer.is_verified ? "default" : "outline"}>
-                {customer.is_verified ? t("verified") : t("unverified")}
+                {customer.is_verified ? t("verifiedBadge") : t("unverified")}
               </Badge>
             </div>
           </div>
         </div>
-        {onEdit ? (
-          <Button type="button" variant="outline" size="sm" className="gap-2 shrink-0" onClick={onEdit}>
-            <Pencil className="h-4 w-4" />
-            {t("edit")}
-          </Button>
-        ) : null}
+        <div className="flex flex-wrap gap-2 shrink-0">
+          {onSendVerification ? (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="gap-2"
+              disabled={sendingVerification}
+              onClick={onSendVerification}
+            >
+              <MessageCircle className="h-4 w-4" />
+              {t("sendVerificationLink")}
+            </Button>
+          ) : null}
+          {onEdit ? (
+            <Button type="button" variant="outline" size="sm" className="gap-2" onClick={onEdit}>
+              <Pencil className="h-4 w-4" />
+              {t("edit")}
+            </Button>
+          ) : null}
+        </div>
       </div>
+
+      {customer.signature_preview_url ? (
+        <div className="mt-6">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t("signaturePreview")}
+          </p>
+          <div className="inline-block rounded-lg border border-border bg-white p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={customer.signature_preview_url}
+              alt={t("signaturePreview")}
+              className="max-h-24 max-w-full object-contain"
+            />
+          </div>
+        </div>
+      ) : null}
 
       <dl className="mt-6 grid gap-4 sm:grid-cols-2">
         <div>

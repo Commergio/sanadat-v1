@@ -4,6 +4,7 @@ export type UseCaseErrorCode =
   | "VALIDATION"
   | "CONFLICT"
   | "EXPIRED_INVITATION"
+  | "EXPIRED"
   | "ALREADY_ACCEPTED"
   | "ALREADY_PROCESSED"
   | "NOT_IMPLEMENTED"
