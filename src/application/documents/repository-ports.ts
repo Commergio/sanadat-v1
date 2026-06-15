@@ -10,11 +10,7 @@ import type {
 import type { PaginatedModel, PaginationModel } from "@/application/shared/pagination";
 
 export interface ReceiptRepositoryPort {
-  create(
-    ctx: TenantContext,
-    input: CreateReceiptInput,
-    allocatedDisplayNumber: string
-  ): Promise<ReceiptVoucher>;
+  create(ctx: TenantContext, input: CreateReceiptInput): Promise<ReceiptVoucher>;
   getById(ctx: TenantContext, id: string): Promise<ReceiptVoucher | null>;
   list(ctx: TenantContext, params: PaginationModel): Promise<PaginatedModel<ReceiptVoucher>>;
   cancel(ctx: TenantContext, id: string, reason: string): Promise<void>;

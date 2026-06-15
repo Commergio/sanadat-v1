@@ -9,6 +9,7 @@ export interface CreateReceiptInput {
   date: string;
   amount: number;
   partyName: string;
+  customerId: string;
   description?: string;
   paymentMethod: DocumentBase["paymentMethod"];
   transferNumber?: string;

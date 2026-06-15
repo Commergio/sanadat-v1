@@ -7,6 +7,7 @@ import type {
   UseFormRegister,
   UseFormHandleSubmit,
   UseFormWatch,
+  UseFormSetValue,
 } from "react-hook-form";
 import type { VoucherStudioConfig } from "@/components/documents/voucher-studio/config";
 import type { PaymentMethod } from "@/lib/types";
@@ -15,7 +16,9 @@ import type { createDocumentBaseSchema } from "@/lib/validations";
 
 export type VoucherStudioFormData = z.infer<
   ReturnType<typeof createDocumentBaseSchema>
->;
+> & {
+  customer_id?: string;
+};
 
 export type StudioViewMode = "edit" | "preview";
 
@@ -27,6 +30,7 @@ export interface VoucherStudioContextValue {
   control: Control<VoucherStudioFormData>;
   handleSubmit: ReturnType<UseFormHandleSubmit<VoucherStudioFormData>>;
   watch: UseFormWatch<VoucherStudioFormData>;
+  setValue: UseFormSetValue<VoucherStudioFormData>;
   errors: FieldErrors<VoucherStudioFormData>;
   fieldValid: (name: keyof VoucherStudioFormData) => boolean;
   paymentMethod: PaymentMethod;

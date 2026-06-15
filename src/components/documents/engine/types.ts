@@ -12,6 +12,8 @@ export interface DocumentShareMeta {
   amountLabel: string;
   /** Localized document type label for WhatsApp message */
   documentTitle?: string;
+  /** When false, PDF/print/WhatsApp are disabled (e.g. draft receipt pending approval) */
+  exportEnabled?: boolean;
 }
 
 export interface DocumentExportConfig {

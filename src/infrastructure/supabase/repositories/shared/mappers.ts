@@ -35,8 +35,8 @@ function mapBase(row: Row) {
   return {
     id: String(row.id),
     companyId: String(row.company_id),
-    number: Number(row.number),
-    displayNumber: String(row.display_number),
+    number: row.number != null ? Number(row.number) : 0,
+    displayNumber: row.display_number != null ? String(row.display_number) : "",
     status: row.status as "active" | "cancelled",
     date: String(row.date),
     amount: Number(row.amount),

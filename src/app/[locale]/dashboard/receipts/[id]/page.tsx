@@ -6,10 +6,9 @@ import { requireTenantContext } from "@/lib/auth/require-tenant";
 import { buildReceiptVoucherApp } from "@/application/documents/receipt-voucher.factory";
 import { toReceiptDetail } from "@/application/documents/receipt-voucher.presenter";
 import { UseCaseError } from "@/application/shared/use-case-error";
-import { DocumentDetailView } from "@/components/documents/engine";
-import { CancelDocumentButton } from "@/components/documents/engine/cancel-document-button";
-import { Badge } from "@/components/ui/badge";
+import { ReceiptDetailClient } from "@/components/documents/receipt-detail-client";
 import { hasMinimumTenantRole } from "@/lib/tenant/roles";
+import { receiptDisplayNumber } from "@/lib/documents/receipt-lifecycle";
 
 export default async function ReceiptDetailPage({
   params,
@@ -18,14 +17,15 @@ export default async function ReceiptDetailPage({
 }) {
   const { id } = await params;
   const t = await getTranslations("dashboard");
-  const td = await getTranslations("dashboard.table");
   let errorCode: string | null = null;
   let doc: ReturnType<typeof toReceiptDetail> | null = null;
   let canCancel = false;
+  let canSendApproval = false;
 
   try {
     const ctx = await requireTenantContext();
     canCancel = hasMinimumTenantRole(ctx.role, "accountant");
+    canSendApproval = hasMinimumTenantRole(ctx.role, "accountant");
     const supabase = await createClient();
     const app = buildReceiptVoucherApp(supabase);
     const receipt = await app.getReceiptVoucher(ctx, id);
@@ -38,9 +38,15 @@ export default async function ReceiptDetailPage({
     }
   }
 
+  const pageTitle = doc
+    ? receiptDisplayNumber(doc.display_number, doc.lifecycle_status) !== "—"
+      ? doc.display_number!
+      : t("receiptDraftTitle")
+    : id;
+
   return (
     <>
-      <DashboardHeader title={doc?.display_number ?? id} />
+      <DashboardHeader title={pageTitle ?? id} />
       <main className="flex-1 p-4 lg:p-8">
         {!doc || errorCode ? (
           <EmptyState
@@ -63,18 +69,10 @@ export default async function ReceiptDetailPage({
             actionHref="/dashboard/receipts"
           />
         ) : (
-          <DocumentDetailView
+          <ReceiptDetailClient
             document={doc}
-            actionsExtra={
-              canCancel && doc.status === "active" ? (
-                <CancelDocumentButton endpoint={`/api/receipts/${doc.id}/cancel`} />
-              ) : null
-            }
-            header={
-              <Badge variant={doc.status === "active" ? "success" : "destructive"}>
-                {doc.status === "active" ? td("active") : td("cancelled")}
-              </Badge>
-            }
+            canCancel={canCancel}
+            canSendApproval={canSendApproval}
           />
         )}
       </main>

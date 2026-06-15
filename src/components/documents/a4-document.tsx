@@ -16,6 +16,7 @@ interface A4DocumentProps {
   company?: Company;
   notes?: string;
   draft?: boolean;
+  pendingApproval?: boolean;
   partyFieldLabel?: string;
   previewPartyPlaceholder?: string;
 }
@@ -35,6 +36,7 @@ export function A4Document({
   company: companyProp,
   notes,
   draft = false,
+  pendingApproval = false,
   partyFieldLabel,
   previewPartyPlaceholder,
 }: A4DocumentProps) {
@@ -102,8 +104,12 @@ export function A4Document({
           </div>
         )}
 
-        {draft && (
+        {draft && !pendingApproval && (
           <div className="a4-draft-banner">{t("draftWatermark")}</div>
+        )}
+
+        {pendingApproval && (
+          <div className="a4-pending-approval-banner">{t("pendingApprovalWatermark")}</div>
         )}
 
         {/* Document title banner */}
@@ -165,7 +171,10 @@ export function A4Document({
           <div className="a4-meta">
             <div className="a4-meta__row">
               <span className="a4-meta__label">{t("numberLabel")}</span>
-              <span className="a4-meta__value tabular-nums">{document.display_number}</span>
+              <span className="a4-meta__value tabular-nums">
+                {document.display_number?.trim() ||
+                  (pendingApproval ? t("pendingNumber") : draft ? t("draftNumber") : "—")}
+              </span>
             </div>
             <div className="a4-meta__row">
               <span className="a4-meta__label">{t("dateLabel")}</span>

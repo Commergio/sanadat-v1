@@ -4,6 +4,7 @@ export const receiptVoucherInputSchema = z.object({
   date: z.string().min(1),
   amount: z.number().positive("Amount must be positive"),
   partyName: z.string().min(1, "Party name is required"),
+  customerId: z.string().uuid("Customer is required"),
   description: z.string().optional(),
   paymentMethod: z.enum(["cash", "bank_transfer", "pos"]),
   transferNumber: z.string().optional(),

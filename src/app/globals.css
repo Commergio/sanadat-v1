@@ -452,6 +452,18 @@ body {
   color: #b45309;
 }
 
+.a4-pending-approval-banner {
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px dashed #f97316;
+  background: #fff7ed;
+  padding: 6px 12px;
+  text-align: center;
+  font-size: 9pt;
+  font-weight: 600;
+  color: #c2410c;
+}
+
 .a4-voucher-banner {
   margin-bottom: 14px;
   border: 2px solid var(--a4-accent);

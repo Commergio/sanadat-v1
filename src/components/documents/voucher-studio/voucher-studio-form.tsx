@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { StudioField } from "@/components/documents/studio-field";
 import { StudioSection } from "@/components/documents/studio-section";
 import { PaymentMethodPicker } from "@/components/documents/payment-method-picker";
+import { ReceiptCustomerField } from "@/components/documents/receipt-customer-field";
 import { useVoucherStudio } from "@/components/documents/voucher-studio/voucher-studio-context";
 import { useRouter } from "@/i18n/navigation";
 
@@ -24,6 +25,7 @@ export function VoucherStudioForm() {
     register,
     control,
     handleSubmit,
+    setValue,
     errors,
     fieldValid,
     paymentMethod,
@@ -75,14 +77,28 @@ export function VoucherStudioForm() {
           icon={User}
           iconClassName={theme.partySectionIcon}
         >
-          <StudioField
-            label={t(labels.partyLabel)}
-            error={errors.party_name?.message}
-            showValid={fieldValid("party_name")}
-            required
-          >
-            <Input placeholder={t(labels.partyPlaceholder)} {...register("party_name")} />
-          </StudioField>
+          {config.type === "receipt_voucher" ? (
+            <ReceiptCustomerField
+              control={control}
+              errors={errors}
+              setValue={setValue}
+              fieldValid={fieldValid}
+            />
+          ) : (
+            <StudioField
+              label={t(labels.partyLabel)}
+              error={errors.party_name?.message}
+              showValid={fieldValid("party_name")}
+              required
+            >
+              <Input placeholder={t(labels.partyPlaceholder)} {...register("party_name")} />
+            </StudioField>
+          )}
+          {config.type === "receipt_voucher" && (
+            <StudioField label={t(labels.partyLabel)} showValid={fieldValid("party_name")}>
+              <Input readOnly className="bg-muted/60" {...register("party_name")} />
+            </StudioField>
+          )}
           <StudioField
             label={t("amount")}
             error={errors.amount?.message}
@@ -184,7 +200,9 @@ export function VoucherStudioForm() {
 
         <div className="flex items-start gap-2 rounded-xl border border-border/80 bg-muted/30 px-4 py-3">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-          <p className="text-xs leading-relaxed text-muted-foreground">{t("immutableNote")}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {config.type === "receipt_voucher" ? t("receiptApprovalNote") : t("immutableNote")}
+          </p>
         </div>
 
         <div className="flex gap-3 pb-4 lg:hidden">

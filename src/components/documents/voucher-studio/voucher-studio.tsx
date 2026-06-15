@@ -20,6 +20,7 @@ import {
 } from "@/components/documents/voucher-studio/voucher-studio-context";
 import type { VoucherStudioConfig } from "@/components/documents/voucher-studio/config";
 import { createDocumentBaseSchema } from "@/lib/validations";
+import { z } from "zod";
 import { formatCurrency } from "@/lib/format";
 import {
   useDraftAutosave,
@@ -60,9 +61,22 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
     () => config.getNextNumber(),
     [config]
   );
-  const displayNum = locale === "ar" ? displayNumber : displayNumberEn;
+  const displayNum =
+    config.type === "receipt_voucher"
+      ? t("draftNumberLabel")
+      : locale === "ar"
+        ? displayNumber
+        : displayNumberEn;
 
-  const schema = useMemo(() => createDocumentBaseSchema(tv), [tv]);
+  const schema = useMemo(() => {
+    const base = createDocumentBaseSchema(tv);
+    if (config.type === "receipt_voucher") {
+      return base.extend({
+        customer_id: z.string().uuid(tv("customerRequired")),
+      });
+    }
+    return base;
+  }, [tv, config.type]);
 
   const form = useForm<VoucherStudioFormData>({
     resolver: zodResolver(schema),
@@ -77,6 +91,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors, touchedFields, dirtyFields },
   } = form;
 
@@ -120,6 +135,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
               date: data.date,
               amount: Number(data.amount),
               partyName: data.party_name,
+              customerId: data.customer_id,
               description: data.description,
               notes: data.notes,
               paymentMethod: data.payment_method,
@@ -145,7 +161,9 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
             return;
           }
           clearDraft(config.draftStorageKey);
-          toast.success(t("createSuccess"));
+          toast.success(
+            config.type === "receipt_voucher" ? t("draftSaveSuccess") : t("createSuccess")
+          );
           router.push(payload.redirectPath ?? config.redirectPath);
           return;
         }
@@ -175,6 +193,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
       control,
       handleSubmit: handleSubmit(onSubmit),
       watch,
+      setValue,
       errors,
       fieldValid,
       paymentMethod,
@@ -191,6 +210,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
       handleSubmit,
       onSubmit,
       watch,
+      setValue,
       errors,
       fieldValid,
       paymentMethod,

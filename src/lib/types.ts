@@ -77,9 +77,10 @@ export interface Subscription {
 export interface DocumentBase {
   id: string;
   company_id: string;
-  number: number;
-  display_number: string;
+  number?: number | null;
+  display_number?: string | null;
   status: DocumentStatus;
+  lifecycle_status?: DocumentLifecycleStatus;
   date: string;
   amount: number;
   description?: string;
@@ -93,6 +94,15 @@ export interface DocumentBase {
   cancel_reason?: string;
   created_at: string;
   updated_at: string;
+  customer_id?: string | null;
+  approval_sent_at?: string | null;
+  approval_expires_at?: string | null;
+  approved_at?: string | null;
+  approved_by_name?: string | null;
+  approved_by_phone?: string | null;
+  rejection_reason?: string | null;
+  rejected_at?: string | null;
+  issued_at?: string | null;
 }
 
 export interface ReceiptVoucher extends DocumentBase {
