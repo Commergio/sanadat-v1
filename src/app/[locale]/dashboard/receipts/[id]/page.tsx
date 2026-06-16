@@ -8,7 +8,8 @@ import { toReceiptDetail } from "@/application/documents/receipt-voucher.present
 import { UseCaseError } from "@/application/shared/use-case-error";
 import { ReceiptDetailClient } from "@/components/documents/receipt-detail-client";
 import { hasMinimumTenantRole } from "@/lib/tenant/roles";
-import { receiptDisplayNumber } from "@/lib/documents/receipt-lifecycle";
+import { effectiveReceiptLifecycle, receiptDisplayNumber } from "@/lib/documents/receipt-lifecycle";
+import { createCustomerSignatureSignedUrl } from "@/lib/storage/customer-signature";
 
 export default async function ReceiptDetailPage({
   params,
@@ -19,6 +20,7 @@ export default async function ReceiptDetailPage({
   const t = await getTranslations("dashboard");
   let errorCode: string | null = null;
   let doc: ReturnType<typeof toReceiptDetail> | null = null;
+  let customerSignatureUrl: string | null = null;
   let canCancel = false;
   let canSendApproval = false;
 
@@ -29,7 +31,18 @@ export default async function ReceiptDetailPage({
     const supabase = await createClient();
     const app = buildReceiptVoucherApp(supabase);
     const receipt = await app.getReceiptVoucher(ctx, id);
+    const lifecycle = effectiveReceiptLifecycle(receipt.lifecycleStatus);
+    if (lifecycle === "issued" && receipt.customerSignaturePath) {
+      customerSignatureUrl = await createCustomerSignatureSignedUrl(
+        supabase,
+        receipt.customerSignaturePath,
+        3600
+      );
+    }
     doc = toReceiptDetail(receipt);
+    if (doc) {
+      doc.customer_signature_url = customerSignatureUrl;
+    }
   } catch (error) {
     if (error instanceof UseCaseError) {
       errorCode = error.code;
@@ -71,6 +84,7 @@ export default async function ReceiptDetailPage({
         ) : (
           <ReceiptDetailClient
             document={doc}
+            customerSignatureUrl={customerSignatureUrl}
             canCancel={canCancel}
             canSendApproval={canSendApproval}
           />

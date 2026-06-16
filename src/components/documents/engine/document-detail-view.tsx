@@ -20,6 +20,13 @@ interface DocumentDetailViewProps {
   pendingApprovalWatermark?: boolean;
   showDraftWatermark?: boolean;
   shareMetaOverride?: Partial<import("./types").DocumentShareMeta>;
+  receiptApproval?: {
+    lifecycleStatus: string;
+    signatureUrl: string | null;
+    approvedByName: string | null;
+    approvedByPhone: string | null;
+    approvedAt: string | null;
+  };
 }
 
 export function DocumentDetailView({
@@ -31,6 +38,7 @@ export function DocumentDetailView({
   pendingApprovalWatermark = false,
   showDraftWatermark = false,
   shareMetaOverride,
+  receiptApproval,
 }: DocumentDetailViewProps) {
   const locale = useLocale();
   const t = useTranslations("documents");
@@ -78,6 +86,7 @@ export function DocumentDetailView({
           pendingApproval={pendingApprovalWatermark}
           draft={showDraftWatermark}
           savedDraft={showDraftWatermark && !pendingApprovalWatermark}
+          receiptApproval={receiptApproval}
         />
       </DocumentPreviewShell>
 

@@ -100,6 +100,7 @@ export interface DocumentBase {
   approved_at?: string | null;
   approved_by_name?: string | null;
   approved_by_phone?: string | null;
+  customer_signature_url?: string | null;
   rejection_reason?: string | null;
   rejected_at?: string | null;
   issued_at?: string | null;

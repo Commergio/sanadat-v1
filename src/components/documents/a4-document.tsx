@@ -18,6 +18,13 @@ interface A4DocumentProps {
   draft?: boolean;
   pendingApproval?: boolean;
   savedDraft?: boolean;
+  receiptApproval?: {
+    lifecycleStatus: string;
+    signatureUrl: string | null;
+    approvedByName: string | null;
+    approvedByPhone: string | null;
+    approvedAt: string | null;
+  };
   partyFieldLabel?: string;
   previewPartyPlaceholder?: string;
 }
@@ -39,6 +46,7 @@ export function A4Document({
   draft = false,
   pendingApproval = false,
   savedDraft = false,
+  receiptApproval,
   partyFieldLabel,
   previewPartyPlaceholder,
 }: A4DocumentProps) {
@@ -295,6 +303,45 @@ export function A4Document({
 
         {/* Signature & stamp */}
         <div className="a4-signatures">
+          {isReceipt && (
+            <div className="a4-signatures__item">
+              <div className="a4-signatures__box">
+                {receiptApproval?.lifecycleStatus === "issued" && receiptApproval.signatureUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={receiptApproval.signatureUrl}
+                    alt={t("approvedCustomerSignature")}
+                    className="a4-signatures__image"
+                  />
+                ) : (
+                  <div className="a4-signatures__line" />
+                )}
+              </div>
+              <p className="a4-signatures__label">{t("approvedCustomerSignature")}</p>
+              {receiptApproval?.lifecycleStatus === "issued" ? (
+                <>
+                  {receiptApproval.approvedByName ? (
+                    <p className="a4-signatures__name">
+                      {t("signatureNameLabel")} {receiptApproval.approvedByName}
+                    </p>
+                  ) : null}
+                  {receiptApproval.approvedAt ? (
+                    <p className="a4-signatures__name">
+                      {t("signatureDateLabel")} {formatDate(receiptApproval.approvedAt, locale)}
+                    </p>
+                  ) : null}
+                  {receiptApproval.approvedByPhone ? (
+                    <p className="a4-signatures__name" dir="ltr">
+                      {t("signaturePhoneLabel")} {receiptApproval.approvedByPhone}
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <p className="a4-signatures__name">{t("awaitingCustomerSignature")}</p>
+              )}
+            </div>
+          )}
+
           <div className="a4-signatures__item">
             <div className="a4-signatures__box">
               {company.signature_url ? (

@@ -42,6 +42,7 @@ export function toReceiptDetail(receipt: DomainReceiptVoucher): ReceiptVoucher {
     approved_at: receipt.approvedAt ?? undefined,
     approved_by_name: receipt.approvedByName ?? undefined,
     approved_by_phone: receipt.approvedByPhone ?? undefined,
+    customer_signature_url: null,
     rejection_reason: receipt.rejectionReason ?? undefined,
     rejected_at: receipt.rejectedAt ?? undefined,
     issued_at: receipt.issuedAt ?? undefined,

@@ -15,21 +15,26 @@ import { ReceiptLifecycleBadge } from "@/components/documents/receipt-approval-p
 import { formatCurrency } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/format";
 
 interface ReceiptDetailClientProps {
   document: ReceiptVoucher;
+  customerSignatureUrl: string | null;
   canCancel: boolean;
   canSendApproval: boolean;
 }
 
 export function ReceiptDetailClient({
   document,
+  customerSignatureUrl,
   canCancel,
   canSendApproval,
 }: ReceiptDetailClientProps) {
   const locale = useLocale();
   const td = useTranslations("dashboard.table");
   const tDash = useTranslations("dashboard");
+  const tDocs = useTranslations("documents");
   const lifecycle = effectiveReceiptLifecycle(document.lifecycle_status);
   const exportEnabled = canExportReceipt(lifecycle, document.display_number);
   const pendingApproval = lifecycle === "pending_approval";
@@ -74,6 +79,38 @@ export function ReceiptDetailClient({
       footer={
         <>
           <ReceiptApprovalPanel receipt={document} canSendApproval={canSendApproval} />
+          {lifecycle === "issued" ? (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{tDocs("approvedCustomerSignature")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {customerSignatureUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={customerSignatureUrl}
+                    alt={tDocs("approvedCustomerSignature")}
+                    className="max-h-28 rounded border bg-white p-2"
+                  />
+                ) : (
+                  <p className="text-muted-foreground">{tDocs("noSavedSignature")}</p>
+                )}
+                {document.approved_by_name ? (
+                  <p>
+                    {tDocs("signatureNameLabel")} {document.approved_by_name}
+                  </p>
+                ) : null}
+                {document.approved_by_phone ? (
+                  <p dir="ltr" className="text-start">
+                    {tDocs("signaturePhoneLabel")} {document.approved_by_phone}
+                  </p>
+                ) : null}
+                {document.approved_at ? (
+                  <p>{tDocs("signatureDateLabel")} {formatDate(document.approved_at, locale)}</p>
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
           {isRejected ? (
             <div className="flex justify-end">
               <Button asChild variant="outline" size="sm">
@@ -87,6 +124,13 @@ export function ReceiptDetailClient({
         documentNumber: document.display_number || (locale === "ar" ? "مسودة" : "Draft"),
         amountLabel: formatCurrency(document.amount, locale),
         lifecycleStatus: lifecycle,
+      }}
+      receiptApproval={{
+        lifecycleStatus: lifecycle,
+        signatureUrl: customerSignatureUrl,
+        approvedByName: document.approved_by_name ?? null,
+        approvedByPhone: document.approved_by_phone ?? null,
+        approvedAt: document.approved_at ?? null,
       }}
     />
   );
