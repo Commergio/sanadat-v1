@@ -11,6 +11,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_receipt_vouchers_issued_company_number
   ON receipt_vouchers(company_id, number)
   WHERE lifecycle_status = 'issued' AND number IS NOT NULL;
 
+CREATE OR REPLACE FUNCTION public.safe_inet_from_text(p_value TEXT)
+RETURNS INET
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+BEGIN
+  IF p_value IS NULL OR length(trim(p_value)) = 0 THEN
+    RETURN NULL;
+  END IF;
+  RETURN trim(p_value)::inet;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN NULL;
+END;
+$$;
+
 -- ─── 2. Send receipt for customer approval ──────────────────────────────────
 
 CREATE OR REPLACE FUNCTION public.send_receipt_for_approval(
@@ -264,7 +280,7 @@ BEGIN
     approved_by_name = NULLIF(trim(p_approved_by_name), ''),
     approved_by_phone = NULLIF(trim(p_approved_by_phone), ''),
     customer_signature_path = p_signature_path,
-    approval_ip = NULLIF(trim(p_ip), ''),
+    approval_ip = public.safe_inet_from_text(p_ip),
     approval_user_agent = NULLIF(trim(p_user_agent), ''),
     approval_token_used_at = NOW()
   WHERE id = v_receipt.id;
@@ -342,7 +358,7 @@ BEGIN
     lifecycle_status = 'rejected',
     rejection_reason = trim(p_reason),
     rejected_at = NOW(),
-    approval_ip = NULLIF(trim(p_ip), ''),
+    approval_ip = public.safe_inet_from_text(p_ip),
     approval_user_agent = NULLIF(trim(p_user_agent), ''),
     approval_token_used_at = NOW()
   WHERE id = v_receipt.id;

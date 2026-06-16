@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildReceiptApprovalPublicApp } from "@/application/documents/receipt-voucher.factory";
 import { UseCaseError } from "@/application/shared/use-case-error";
+import { getClientIp } from "@/lib/http/client-ip";
 import { isServiceRoleConfigured } from "@/lib/env";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { ActivityLogRepository } from "@/infrastructure/supabase/repositories";
@@ -11,12 +12,6 @@ function mapStatus(code: string): number {
   if (code === "CONFLICT") return 409;
   if (code === "EXPIRED") return 410;
   return 500;
-}
-
-function clientIp(request: Request): string | null {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]?.trim() ?? null;
-  return request.headers.get("x-real-ip");
 }
 
 export async function POST(
@@ -35,7 +30,7 @@ export async function POST(
     const body = (await request.json()) as { reason?: string };
     const reason = body.reason?.trim() ?? "";
     const userAgent = request.headers.get("user-agent");
-    const ip = clientIp(request);
+    const ip = getClientIp(request);
 
     const app = buildReceiptApprovalPublicApp();
     const result = await app.rejectReceiptByToken(token, reason, { ip, userAgent });

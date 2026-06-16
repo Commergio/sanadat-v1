@@ -7,7 +7,7 @@ import type {
 } from "@/application/documents/receipt-approval-types";
 import type { TenantContext } from "@/domain";
 import { RepositoryError } from "@/application/shared/errors";
-import { toRepositoryError } from "../shared/errors";
+import { parseInetIp } from "@/lib/http/client-ip";
 
 type Row = Record<string, unknown>;
 
@@ -120,7 +120,7 @@ export class ReceiptApprovalRepository implements ReceiptApprovalRepositoryPort 
       p_signature_path: signaturePath,
       p_approved_by_name: approvedByName ?? "",
       p_approved_by_phone: approvedByPhone ?? "",
-      p_ip: ip ?? "",
+      p_ip: parseInetIp(ip),
       p_user_agent: userAgent ?? "",
     });
 
@@ -145,7 +145,7 @@ export class ReceiptApprovalRepository implements ReceiptApprovalRepositoryPort 
     const { data, error } = await this.supabase.rpc("reject_receipt_by_hash", {
       p_token_hash: tokenHash,
       p_reason: reason,
-      p_ip: ip ?? "",
+      p_ip: parseInetIp(ip),
       p_user_agent: userAgent ?? "",
     });
 

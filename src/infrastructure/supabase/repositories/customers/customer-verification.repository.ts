@@ -3,6 +3,7 @@ import type { CustomerVerificationRepositoryPort } from "@/application/customers
 import type { CustomerVerificationPayload } from "@/application/customers/verification-types";
 import type { TenantContext } from "@/domain";
 import { RepositoryError } from "@/application/shared/errors";
+import { parseInetIp } from "@/lib/http/client-ip";
 import { toRepositoryError } from "../shared/errors";
 
 type Row = Record<string, unknown>;
@@ -78,7 +79,7 @@ export class CustomerVerificationRepository implements CustomerVerificationRepos
     const { data, error } = await this.supabase.rpc("complete_customer_verification", {
       p_token_hash: tokenHash,
       p_signature_path: signaturePath,
-      p_ip: ip,
+      p_ip: parseInetIp(ip),
       p_user_agent: userAgent,
     });
 

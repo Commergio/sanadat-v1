@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ActivityLogRepository } from "@/infrastructure/supabase/repositories";
 import { buildCustomerVerificationPublicApp } from "@/application/customers/factory";
 import { UseCaseError } from "@/application/shared/use-case-error";
+import { getClientIp } from "@/lib/http/client-ip";
 import { isServiceRoleConfigured } from "@/lib/env";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
@@ -11,12 +12,6 @@ function mapStatus(code: string): number {
   if (code === "CONFLICT") return 409;
   if (code === "EXPIRED") return 410;
   return 500;
-}
-
-function clientIp(request: Request): string | null {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]?.trim() ?? null;
-  return request.headers.get("x-real-ip");
 }
 
 export async function POST(
@@ -45,7 +40,7 @@ export async function POST(
     const buffer = Buffer.from(await signature.arrayBuffer());
     const contentType = signature.type || "image/png";
     const userAgent = request.headers.get("user-agent");
-    const ip = clientIp(request);
+    const ip = getClientIp(request);
 
     const app = buildCustomerVerificationPublicApp();
     const { customerId } = await app.approveCustomerVerification(token, buffer, contentType, {
