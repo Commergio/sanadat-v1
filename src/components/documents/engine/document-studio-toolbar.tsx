@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DocumentActionButtons } from "./document-action-buttons";
+import type { DocumentShareMeta } from "./types";
 import type { StudioViewMode } from "@/components/documents/voucher-studio/voucher-studio-context";
 
 interface DocumentStudioToolbarProps {
@@ -21,6 +22,9 @@ interface DocumentStudioToolbarProps {
   className?: string;
   trailing?: React.ReactNode;
   pdfFilenamePrefix?: string;
+  /** Hide PDF/print/WhatsApp (receipt studio — draft only). */
+  hideExportActions?: boolean;
+  shareMeta?: DocumentShareMeta;
 }
 
 export function DocumentStudioToolbar({
@@ -37,11 +41,19 @@ export function DocumentStudioToolbar({
   className,
   trailing,
   pdfFilenamePrefix = "sanadat",
+  hideExportActions = false,
+  shareMeta: shareMetaProp,
 }: DocumentStudioToolbarProps) {
   const t = useTranslations("documents");
 
   const exportConfig = { previewElementId: previewId, pdfFilenamePrefix };
-  const shareMeta = { documentNumber, partyName, amountLabel, documentTitle };
+  const shareMeta: DocumentShareMeta = shareMetaProp ?? {
+    documentNumber,
+    partyName,
+    amountLabel,
+    documentTitle,
+    exportEnabled: !hideExportActions,
+  };
 
   return (
     <div
@@ -63,7 +75,12 @@ export function DocumentStudioToolbar({
       </div>
 
       <div className="-mx-1 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto px-1 pb-0.5 sm:mx-0 sm:overflow-visible sm:pb-0">
-        <DocumentActionButtons compact exportConfig={exportConfig} shareMeta={shareMeta} />
+        <DocumentActionButtons
+          compact
+          exportConfig={exportConfig}
+          shareMeta={shareMeta}
+          hideExportActions={hideExportActions}
+        />
         {onViewModeChange ? (
           viewMode === "edit" ? (
             <Button

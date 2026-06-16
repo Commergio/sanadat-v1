@@ -50,6 +50,10 @@ export function DocumentDetailView({
     amountLabel: formatCurrency(amount, locale),
     documentTitle: t(config.titleKey),
     exportEnabled,
+    lifecycleStatus:
+      document.type === "receipt_voucher"
+        ? document.lifecycle_status
+        : undefined,
     ...shareMetaOverride,
   };
 
@@ -59,13 +63,11 @@ export function DocumentDetailView({
         {header ? <div className="flex flex-wrap items-center gap-2">{header}</div> : null}
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           {actionsExtra}
-          {exportEnabled ? (
-            <DocumentActionButtons
-              exportConfig={exportConfig}
-              shareMeta={shareMeta}
-              className="w-full justify-start sm:w-auto sm:justify-end"
-            />
-          ) : null}
+          <DocumentActionButtons
+            exportConfig={exportConfig}
+            shareMeta={shareMeta}
+            className="w-full justify-start sm:w-auto sm:justify-end"
+          />
         </div>
       </div>
 
@@ -75,6 +77,7 @@ export function DocumentDetailView({
           title={t(config.titleKey)}
           pendingApproval={pendingApprovalWatermark}
           draft={showDraftWatermark}
+          savedDraft={showDraftWatermark && !pendingApprovalWatermark}
         />
       </DocumentPreviewShell>
 

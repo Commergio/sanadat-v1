@@ -269,6 +269,16 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           pdfFilenamePrefix={pdfFilenamePrefix}
+          hideExportActions={config.type === "receipt_voucher"}
+          shareMeta={{
+            documentType: config.type,
+            documentNumber: displayNum,
+            partyName: values.party_name ?? "",
+            amountLabel,
+            documentTitle: t(labels.documentTitle),
+            exportEnabled: false,
+            lifecycleStatus: "draft",
+          }}
           trailing={
             <span className="hidden font-mono text-[11px] text-muted-foreground tabular-nums lg:inline">
               {displayNum}

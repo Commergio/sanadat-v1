@@ -3,12 +3,16 @@ import { createClient } from "@/lib/supabase/server";
 import { requireTenantContext } from "@/lib/auth/require-tenant";
 import type { DocumentActivityAction } from "@/application/documents";
 import { ActivityLogRepository } from "@/infrastructure/supabase/repositories";
+import { canExportReceipt } from "@/lib/documents/receipt-lifecycle";
+import type { DocumentLifecycleStatus } from "@/lib/types";
 
 type Body = {
   action?: DocumentActivityAction;
   entityId?: string;
   metadata?: Record<string, unknown>;
 };
+
+const EXPORT_ACTIONS = new Set<DocumentActivityAction>(["document.exported", "document.shared"]);
 
 export async function POST(request: Request) {
   try {
@@ -22,11 +26,45 @@ export async function POST(request: Request) {
 
     const ctx = await requireTenantContext();
     const supabase = await createClient();
+
+    if (EXPORT_ACTIONS.has(body.action)) {
+      const documentType = body.metadata?.documentType as string | undefined;
+      if (documentType === "receipt_voucher") {
+        const { data: receipt, error } = await supabase
+          .from("receipt_vouchers")
+          .select("lifecycle_status, display_number")
+          .eq("id", body.entityId)
+          .eq("company_id", ctx.companyId)
+          .maybeSingle();
+
+        if (error || !receipt) {
+          return NextResponse.json(
+            { error: { code: "NOT_FOUND", message: "Receipt voucher not found" } },
+            { status: 404 }
+          );
+        }
+
+        const lifecycle = receipt.lifecycle_status as DocumentLifecycleStatus | null;
+        const displayNumber = receipt.display_number as string | null;
+
+        if (!canExportReceipt(lifecycle, displayNumber)) {
+          return NextResponse.json(
+            {
+              error: {
+                code: "FORBIDDEN",
+                message: "Cannot export or share receipt before customer approval",
+              },
+            },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     const repo = new ActivityLogRepository(supabase);
     await repo.log(ctx, body.action, body.entityId, body.metadata ?? {});
     return NextResponse.json({ ok: true });
   } catch {
-    // Logging must fail gracefully and never break primary UX flow.
     return NextResponse.json({ ok: false }, { status: 200 });
   }
 }

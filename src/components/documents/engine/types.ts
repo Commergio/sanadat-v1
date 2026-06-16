@@ -1,5 +1,5 @@
 import type { NextDocumentNumber } from "@/lib/document-numbers";
-import type { DocumentType } from "@/lib/types";
+import type { DocumentType, DocumentLifecycleStatus } from "@/lib/types";
 
 /** Shared preview element id for all document detail pages. */
 export const DETAIL_PREVIEW_ELEMENT_ID = "document-preview";
@@ -12,8 +12,10 @@ export interface DocumentShareMeta {
   amountLabel: string;
   /** Localized document type label for WhatsApp message */
   documentTitle?: string;
-  /** When false, PDF/print/WhatsApp are disabled (e.g. draft receipt pending approval) */
+  /** When false, PDF/print/final WhatsApp are blocked (receipt approval flow). */
   exportEnabled?: boolean;
+  /** Receipt lifecycle — drives approval WhatsApp vs final share. */
+  lifecycleStatus?: DocumentLifecycleStatus;
 }
 
 export interface DocumentExportConfig {

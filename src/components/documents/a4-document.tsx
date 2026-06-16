@@ -17,6 +17,7 @@ interface A4DocumentProps {
   notes?: string;
   draft?: boolean;
   pendingApproval?: boolean;
+  savedDraft?: boolean;
   partyFieldLabel?: string;
   previewPartyPlaceholder?: string;
 }
@@ -37,6 +38,7 @@ export function A4Document({
   notes,
   draft = false,
   pendingApproval = false,
+  savedDraft = false,
   partyFieldLabel,
   previewPartyPlaceholder,
 }: A4DocumentProps) {
@@ -105,7 +107,9 @@ export function A4Document({
         )}
 
         {draft && !pendingApproval && (
-          <div className="a4-draft-banner">{t("draftWatermark")}</div>
+          <div className="a4-draft-banner">
+            {savedDraft ? t("draftStatusWatermark") : t("draftWatermark")}
+          </div>
         )}
 
         {pendingApproval && (

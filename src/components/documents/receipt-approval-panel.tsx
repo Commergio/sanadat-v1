@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { DocumentLifecycleStatus, ReceiptVoucher } from "@/lib/types";
+import { effectiveReceiptLifecycle } from "@/lib/documents/receipt-lifecycle";
 import { formatDate } from "@/lib/format";
 
 interface ReceiptApprovalPanelProps {
@@ -38,7 +39,7 @@ export function ReceiptApprovalPanel({ receipt, canSendApproval }: ReceiptApprov
   const router = useRouter();
   const t = useTranslations("receiptApproval");
   const [sending, setSending] = useState(false);
-  const lifecycle = receipt.lifecycle_status ?? "issued";
+  const lifecycle = effectiveReceiptLifecycle(receipt.lifecycle_status);
 
   const handleSendApproval = async () => {
     setSending(true);
@@ -53,7 +54,9 @@ export function ReceiptApprovalPanel({ receipt, canSendApproval }: ReceiptApprov
         toast.error(data?.error?.message ?? t("sendFailed"));
         return;
       }
-      toast.success(t("sendSuccess"));
+      toast.success(
+        lifecycle === "pending_approval" ? t("resendSuccess") : t("sendSuccess")
+      );
       if (data.whatsAppUrl) {
         window.open(data.whatsAppUrl, "_blank");
       }
@@ -65,6 +68,9 @@ export function ReceiptApprovalPanel({ receipt, canSendApproval }: ReceiptApprov
     }
   };
 
+  const showSendButton =
+    canSendApproval && (lifecycle === "draft" || lifecycle === "pending_approval");
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -74,25 +80,14 @@ export function ReceiptApprovalPanel({ receipt, canSendApproval }: ReceiptApprov
         </div>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
+        {!exportEnabledHint(lifecycle) ? null : (
+          <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-amber-900 dark:text-amber-200">
+            {t("exportBlockedHint")}
+          </p>
+        )}
+
         {lifecycle === "draft" && (
-          <>
-            <p className="text-muted-foreground">{t("draftHint")}</p>
-            {canSendApproval ? (
-              <Button
-                type="button"
-                className="gap-2"
-                onClick={handleSendApproval}
-                disabled={sending}
-              >
-                {sending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-                {t("sendForApproval")}
-              </Button>
-            ) : null}
-          </>
+          <p className="text-muted-foreground">{t("draftHint")}</p>
         )}
 
         {lifecycle === "pending_approval" && (
@@ -106,6 +101,22 @@ export function ReceiptApprovalPanel({ receipt, canSendApproval }: ReceiptApprov
             ) : null}
           </div>
         )}
+
+        {showSendButton ? (
+          <Button
+            type="button"
+            className="gap-2"
+            onClick={handleSendApproval}
+            disabled={sending}
+          >
+            {sending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+            {lifecycle === "pending_approval" ? t("resendForApproval") : t("sendForApproval")}
+          </Button>
+        ) : null}
 
         {lifecycle === "rejected" && receipt.rejection_reason ? (
           <p className="text-destructive">
@@ -131,8 +142,12 @@ export function ReceiptApprovalPanel({ receipt, canSendApproval }: ReceiptApprov
   );
 }
 
+function exportEnabledHint(lifecycle: DocumentLifecycleStatus): boolean {
+  return lifecycle === "draft" || lifecycle === "pending_approval" || lifecycle === "rejected";
+}
+
 export function ReceiptLifecycleBadge({ lifecycle }: { lifecycle?: DocumentLifecycleStatus }) {
   const t = useTranslations("receiptApproval");
-  const status = lifecycle ?? "issued";
+  const status = effectiveReceiptLifecycle(lifecycle);
   return <Badge variant={lifecycleVariant(status)}>{t(`lifecycle.${status}`)}</Badge>;
 }

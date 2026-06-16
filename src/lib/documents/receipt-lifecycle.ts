@@ -1,17 +1,30 @@
 import type { DocumentLifecycleStatus } from "@/lib/types";
 
+/** Treat missing lifecycle as issued for legacy receipts created before P3.3. */
+export function effectiveReceiptLifecycle(
+  lifecycleStatus?: DocumentLifecycleStatus | null
+): DocumentLifecycleStatus {
+  return lifecycleStatus ?? "issued";
+}
+
 /** Receipt vouchers are exportable/printable only after customer approval issues the document. */
 export function isReceiptIssued(lifecycleStatus?: DocumentLifecycleStatus | null): boolean {
-  return lifecycleStatus === "issued";
+  return effectiveReceiptLifecycle(lifecycleStatus) === "issued";
 }
 
 export function canExportReceipt(
   lifecycleStatus?: DocumentLifecycleStatus | null,
-  status?: "active" | "cancelled"
+  displayNumber?: string | null
 ): boolean {
-  if (status === "cancelled") return false;
-  if (!lifecycleStatus) return true;
-  return lifecycleStatus === "issued";
+  if (!isReceiptIssued(lifecycleStatus)) return false;
+  return Boolean(displayNumber?.trim());
+}
+
+export function canSendReceiptApprovalWhatsApp(
+  lifecycleStatus?: DocumentLifecycleStatus | null
+): boolean {
+  const lifecycle = effectiveReceiptLifecycle(lifecycleStatus);
+  return lifecycle === "draft" || lifecycle === "pending_approval";
 }
 
 export function receiptDisplayNumber(
@@ -19,8 +32,9 @@ export function receiptDisplayNumber(
   lifecycleStatus?: DocumentLifecycleStatus | null
 ): string {
   if (displayNumber?.trim()) return displayNumber;
-  if (lifecycleStatus === "draft") return "—";
-  if (lifecycleStatus === "pending_approval") return "—";
-  if (lifecycleStatus === "rejected") return "—";
+  const lifecycle = effectiveReceiptLifecycle(lifecycleStatus);
+  if (lifecycle === "draft") return "—";
+  if (lifecycle === "pending_approval") return "—";
+  if (lifecycle === "rejected") return "—";
   return "—";
 }
