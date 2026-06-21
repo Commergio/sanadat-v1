@@ -26,6 +26,31 @@ export function paymentApprovalSignaturePath(companyId: string, paymentId: strin
   return `${companyId}/payments/${paymentId}/approval-signature.png`;
 }
 
+export function invoiceApprovalSignaturePath(companyId: string, invoiceId: string): string {
+  return `${companyId}/invoices/${invoiceId}/approval-signature.png`;
+}
+
+export async function uploadInvoiceApprovalSignature(
+  supabase: SupabaseClient,
+  companyId: string,
+  invoiceId: string,
+  buffer: Buffer,
+  contentType: string
+): Promise<string> {
+  const validation = validateSignatureFile(buffer, contentType);
+  if (validation) throw new Error(validation);
+
+  const path = invoiceApprovalSignaturePath(companyId, invoiceId);
+  const { error } = await supabase.storage.from(BUCKET).upload(path, buffer, {
+    upsert: true,
+    contentType,
+    cacheControl: "3600",
+  });
+
+  if (error) throw error;
+  return path;
+}
+
 export async function uploadPaymentApprovalSignature(
   supabase: SupabaseClient,
   companyId: string,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildReceiptApprovalPublicApp } from "@/application/documents/receipt-voucher.factory";
 import { buildPaymentApprovalPublicApp } from "@/application/documents/payment-voucher.factory";
+import { buildInvoiceApprovalPublicApp } from "@/application/documents/invoice.factory";
 import { UseCaseError } from "@/application/shared/use-case-error";
 import { getClientIp } from "@/lib/http/client-ip";
 import { isServiceRoleConfigured } from "@/lib/env";
@@ -33,6 +34,21 @@ export async function POST(
     const userAgent = request.headers.get("user-agent");
     const ip = getClientIp(request);
     const documentType = await resolveApprovalDocumentType(token);
+
+    if (documentType === "invoice") {
+      const app = buildInvoiceApprovalPublicApp();
+      const result = await app.rejectInvoiceByToken(token, reason, { ip, userAgent });
+
+      await logApprovalDocumentActivity(
+        "invoice",
+        result.invoiceId,
+        result.companyId,
+        ["document.rejected"],
+        { reason }
+      );
+
+      return NextResponse.json({ ok: true, document_id: result.invoiceId, receipt_id: result.invoiceId });
+    }
 
     if (documentType === "payment_voucher") {
       const app = buildPaymentApprovalPublicApp();

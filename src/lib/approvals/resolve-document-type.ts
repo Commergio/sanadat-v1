@@ -1,7 +1,7 @@
 import { hashVerificationToken } from "@/lib/verification/token";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
-export type ApprovalDocumentType = "receipt_voucher" | "payment_voucher";
+export type ApprovalDocumentType = "receipt_voucher" | "payment_voucher" | "invoice";
 
 export async function resolveApprovalDocumentType(
   token: string
@@ -16,6 +16,7 @@ export async function resolveApprovalDocumentType(
     .eq("token_hash", tokenHash)
     .maybeSingle();
 
+  if (data?.document_type === "invoice") return "invoice";
   if (data?.document_type === "payment_voucher") return "payment_voucher";
   if (data?.document_type === "receipt_voucher") return "receipt_voucher";
   return null;

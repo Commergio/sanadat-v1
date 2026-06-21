@@ -29,6 +29,7 @@ export interface CreateInvoiceItemInput {
 export interface CreateInvoiceInput {
   date: string;
   partyName: string;
+  customerId: string;
   description?: string;
   paymentMethod: DocumentBase["paymentMethod"];
   transferNumber?: string;

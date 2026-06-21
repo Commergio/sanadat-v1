@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildReceiptApprovalPublicApp } from "@/application/documents/receipt-voucher.factory";
 import { buildPaymentApprovalPublicApp } from "@/application/documents/payment-voucher.factory";
+import { buildInvoiceApprovalPublicApp } from "@/application/documents/invoice.factory";
 import { UseCaseError } from "@/application/shared/use-case-error";
 import { getClientIp } from "@/lib/http/client-ip";
 import { isServiceRoleConfigured } from "@/lib/env";
@@ -55,6 +56,7 @@ export async function POST(
     const ip = getClientIp(request);
     const documentType = await resolveApprovalDocumentType(token);
     const isPayment = documentType === "payment_voucher";
+    const isInvoice = documentType === "invoice";
 
     if (contentType.includes("application/json")) {
       const body = (await request.json()) as {
@@ -62,6 +64,39 @@ export async function POST(
         approved_by_name?: string;
         approved_by_phone?: string;
       };
+
+      if (isInvoice) {
+        const app = buildInvoiceApprovalPublicApp();
+        const payload = await app.getInvoiceApprovalByToken(token);
+        const existingSignaturePath = await resolveExistingSignaturePath(
+          Boolean(body.use_existing_signature),
+          payload.customerId,
+          payload.customerSignaturePath
+        );
+
+        const result = await app.approveInvoiceByToken(token, {
+          useExistingSignaturePath: body.use_existing_signature ? existingSignaturePath : null,
+          approvedByName: body.approved_by_name ?? null,
+          approvedByPhone: body.approved_by_phone ?? null,
+          ip,
+          userAgent,
+        });
+
+        await logApprovalDocumentActivity(
+          "invoice",
+          result.invoiceId,
+          result.companyId,
+          ["document.approved", "document.issued"],
+          { displayNumber: result.displayNumber }
+        );
+
+        return NextResponse.json({
+          ok: true,
+          document_id: result.invoiceId,
+          receipt_id: result.invoiceId,
+          display_number: result.displayNumber,
+        });
+      }
 
       if (isPayment) {
         const app = buildPaymentApprovalPublicApp();
@@ -142,6 +177,33 @@ export async function POST(
 
     const buffer = Buffer.from(await signature.arrayBuffer());
     const sigContentType = signature.type || "image/png";
+
+    if (isInvoice) {
+      const app = buildInvoiceApprovalPublicApp();
+      const result = await app.approveInvoiceByToken(token, {
+        signatureBuffer: buffer,
+        signatureContentType: sigContentType,
+        approvedByName: approvedByName || null,
+        approvedByPhone: approvedByPhone || null,
+        ip,
+        userAgent,
+      });
+
+      await logApprovalDocumentActivity(
+        "invoice",
+        result.invoiceId,
+        result.companyId,
+        ["document.approved", "document.issued"],
+        { displayNumber: result.displayNumber }
+      );
+
+      return NextResponse.json({
+        ok: true,
+        document_id: result.invoiceId,
+        receipt_id: result.invoiceId,
+        display_number: result.displayNumber,
+      });
+    }
 
     if (isPayment) {
       const app = buildPaymentApprovalPublicApp();

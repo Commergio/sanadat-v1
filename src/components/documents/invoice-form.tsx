@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, User } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,17 +13,32 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createInvoiceSchema, type InvoiceInput } from "@/lib/validations";
 import { formatCurrency } from "@/lib/format";
+import { useCustomers, createCustomer } from "@/hooks/use-customers";
 
 export function InvoiceForm() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("documents");
+  const tc = useTranslations("dashboard.customers");
   const tv = useTranslations("validation");
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [showNew, setShowNew] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [creating, setCreating] = useState(false);
+  const { customers, loading: customersLoading, refresh } = useCustomers(search);
 
   const schema = useMemo(() => createInvoiceSchema(tv), [tv]);
 
-  const { register, control, handleSubmit, watch, formState: { errors } } = useForm<InvoiceInput>({
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<InvoiceInput>({
     resolver: zodResolver(schema),
     defaultValues: {
       date: new Date().toISOString().split("T")[0],
@@ -43,12 +58,35 @@ export function InvoiceForm() {
   );
   const total = Math.max(0, subtotal - Number(discount));
 
+  const handleCreateCustomer = useCallback(async () => {
+    if (!newName.trim() || !newPhone.trim()) {
+      toast.error(tv("partyRequired"));
+      return;
+    }
+    setCreating(true);
+    try {
+      const customer = await createCustomer({ name: newName.trim(), phone: newPhone.trim() });
+      setValue("customer_id", customer.id);
+      setValue("party_name", customer.name);
+      setShowNew(false);
+      setNewName("");
+      setNewPhone("");
+      await refresh();
+      toast.success(tc("createSuccess"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : tc("saveFailed"));
+    } finally {
+      setCreating(false);
+    }
+  }, [newName, newPhone, refresh, setValue, tc, tv]);
+
   const onSubmit = async (data: InvoiceInput) => {
     setLoading(true);
     try {
       const payload = {
         date: data.date,
         partyName: data.party_name,
+        customerId: data.customer_id,
         description: data.description,
         paymentMethod: data.payment_method,
         transferNumber: data.transfer_number,
@@ -93,6 +131,10 @@ export function InvoiceForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-6">
+      <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
+        {t("invoiceApprovalNote")}
+      </p>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t("newInvoice")}</CardTitle>
@@ -103,12 +145,81 @@ export function InvoiceForm() {
               <Label>{t("date")}</Label>
               <Input type="date" {...register("date")} />
             </div>
-            <div className="space-y-2">
-              <Label>{t("client")}</Label>
-              <Input {...register("party_name")} />
-              {errors.party_name && <p className="text-xs text-destructive">{errors.party_name.message}</p>}
-            </div>
           </div>
+
+          <div className="space-y-2">
+            <Label>{t("selectCustomer")}</Label>
+            <Input
+              placeholder={t("searchCustomer")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <Controller
+              name="customer_id"
+              control={control}
+              render={({ field }) => (
+                <div className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-border/80 p-1">
+                  {customersLoading ? (
+                    <p className="px-3 py-2 text-xs text-muted-foreground">{t("loadingCustomers")}</p>
+                  ) : customers.length === 0 ? (
+                    <p className="px-3 py-2 text-xs text-muted-foreground">{t("noCustomers")}</p>
+                  ) : (
+                    customers.map((customer) => (
+                      <button
+                        key={customer.id}
+                        type="button"
+                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-start text-sm transition-colors hover:bg-muted ${
+                          field.value === customer.id ? "bg-primary/10 font-medium" : ""
+                        }`}
+                        onClick={() => {
+                          field.onChange(customer.id);
+                          setValue("party_name", customer.name);
+                        }}
+                      >
+                        <User className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span className="flex-1">{customer.name}</span>
+                        <span className="text-xs text-muted-foreground tabular-nums" dir="ltr">
+                          {customer.phone}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            />
+            {errors.customer_id && (
+              <p className="text-xs text-destructive">{errors.customer_id.message}</p>
+            )}
+          </div>
+
+          {!showNew ? (
+            <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => setShowNew(true)}>
+              <Plus className="h-4 w-4" />
+              {t("addCustomer")}
+            </Button>
+          ) : (
+            <div className="space-y-3 rounded-xl border border-dashed border-primary/30 bg-primary/[0.03] p-4">
+              <p className="text-xs font-semibold">{t("newCustomerInline")}</p>
+              <Input placeholder={tc("namePlaceholder")} value={newName} onChange={(e) => setNewName(e.target.value)} />
+              <Input
+                placeholder={tc("phone")}
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+                dir="ltr"
+                className="text-start"
+              />
+              <div className="flex gap-2">
+                <Button type="button" size="sm" disabled={creating} onClick={() => void handleCreateCustomer()}>
+                  {creating ? t("creating") : tc("addCustomer")}
+                </Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => setShowNew(false)}>
+                  {t("cancel")}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <input type="hidden" {...register("party_name")} />
         </CardContent>
       </Card>
 

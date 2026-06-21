@@ -81,6 +81,7 @@ export const createInvoiceItemSchema = (t: T) =>
 export const createInvoiceSchema = (t: T) =>
   z.object({
     date: z.string(),
+    customer_id: z.string().uuid(t("customerRequired")),
     party_name: z.string().min(2, t("partyRequired")),
     description: z.string().optional(),
     items: z.array(createInvoiceItemSchema(t)).min(1, t("itemRequired")),

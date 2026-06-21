@@ -24,11 +24,7 @@ export interface PaymentVoucherRepositoryPort {
 }
 
 export interface InvoiceRepositoryPort {
-  create(
-    ctx: TenantContext,
-    input: CreateInvoiceInput,
-    allocatedDisplayNumber: string
-  ): Promise<Invoice>;
+  create(ctx: TenantContext, input: CreateInvoiceInput): Promise<Invoice>;
   getById(ctx: TenantContext, id: string): Promise<Invoice | null>;
   list(ctx: TenantContext, params: PaginationModel): Promise<PaginatedModel<Invoice>>;
   cancel(ctx: TenantContext, id: string, reason: string): Promise<void>;

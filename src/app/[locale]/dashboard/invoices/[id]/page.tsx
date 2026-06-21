@@ -4,12 +4,12 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenantContext } from "@/lib/auth/require-tenant";
 import { buildInvoiceApp } from "@/application/documents/invoice.factory";
-import { toInvoiceDetail } from "@/application/documents/invoice.presenter";
+import { enrichInvoiceDetail } from "@/application/documents/enrich-invoice-detail";
 import { UseCaseError } from "@/application/shared/use-case-error";
-import { DocumentDetailView } from "@/components/documents/engine";
-import { CancelDocumentButton } from "@/components/documents/engine/cancel-document-button";
-import { Badge } from "@/components/ui/badge";
+import { InvoiceDetailClient } from "@/components/documents/invoice-detail-client";
 import { hasMinimumTenantRole } from "@/lib/tenant/roles";
+import { invoiceDisplayNumber } from "@/lib/documents/invoice-lifecycle";
+import type { Invoice } from "@/lib/types";
 
 export default async function InvoiceDetailPage({
   params,
@@ -18,18 +18,19 @@ export default async function InvoiceDetailPage({
 }) {
   const { id } = await params;
   const t = await getTranslations("dashboard");
-  const td = await getTranslations("dashboard.table");
   let errorCode: string | null = null;
-  let doc: ReturnType<typeof toInvoiceDetail> | null = null;
+  let doc: Invoice | null = null;
   let canCancel = false;
+  let canSendApproval = false;
 
   try {
     const ctx = await requireTenantContext();
     canCancel = hasMinimumTenantRole(ctx.role, "accountant");
+    canSendApproval = hasMinimumTenantRole(ctx.role, "accountant");
     const supabase = await createClient();
     const app = buildInvoiceApp(supabase);
     const invoice = await app.getInvoice(ctx, id);
-    doc = toInvoiceDetail(invoice);
+    doc = await enrichInvoiceDetail(invoice);
   } catch (error) {
     if (error instanceof UseCaseError) {
       errorCode = error.code;
@@ -38,9 +39,15 @@ export default async function InvoiceDetailPage({
     }
   }
 
+  const pageTitle = doc
+    ? invoiceDisplayNumber(doc.display_number, doc.lifecycle_status) !== "—"
+      ? doc.display_number!
+      : t("invoiceDraftTitle")
+    : id;
+
   return (
     <>
-      <DashboardHeader title={doc?.display_number ?? id} />
+      <DashboardHeader title={pageTitle ?? id} />
       <main className="flex-1 p-4 lg:p-8">
         {!doc || errorCode ? (
           <EmptyState
@@ -63,18 +70,11 @@ export default async function InvoiceDetailPage({
             actionHref="/dashboard/invoices"
           />
         ) : (
-          <DocumentDetailView
+          <InvoiceDetailClient
             document={doc}
-            actionsExtra={
-              canCancel && doc.status === "active" ? (
-                <CancelDocumentButton endpoint={`/api/invoices/${doc.id}/cancel`} />
-              ) : null
-            }
-            header={
-              <Badge variant={doc.status === "active" ? "success" : "destructive"}>
-                {doc.status === "active" ? td("active") : td("cancelled")}
-              </Badge>
-            }
+            customerSignatureUrl={doc.customer_signature_url ?? null}
+            canCancel={canCancel}
+            canSendApproval={canSendApproval}
           />
         )}
       </main>

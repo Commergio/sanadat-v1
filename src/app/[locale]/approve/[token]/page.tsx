@@ -13,6 +13,16 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { usePaymentMethodLabel } from "@/hooks/use-translated-constants";
 import type { PaymentMethod } from "@/lib/types";
 
+type DocumentApprovalType = "receipt_voucher" | "payment_voucher" | "invoice";
+
+interface InvoiceSnapshotItem {
+  description: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+  sort_order: number;
+}
+
 interface ApprovalSnapshot {
   date: string;
   amount: number;
@@ -22,10 +32,15 @@ interface ApprovalSnapshot {
   transfer_number: string | null;
   bank_name: string | null;
   reference_number: string | null;
+  items?: InvoiceSnapshotItem[];
+  subtotal?: number;
+  discount?: number;
+  tax?: number;
+  total?: number;
 }
 
 interface ApprovalPayload {
-  document_type: "receipt_voucher" | "payment_voucher";
+  document_type: DocumentApprovalType;
   receipt_id: string;
   company_name: string;
   company_name_en: string | null;
@@ -44,6 +59,12 @@ interface ApprovalPayload {
   token_used: boolean;
 }
 
+function approvalNamespace(documentType: DocumentApprovalType) {
+  if (documentType === "invoice") return "invoiceApprovalPublic";
+  if (documentType === "payment_voucher") return "paymentApprovalPublic";
+  return "receiptApprovalPublic";
+}
+
 export default function DocumentApprovalPage({
   params,
 }: {
@@ -51,12 +72,8 @@ export default function DocumentApprovalPage({
 }) {
   const { token } = use(params);
   const locale = useLocale();
-  const [documentType, setDocumentType] = useState<"receipt_voucher" | "payment_voucher">(
-    "receipt_voucher"
-  );
-  const t = useTranslations(
-    documentType === "payment_voucher" ? "paymentApprovalPublic" : "receiptApprovalPublic"
-  );
+  const [documentType, setDocumentType] = useState<DocumentApprovalType>("receipt_voucher");
+  const t = useTranslations(approvalNamespace(documentType));
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -70,6 +87,7 @@ export default function DocumentApprovalPage({
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const paymentLabel = usePaymentMethodLabel(payload?.snapshot.payment_method ?? "cash");
+  const isInvoice = documentType === "invoice";
 
   useEffect(() => {
     async function load() {
@@ -267,6 +285,7 @@ export default function DocumentApprovalPage({
   const snap = payload.snapshot;
   const companyDisplay =
     locale === "en" && payload.company_name_en ? payload.company_name_en : payload.company_name;
+  const displayAmount = isInvoice ? (snap.total ?? snap.amount) : snap.amount;
 
   return (
     <div className="min-h-[100dvh] bg-muted/30 px-4 py-8" dir={dir}>
@@ -289,10 +308,6 @@ export default function DocumentApprovalPage({
                 <dd className="font-medium">{payload.customer_name}</dd>
               </div>
               <div>
-                <dt className="text-muted-foreground">{t("amount")}</dt>
-                <dd className="font-bold tabular-nums">{formatCurrency(snap.amount, locale)}</dd>
-              </div>
-              <div>
                 <dt className="text-muted-foreground">{t("date")}</dt>
                 <dd className="font-medium">{formatDate(snap.date, locale)}</dd>
               </div>
@@ -300,6 +315,12 @@ export default function DocumentApprovalPage({
                 <dt className="text-muted-foreground">{t("paymentMethod")}</dt>
                 <dd className="font-medium">{paymentLabel}</dd>
               </div>
+              {!isInvoice ? (
+                <div>
+                  <dt className="text-muted-foreground">{t("amount")}</dt>
+                  <dd className="font-bold tabular-nums">{formatCurrency(snap.amount, locale)}</dd>
+                </div>
+              ) : null}
               {snap.description ? (
                 <div>
                   <dt className="text-muted-foreground">{t("description")}</dt>
@@ -315,6 +336,56 @@ export default function DocumentApprovalPage({
                 </div>
               ) : null}
             </dl>
+
+            {isInvoice && snap.items && snap.items.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t("itemsTitle")}</p>
+                <div className="overflow-x-auto rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/40 text-muted-foreground">
+                        <th className="px-3 py-2 text-start font-medium">{t("itemDescription")}</th>
+                        <th className="px-3 py-2 text-center font-medium">{t("quantity")}</th>
+                        <th className="px-3 py-2 text-end font-medium">{t("unitPrice")}</th>
+                        <th className="px-3 py-2 text-end font-medium">{t("lineTotal")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {snap.items.map((item, index) => (
+                        <tr key={index} className="border-b last:border-0">
+                          <td className="px-3 py-2">{item.description}</td>
+                          <td className="px-3 py-2 text-center tabular-nums">{item.quantity}</td>
+                          <td className="px-3 py-2 text-end tabular-nums">
+                            {formatCurrency(item.unit_price, locale)}
+                          </td>
+                          <td className="px-3 py-2 text-end tabular-nums font-medium">
+                            {formatCurrency(item.total, locale)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <dl className="space-y-2 rounded-lg bg-muted/40 p-4 text-sm">
+                  {typeof snap.subtotal === "number" ? (
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">{t("subtotal")}</dt>
+                      <dd className="tabular-nums">{formatCurrency(snap.subtotal, locale)}</dd>
+                    </div>
+                  ) : null}
+                  {typeof snap.discount === "number" && snap.discount > 0 ? (
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">{t("discount")}</dt>
+                      <dd className="tabular-nums">-{formatCurrency(snap.discount, locale)}</dd>
+                    </div>
+                  ) : null}
+                  <div className="flex justify-between border-t pt-2 font-bold">
+                    <dt>{t("total")}</dt>
+                    <dd className="tabular-nums text-primary">{formatCurrency(displayAmount, locale)}</dd>
+                  </div>
+                </dl>
+              </div>
+            ) : null}
 
             <p className="text-xs leading-relaxed text-muted-foreground">{t("terms")}</p>
 

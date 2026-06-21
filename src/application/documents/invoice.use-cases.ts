@@ -4,10 +4,7 @@ import type {
   TenantContext,
 } from "@/domain";
 import type { PaginationModel, PaginatedModel } from "@/application/shared/pagination";
-import type {
-  DocumentNumberRepositoryPort,
-  InvoiceRepositoryPort,
-} from "./repository-ports";
+import type { InvoiceRepositoryPort } from "./repository-ports";
 import { assertCanCreateOrCancel, assertCanRead } from "./authorization";
 import { invoiceInputSchema } from "./schemas";
 import { UseCaseError } from "@/application/shared/use-case-error";
@@ -15,7 +12,6 @@ import type { ActivityLogPort } from "./activity-log.port";
 
 interface InvoiceUseCaseDeps {
   repository: InvoiceRepositoryPort;
-  numberRepository: DocumentNumberRepositoryPort;
   activityLog: ActivityLogPort;
 }
 
@@ -31,12 +27,10 @@ export function buildInvoiceUseCases(deps: InvoiceUseCaseDeps) {
         throw new UseCaseError("VALIDATION", "Invalid invoice input", parsed.error.flatten());
       }
 
-      const displayNumber = await deps.numberRepository.nextInvoiceNumber(ctx);
-      const created = await deps.repository.create(ctx, parsed.data, displayNumber);
+      const created = await deps.repository.create(ctx, parsed.data);
       try {
-        await deps.activityLog.log(ctx, "document.created", created.id, {
+        await deps.activityLog.log(ctx, "document.draft_created", created.id, {
           documentType: "invoice",
-          displayNumber: created.displayNumber,
         });
       } catch {
         // Activity logging should never block main document flow.

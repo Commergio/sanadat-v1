@@ -1,10 +1,12 @@
 import type { Invoice as DomainInvoice } from "@/domain";
 import type { Invoice, InvoiceListRow } from "@/lib/types";
+import { effectiveInvoiceLifecycle, invoiceDisplayNumber } from "@/lib/documents/invoice-lifecycle";
 
 export function toInvoiceListRow(invoice: DomainInvoice): InvoiceListRow {
+  const lifecycle = effectiveInvoiceLifecycle(invoice.lifecycleStatus);
   return {
     id: invoice.id,
-    display_number: invoice.displayNumber,
+    display_number: invoiceDisplayNumber(invoice.displayNumber, lifecycle),
     party_name: invoice.partyName,
     amount: invoice.amount,
     date: invoice.date,
@@ -14,14 +16,18 @@ export function toInvoiceListRow(invoice: DomainInvoice): InvoiceListRow {
   };
 }
 
-export function toInvoiceDetail(invoice: DomainInvoice): Invoice {
+export function toInvoiceDetail(
+  invoice: DomainInvoice,
+  options?: { customerSignatureUrl?: string | null }
+): Invoice {
   return {
     id: invoice.id,
     type: "invoice",
     company_id: invoice.companyId,
-    number: invoice.number,
-    display_number: invoice.displayNumber,
+    number: invoice.number || null,
+    display_number: invoice.displayNumber || null,
     status: invoice.status,
+    lifecycle_status: invoice.lifecycleStatus,
     date: invoice.date,
     amount: invoice.amount,
     description: invoice.description ?? undefined,
@@ -35,6 +41,16 @@ export function toInvoiceDetail(invoice: DomainInvoice): Invoice {
     cancel_reason: invoice.cancelReason ?? undefined,
     created_at: invoice.createdAt,
     updated_at: invoice.updatedAt,
+    customer_id: invoice.customerId ?? undefined,
+    approval_sent_at: invoice.approvalSentAt ?? undefined,
+    approval_expires_at: invoice.approvalExpiresAt ?? undefined,
+    approved_at: invoice.approvedAt ?? undefined,
+    approved_by_name: invoice.approvedByName ?? undefined,
+    approved_by_phone: invoice.approvedByPhone ?? undefined,
+    customer_signature_url: options?.customerSignatureUrl ?? null,
+    rejection_reason: invoice.rejectionReason ?? undefined,
+    rejected_at: invoice.rejectedAt ?? undefined,
+    issued_at: invoice.issuedAt ?? undefined,
     items: invoice.items.map((item) => ({
       id: item.id,
       description: item.description,

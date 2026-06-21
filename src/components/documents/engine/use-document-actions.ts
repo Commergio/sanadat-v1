@@ -13,6 +13,10 @@ import {
   canSendPaymentApprovalWhatsApp,
   isPaymentIssued,
 } from "@/lib/documents/payment-lifecycle";
+import {
+  canSendInvoiceApprovalWhatsApp,
+  isInvoiceIssued,
+} from "@/lib/documents/invoice-lifecycle";
 import type { DocumentExportConfig, DocumentShareMeta } from "./types";
 import { resolveWhatsAppPhone, useDocumentBranding } from "./use-document-branding";
 
@@ -29,6 +33,12 @@ export function resolveDocumentWhatsAppMode(shareMeta: DocumentShareMeta): Docum
   if (
     shareMeta.documentType === "payment_voucher" &&
     canSendPaymentApprovalWhatsApp(shareMeta.lifecycleStatus)
+  ) {
+    return "approval";
+  }
+  if (
+    shareMeta.documentType === "invoice" &&
+    canSendInvoiceApprovalWhatsApp(shareMeta.lifecycleStatus)
   ) {
     return "approval";
   }
@@ -137,7 +147,9 @@ export function useDocumentActions(
         ? `/api/payment-vouchers/${documentId}/send-approval`
         : documentType === "receipt_voucher"
           ? `/api/receipts/${documentId}/send-approval`
-          : null;
+          : documentType === "invoice"
+            ? `/api/invoices/${documentId}/send-approval`
+            : null;
 
     if (!endpoint) return;
 
@@ -146,7 +158,9 @@ export function useDocumentActions(
         ? canSendReceiptApprovalWhatsApp(shareMeta.lifecycleStatus)
         : documentType === "payment_voucher"
           ? canSendPaymentApprovalWhatsApp(shareMeta.lifecycleStatus)
-          : false;
+          : documentType === "invoice"
+            ? canSendInvoiceApprovalWhatsApp(shareMeta.lifecycleStatus)
+            : false;
 
     if (!canSend) return;
 
@@ -164,7 +178,9 @@ export function useDocumentActions(
       const isIssued =
         documentType === "payment_voucher"
           ? isPaymentIssued(shareMeta.lifecycleStatus)
-          : isReceiptIssued(shareMeta.lifecycleStatus);
+          : documentType === "invoice"
+            ? isInvoiceIssued(shareMeta.lifecycleStatus)
+            : isReceiptIssued(shareMeta.lifecycleStatus);
       toast.success(
         isIssued
           ? tApproval("sendSuccess")

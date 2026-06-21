@@ -2,11 +2,12 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { ActivityLogRepository } from "@/infrastructure/supabase/repositories";
 import type { DocumentActivityAction } from "@/application/documents";
 
-type ApprovalDocumentType = "receipt_voucher" | "payment_voucher";
+type ApprovalDocumentType = "receipt_voucher" | "payment_voucher" | "invoice";
 
 const SOURCE_TABLE: Record<ApprovalDocumentType, string> = {
   receipt_voucher: "receipt_vouchers",
   payment_voucher: "payment_vouchers",
+  invoice: "invoices",
 };
 
 export async function logApprovalDocumentActivity(

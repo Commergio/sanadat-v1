@@ -5,6 +5,7 @@ import type { DocumentActivityAction } from "@/application/documents";
 import { ActivityLogRepository } from "@/infrastructure/supabase/repositories";
 import { canExportReceipt } from "@/lib/documents/receipt-lifecycle";
 import { canExportPayment } from "@/lib/documents/payment-lifecycle";
+import { canExportInvoice } from "@/lib/documents/invoice-lifecycle";
 import type { DocumentLifecycleStatus } from "@/lib/types";
 
 type Body = {
@@ -85,6 +86,37 @@ export async function POST(request: Request) {
               error: {
                 code: "FORBIDDEN",
                 message: "Cannot export or share payment before customer approval",
+              },
+            },
+            { status: 403 }
+          );
+        }
+      }
+
+      if (documentType === "invoice") {
+        const { data: invoice, error } = await supabase
+          .from("invoices")
+          .select("lifecycle_status, display_number")
+          .eq("id", body.entityId)
+          .eq("company_id", ctx.companyId)
+          .maybeSingle();
+
+        if (error || !invoice) {
+          return NextResponse.json(
+            { error: { code: "NOT_FOUND", message: "Invoice not found" } },
+            { status: 404 }
+          );
+        }
+
+        const lifecycle = invoice.lifecycle_status as DocumentLifecycleStatus | null;
+        const displayNumber = invoice.display_number as string | null;
+
+        if (!canExportInvoice(lifecycle, displayNumber)) {
+          return NextResponse.json(
+            {
+              error: {
+                code: "FORBIDDEN",
+                message: "Cannot export or share invoice before customer approval",
               },
             },
             { status: 403 }

@@ -59,7 +59,9 @@ export function DocumentDetailView({
     documentTitle: t(config.titleKey),
     exportEnabled,
     lifecycleStatus:
-      document.type === "receipt_voucher" || document.type === "payment_voucher"
+      document.type === "receipt_voucher" ||
+      document.type === "payment_voucher" ||
+      document.type === "invoice"
         ? document.lifecycle_status
         : undefined,
     ...shareMetaOverride,

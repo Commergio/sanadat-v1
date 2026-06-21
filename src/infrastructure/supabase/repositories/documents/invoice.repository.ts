@@ -13,13 +13,7 @@ type Row = Record<string, unknown>;
 export class SupabaseInvoiceRepository implements InvoiceRepositoryPort {
   constructor(private readonly supabase: SupabaseClient) {}
 
-  async create(
-    ctx: TenantContext,
-    input: CreateInvoiceInput,
-    allocatedDisplayNumber: string
-  ): Promise<Invoice> {
-    const number = Number(allocatedDisplayNumber.split("-").pop() ?? "1");
-
+  async create(ctx: TenantContext, input: CreateInvoiceInput): Promise<Invoice> {
     const subtotal = input.items.reduce(
       (sum, i) => sum + Number(i.quantity) * Number(i.unitPrice),
       0
@@ -32,14 +26,11 @@ export class SupabaseInvoiceRepository implements InvoiceRepositoryPort {
       .from("invoices")
       .insert({
         company_id: ctx.companyId,
-        number,
-        display_number: allocatedDisplayNumber,
         status: "active",
-        lifecycle_status: "issued",
-        issued_at: new Date().toISOString(),
-        issued_by: ctx.userId,
+        lifecycle_status: "draft",
         date: input.date,
         party_name: input.partyName,
+        customer_id: input.customerId,
         description: input.description ?? null,
         payment_method: input.paymentMethod,
         transfer_number: input.transferNumber ?? null,
@@ -78,7 +69,6 @@ export class SupabaseInvoiceRepository implements InvoiceRepositoryPort {
       .select("*");
 
     if (itemError) {
-      // Best-effort rollback to avoid partial invoice creation if item insert fails.
       await this.supabase.from("invoices").delete().eq("id", invoiceId).eq("company_id", ctx.companyId);
       throw toRepositoryError(itemError, "Failed to create invoice items");
     }
