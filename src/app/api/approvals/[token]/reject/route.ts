@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { buildReceiptApprovalPublicApp } from "@/application/documents/receipt-voucher.factory";
+import { buildPaymentApprovalPublicApp } from "@/application/documents/payment-voucher.factory";
 import { UseCaseError } from "@/application/shared/use-case-error";
 import { getClientIp } from "@/lib/http/client-ip";
 import { isServiceRoleConfigured } from "@/lib/env";
-import { createServiceRoleClient } from "@/lib/supabase/service-role";
-import { ActivityLogRepository } from "@/infrastructure/supabase/repositories";
+import { resolveApprovalDocumentType } from "@/lib/approvals/resolve-document-type";
+import { logApprovalDocumentActivity } from "@/lib/approvals/log-approval-activity";
 
 function mapStatus(code: string): number {
   if (code === "NOT_FOUND") return 404;
@@ -31,42 +32,35 @@ export async function POST(
     const reason = body.reason?.trim() ?? "";
     const userAgent = request.headers.get("user-agent");
     const ip = getClientIp(request);
+    const documentType = await resolveApprovalDocumentType(token);
+
+    if (documentType === "payment_voucher") {
+      const app = buildPaymentApprovalPublicApp();
+      const result = await app.rejectPaymentByToken(token, reason, { ip, userAgent });
+
+      await logApprovalDocumentActivity(
+        "payment_voucher",
+        result.paymentId,
+        result.companyId,
+        ["document.rejected"],
+        { reason }
+      );
+
+      return NextResponse.json({ ok: true, document_id: result.paymentId, receipt_id: result.paymentId });
+    }
 
     const app = buildReceiptApprovalPublicApp();
     const result = await app.rejectReceiptByToken(token, reason, { ip, userAgent });
 
-    try {
-      const supabase = createServiceRoleClient();
-      const { data: receipt } = await supabase
-        .from("receipt_vouchers")
-        .select("created_by")
-        .eq("id", result.receiptId)
-        .maybeSingle();
+    await logApprovalDocumentActivity(
+      "receipt_voucher",
+      result.receiptId,
+      result.companyId,
+      ["document.rejected"],
+      { reason }
+    );
 
-      let actorId = receipt?.created_by as string | null;
-      if (!actorId) {
-        const { data: company } = await supabase
-          .from("companies")
-          .select("owner_id")
-          .eq("id", result.companyId)
-          .maybeSingle();
-        actorId = (company?.owner_id as string | null) ?? null;
-      }
-
-      if (actorId) {
-        const activityLog = new ActivityLogRepository(supabase);
-        await activityLog.log(
-          { userId: actorId, companyId: result.companyId, role: "accountant" },
-          "document.rejected",
-          result.receiptId,
-          { documentType: "receipt_voucher", reason, actor: "customer" }
-        );
-      }
-    } catch {
-      // Non-blocking
-    }
-
-    return NextResponse.json({ ok: true, receipt_id: result.receiptId });
+    return NextResponse.json({ ok: true, document_id: result.receiptId, receipt_id: result.receiptId });
   } catch (error) {
     if (error instanceof UseCaseError) {
       return NextResponse.json(
@@ -75,7 +69,7 @@ export async function POST(
       );
     }
     return NextResponse.json(
-      { error: { code: "INTERNAL", message: "Failed to reject receipt" } },
+      { error: { code: "INTERNAL", message: "Failed to reject document" } },
       { status: 500 }
     );
   }

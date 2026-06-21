@@ -62,7 +62,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
     [config]
   );
   const displayNum =
-    config.type === "receipt_voucher"
+    config.type === "receipt_voucher" || config.type === "payment_voucher"
       ? t("draftNumberLabel")
       : locale === "ar"
         ? displayNumber
@@ -70,7 +70,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
 
   const schema = useMemo(() => {
     const base = createDocumentBaseSchema(tv);
-    if (config.type === "receipt_voucher") {
+    if (config.type === "receipt_voucher" || config.type === "payment_voucher") {
       return base.extend({
         customer_id: z.string().uuid(tv("customerRequired")),
       });
@@ -162,7 +162,9 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           }
           clearDraft(config.draftStorageKey);
           toast.success(
-            config.type === "receipt_voucher" ? t("draftSaveSuccess") : t("createSuccess")
+            config.type === "receipt_voucher" || config.type === "payment_voucher"
+              ? t("draftSaveSuccess")
+              : t("createSuccess")
           );
           router.push(payload.redirectPath ?? config.redirectPath);
           return;
@@ -269,7 +271,9 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           pdfFilenamePrefix={pdfFilenamePrefix}
-          hideExportActions={config.type === "receipt_voucher"}
+          hideExportActions={
+            config.type === "receipt_voucher" || config.type === "payment_voucher"
+          }
           shareMeta={{
             documentType: config.type,
             documentNumber: displayNum,

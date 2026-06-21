@@ -17,11 +17,7 @@ export interface ReceiptRepositoryPort {
 }
 
 export interface PaymentVoucherRepositoryPort {
-  create(
-    ctx: TenantContext,
-    input: CreatePaymentInput,
-    allocatedDisplayNumber: string
-  ): Promise<PaymentVoucher>;
+  create(ctx: TenantContext, input: CreatePaymentInput): Promise<PaymentVoucher>;
   getById(ctx: TenantContext, id: string): Promise<PaymentVoucher | null>;
   list(ctx: TenantContext, params: PaginationModel): Promise<PaginatedModel<PaymentVoucher>>;
   cancel(ctx: TenantContext, id: string, reason: string): Promise<void>;

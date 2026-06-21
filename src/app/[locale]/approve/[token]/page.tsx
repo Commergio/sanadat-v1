@@ -25,6 +25,7 @@ interface ApprovalSnapshot {
 }
 
 interface ApprovalPayload {
+  document_type: "receipt_voucher" | "payment_voucher";
   receipt_id: string;
   company_name: string;
   company_name_en: string | null;
@@ -43,14 +44,19 @@ interface ApprovalPayload {
   token_used: boolean;
 }
 
-export default function ReceiptApprovalPage({
+export default function DocumentApprovalPage({
   params,
 }: {
   params: Promise<{ token: string }>;
 }) {
   const { token } = use(params);
   const locale = useLocale();
-  const t = useTranslations("receiptApprovalPublic");
+  const [documentType, setDocumentType] = useState<"receipt_voucher" | "payment_voucher">(
+    "receipt_voucher"
+  );
+  const t = useTranslations(
+    documentType === "payment_voucher" ? "paymentApprovalPublic" : "receiptApprovalPublic"
+  );
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -77,6 +83,7 @@ export default function ReceiptApprovalPage({
           return;
         }
         const p = data as ApprovalPayload;
+        setDocumentType(p.document_type ?? "receipt_voucher");
         setPayload(p);
         if (p.customer_verified && p.customer_signature_url) {
           setUseExisting(true);

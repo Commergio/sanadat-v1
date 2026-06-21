@@ -50,7 +50,6 @@ export async function POST(request: Request) {
     const created = await app.createPaymentVoucher(ctx, input);
     return NextResponse.json({
       id: created.id,
-      displayNumber: created.displayNumber,
       redirectPath: `/dashboard/payments/${created.id}`,
     });
   } catch (error) {

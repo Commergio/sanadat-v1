@@ -4,6 +4,7 @@ import { requireTenantContext } from "@/lib/auth/require-tenant";
 import type { DocumentActivityAction } from "@/application/documents";
 import { ActivityLogRepository } from "@/infrastructure/supabase/repositories";
 import { canExportReceipt } from "@/lib/documents/receipt-lifecycle";
+import { canExportPayment } from "@/lib/documents/payment-lifecycle";
 import type { DocumentLifecycleStatus } from "@/lib/types";
 
 type Body = {
@@ -53,6 +54,37 @@ export async function POST(request: Request) {
               error: {
                 code: "FORBIDDEN",
                 message: "Cannot export or share receipt before customer approval",
+              },
+            },
+            { status: 403 }
+          );
+        }
+      }
+
+      if (documentType === "payment_voucher") {
+        const { data: payment, error } = await supabase
+          .from("payment_vouchers")
+          .select("lifecycle_status, display_number")
+          .eq("id", body.entityId)
+          .eq("company_id", ctx.companyId)
+          .maybeSingle();
+
+        if (error || !payment) {
+          return NextResponse.json(
+            { error: { code: "NOT_FOUND", message: "Payment voucher not found" } },
+            { status: 404 }
+          );
+        }
+
+        const lifecycle = payment.lifecycle_status as DocumentLifecycleStatus | null;
+        const displayNumber = payment.display_number as string | null;
+
+        if (!canExportPayment(lifecycle, displayNumber)) {
+          return NextResponse.json(
+            {
+              error: {
+                code: "FORBIDDEN",
+                message: "Cannot export or share payment before customer approval",
               },
             },
             { status: 403 }

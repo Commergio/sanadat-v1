@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { ActivityLogRepository } from "@/infrastructure/supabase/repositories";
 import { buildReceiptApprovalPublicApp } from "@/application/documents/receipt-voucher.factory";
+import { buildPaymentApprovalPublicApp } from "@/application/documents/payment-voucher.factory";
 import { UseCaseError } from "@/application/shared/use-case-error";
 import { getClientIp } from "@/lib/http/client-ip";
 import { isServiceRoleConfigured } from "@/lib/env";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
+import { resolveApprovalDocumentType } from "@/lib/approvals/resolve-document-type";
+import { logApprovalDocumentActivity } from "@/lib/approvals/log-approval-activity";
 
 function mapStatus(code: string): number {
   if (code === "NOT_FOUND") return 404;
@@ -14,44 +16,25 @@ function mapStatus(code: string): number {
   return 500;
 }
 
-async function logReceiptActivity(
-  receiptId: string,
-  companyId: string,
-  actions: Array<"document.approved" | "document.issued" | "document.rejected">,
-  metadata: Record<string, unknown>
-) {
-  try {
+async function resolveExistingSignaturePath(
+  useExisting: boolean,
+  customerId: string | null | undefined,
+  payloadPath: string | null | undefined
+): Promise<string | null> {
+  if (!useExisting) return null;
+
+  let existingSignaturePath = payloadPath?.trim() || null;
+  if (!existingSignaturePath && customerId) {
     const supabase = createServiceRoleClient();
-    const { data: receipt } = await supabase
-      .from("receipt_vouchers")
-      .select("created_by")
-      .eq("id", receiptId)
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("default_signature_path")
+      .eq("id", customerId)
       .maybeSingle();
-
-    let actorId = receipt?.created_by as string | null;
-    if (!actorId) {
-      const { data: company } = await supabase
-        .from("companies")
-        .select("owner_id")
-        .eq("id", companyId)
-        .maybeSingle();
-      actorId = (company?.owner_id as string | null) ?? null;
-    }
-
-    if (!actorId) return;
-
-    const activityLog = new ActivityLogRepository(supabase);
-    const ctx = { userId: actorId, companyId, role: "accountant" as const };
-    for (const action of actions) {
-      await activityLog.log(ctx, action, receiptId, {
-        documentType: "receipt_voucher",
-        actor: "customer",
-        ...metadata,
-      });
-    }
-  } catch {
-    // Non-blocking
+    existingSignaturePath =
+      (customer?.default_signature_path as string | null)?.trim() || null;
   }
+  return existingSignaturePath;
 }
 
 export async function POST(
@@ -70,8 +53,8 @@ export async function POST(
     const contentType = request.headers.get("content-type") ?? "";
     const userAgent = request.headers.get("user-agent");
     const ip = getClientIp(request);
-
-    const app = buildReceiptApprovalPublicApp();
+    const documentType = await resolveApprovalDocumentType(token);
+    const isPayment = documentType === "payment_voucher";
 
     if (contentType.includes("application/json")) {
       const body = (await request.json()) as {
@@ -80,22 +63,46 @@ export async function POST(
         approved_by_phone?: string;
       };
 
-      const payload = await app.getReceiptApprovalByToken(token);
+      if (isPayment) {
+        const app = buildPaymentApprovalPublicApp();
+        const payload = await app.getPaymentApprovalByToken(token);
+        const existingSignaturePath = await resolveExistingSignaturePath(
+          Boolean(body.use_existing_signature),
+          payload.customerId,
+          payload.customerSignaturePath
+        );
 
-      let existingSignaturePath: string | null = null;
-      if (body.use_existing_signature) {
-        existingSignaturePath = payload.customerSignaturePath?.trim() || null;
-        if (!existingSignaturePath && payload.customerId) {
-          const supabase = createServiceRoleClient();
-          const { data: customer } = await supabase
-            .from("customers")
-            .select("default_signature_path")
-            .eq("id", payload.customerId)
-            .maybeSingle();
-          existingSignaturePath =
-            (customer?.default_signature_path as string | null)?.trim() || null;
-        }
+        const result = await app.approvePaymentByToken(token, {
+          useExistingSignaturePath: body.use_existing_signature ? existingSignaturePath : null,
+          approvedByName: body.approved_by_name ?? null,
+          approvedByPhone: body.approved_by_phone ?? null,
+          ip,
+          userAgent,
+        });
+
+        await logApprovalDocumentActivity(
+          "payment_voucher",
+          result.paymentId,
+          result.companyId,
+          ["document.approved", "document.issued"],
+          { displayNumber: result.displayNumber }
+        );
+
+        return NextResponse.json({
+          ok: true,
+          document_id: result.paymentId,
+          receipt_id: result.paymentId,
+          display_number: result.displayNumber,
+        });
       }
+
+      const app = buildReceiptApprovalPublicApp();
+      const payload = await app.getReceiptApprovalByToken(token);
+      const existingSignaturePath = await resolveExistingSignaturePath(
+        Boolean(body.use_existing_signature),
+        payload.customerId,
+        payload.customerSignaturePath
+      );
 
       const result = await app.approveReceiptByToken(token, {
         useExistingSignaturePath: body.use_existing_signature ? existingSignaturePath : null,
@@ -105,12 +112,17 @@ export async function POST(
         userAgent,
       });
 
-      await logReceiptActivity(result.receiptId, result.companyId, ["document.approved", "document.issued"], {
-        displayNumber: result.displayNumber,
-      });
+      await logApprovalDocumentActivity(
+        "receipt_voucher",
+        result.receiptId,
+        result.companyId,
+        ["document.approved", "document.issued"],
+        { displayNumber: result.displayNumber }
+      );
 
       return NextResponse.json({
         ok: true,
+        document_id: result.receiptId,
         receipt_id: result.receiptId,
         display_number: result.displayNumber,
       });
@@ -131,6 +143,34 @@ export async function POST(
     const buffer = Buffer.from(await signature.arrayBuffer());
     const sigContentType = signature.type || "image/png";
 
+    if (isPayment) {
+      const app = buildPaymentApprovalPublicApp();
+      const result = await app.approvePaymentByToken(token, {
+        signatureBuffer: buffer,
+        signatureContentType: sigContentType,
+        approvedByName: approvedByName || null,
+        approvedByPhone: approvedByPhone || null,
+        ip,
+        userAgent,
+      });
+
+      await logApprovalDocumentActivity(
+        "payment_voucher",
+        result.paymentId,
+        result.companyId,
+        ["document.approved", "document.issued"],
+        { displayNumber: result.displayNumber }
+      );
+
+      return NextResponse.json({
+        ok: true,
+        document_id: result.paymentId,
+        receipt_id: result.paymentId,
+        display_number: result.displayNumber,
+      });
+    }
+
+    const app = buildReceiptApprovalPublicApp();
     const result = await app.approveReceiptByToken(token, {
       signatureBuffer: buffer,
       signatureContentType: sigContentType,
@@ -140,12 +180,17 @@ export async function POST(
       userAgent,
     });
 
-    await logReceiptActivity(result.receiptId, result.companyId, ["document.approved", "document.issued"], {
-      displayNumber: result.displayNumber,
-    });
+    await logApprovalDocumentActivity(
+      "receipt_voucher",
+      result.receiptId,
+      result.companyId,
+      ["document.approved", "document.issued"],
+      { displayNumber: result.displayNumber }
+    );
 
     return NextResponse.json({
       ok: true,
+      document_id: result.receiptId,
       receipt_id: result.receiptId,
       display_number: result.displayNumber,
     });
@@ -157,7 +202,7 @@ export async function POST(
       );
     }
     return NextResponse.json(
-      { error: { code: "INTERNAL", message: "Failed to approve receipt" } },
+      { error: { code: "INTERNAL", message: "Failed to approve document" } },
       { status: 500 }
     );
   }

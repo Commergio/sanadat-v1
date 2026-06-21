@@ -13,27 +13,18 @@ type PaymentRow = Record<string, unknown>;
 export class SupabasePaymentVoucherRepository implements PaymentVoucherRepositoryPort {
   constructor(private readonly supabase: SupabaseClient) {}
 
-  async create(
-    ctx: TenantContext,
-    input: CreatePaymentInput,
-    allocatedDisplayNumber: string
-  ): Promise<PaymentVoucher> {
-    const number = Number(allocatedDisplayNumber.split("-").pop() ?? "1");
-
+  async create(ctx: TenantContext, input: CreatePaymentInput): Promise<PaymentVoucher> {
     const { data, error } = await this.supabase
       .from("payment_vouchers")
       .insert({
         company_id: ctx.companyId,
-        number,
-        display_number: allocatedDisplayNumber,
         status: "active",
-        lifecycle_status: "issued",
-        issued_at: new Date().toISOString(),
-        issued_by: ctx.userId,
+        lifecycle_status: "draft",
         date: input.date,
         amount: input.amount,
         description: input.description ?? null,
         party_name: input.partyName,
+        customer_id: input.customerId,
         payment_method: input.paymentMethod,
         transfer_number: input.transferNumber ?? null,
         bank_name: input.bankName ?? null,

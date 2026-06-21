@@ -4,12 +4,12 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { createClient } from "@/lib/supabase/server";
 import { requireTenantContext } from "@/lib/auth/require-tenant";
 import { buildPaymentVoucherApp } from "@/application/documents/payment-voucher.factory";
-import { toPaymentDetail } from "@/application/documents/payment-voucher.presenter";
+import { enrichPaymentDetail } from "@/application/documents/enrich-payment-detail";
 import { UseCaseError } from "@/application/shared/use-case-error";
-import { DocumentDetailView } from "@/components/documents/engine";
-import { CancelDocumentButton } from "@/components/documents/engine/cancel-document-button";
-import { Badge } from "@/components/ui/badge";
+import { PaymentDetailClient } from "@/components/documents/payment-detail-client";
 import { hasMinimumTenantRole } from "@/lib/tenant/roles";
+import { paymentDisplayNumber } from "@/lib/documents/payment-lifecycle";
+import type { PaymentVoucher } from "@/lib/types";
 
 export default async function PaymentDetailPage({
   params,
@@ -18,18 +18,19 @@ export default async function PaymentDetailPage({
 }) {
   const { id } = await params;
   const t = await getTranslations("dashboard");
-  const td = await getTranslations("dashboard.table");
   let errorCode: string | null = null;
-  let doc: ReturnType<typeof toPaymentDetail> | null = null;
+  let doc: PaymentVoucher | null = null;
   let canCancel = false;
+  let canSendApproval = false;
 
   try {
     const ctx = await requireTenantContext();
     canCancel = hasMinimumTenantRole(ctx.role, "accountant");
+    canSendApproval = hasMinimumTenantRole(ctx.role, "accountant");
     const supabase = await createClient();
     const app = buildPaymentVoucherApp(supabase);
     const payment = await app.getPaymentVoucher(ctx, id);
-    doc = toPaymentDetail(payment);
+    doc = await enrichPaymentDetail(payment);
   } catch (error) {
     if (error instanceof UseCaseError) {
       errorCode = error.code;
@@ -38,9 +39,15 @@ export default async function PaymentDetailPage({
     }
   }
 
+  const pageTitle = doc
+    ? paymentDisplayNumber(doc.display_number, doc.lifecycle_status) !== "—"
+      ? doc.display_number!
+      : t("paymentDraftTitle")
+    : id;
+
   return (
     <>
-      <DashboardHeader title={doc?.display_number ?? id} />
+      <DashboardHeader title={pageTitle ?? id} />
       <main className="flex-1 p-4 lg:p-8">
         {!doc || errorCode ? (
           <EmptyState
@@ -63,18 +70,11 @@ export default async function PaymentDetailPage({
             actionHref="/dashboard/payments"
           />
         ) : (
-          <DocumentDetailView
+          <PaymentDetailClient
             document={doc}
-            actionsExtra={
-              canCancel && doc.status === "active" ? (
-                <CancelDocumentButton endpoint={`/api/payment-vouchers/${doc.id}/cancel`} />
-              ) : null
-            }
-            header={
-              <Badge variant={doc.status === "active" ? "success" : "destructive"}>
-                {doc.status === "active" ? td("active") : td("cancelled")}
-              </Badge>
-            }
+            customerSignatureUrl={doc.customer_signature_url ?? null}
+            canCancel={canCancel}
+            canSendApproval={canSendApproval}
           />
         )}
       </main>

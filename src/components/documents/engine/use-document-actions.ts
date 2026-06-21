@@ -9,6 +9,10 @@ import {
   canSendReceiptApprovalWhatsApp,
   isReceiptIssued,
 } from "@/lib/documents/receipt-lifecycle";
+import {
+  canSendPaymentApprovalWhatsApp,
+  isPaymentIssued,
+} from "@/lib/documents/payment-lifecycle";
 import type { DocumentExportConfig, DocumentShareMeta } from "./types";
 import { resolveWhatsAppPhone, useDocumentBranding } from "./use-document-branding";
 
@@ -19,6 +23,12 @@ export function resolveDocumentWhatsAppMode(shareMeta: DocumentShareMeta): Docum
   if (
     shareMeta.documentType === "receipt_voucher" &&
     canSendReceiptApprovalWhatsApp(shareMeta.lifecycleStatus)
+  ) {
+    return "approval";
+  }
+  if (
+    shareMeta.documentType === "payment_voucher" &&
+    canSendPaymentApprovalWhatsApp(shareMeta.lifecycleStatus)
   ) {
     return "approval";
   }
@@ -120,11 +130,28 @@ export function useDocumentActions(
   ]);
 
   const shareApprovalWhatsApp = useCallback(async () => {
-    if (!documentId || documentType !== "receipt_voucher") return;
-    if (!canSendReceiptApprovalWhatsApp(shareMeta.lifecycleStatus)) return;
+    if (!documentId) return;
+
+    const endpoint =
+      documentType === "payment_voucher"
+        ? `/api/payment-vouchers/${documentId}/send-approval`
+        : documentType === "receipt_voucher"
+          ? `/api/receipts/${documentId}/send-approval`
+          : null;
+
+    if (!endpoint) return;
+
+    const canSend =
+      documentType === "receipt_voucher"
+        ? canSendReceiptApprovalWhatsApp(shareMeta.lifecycleStatus)
+        : documentType === "payment_voucher"
+          ? canSendPaymentApprovalWhatsApp(shareMeta.lifecycleStatus)
+          : false;
+
+    if (!canSend) return;
 
     try {
-      const res = await fetch(`/api/receipts/${documentId}/send-approval`, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ locale }),
@@ -134,8 +161,12 @@ export function useDocumentActions(
         toast.error(data?.error?.message ?? tApproval("sendFailed"));
         return;
       }
+      const isIssued =
+        documentType === "payment_voucher"
+          ? isPaymentIssued(shareMeta.lifecycleStatus)
+          : isReceiptIssued(shareMeta.lifecycleStatus);
       toast.success(
-        isReceiptIssued(shareMeta.lifecycleStatus)
+        isIssued
           ? tApproval("sendSuccess")
           : shareMeta.lifecycleStatus === "pending_approval"
             ? tApproval("resendSuccess")

@@ -303,7 +303,7 @@ export function A4Document({
 
         {/* Signature & stamp */}
         <div className="a4-signatures">
-          {isReceipt && (
+          {isVoucher && (
             <div className="a4-signatures__item">
               <div className="a4-signatures__box">
                 {receiptApproval?.lifecycleStatus === "issued" && receiptApproval.signatureUrl ? (

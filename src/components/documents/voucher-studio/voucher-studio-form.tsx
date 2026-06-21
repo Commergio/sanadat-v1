@@ -77,7 +77,7 @@ export function VoucherStudioForm() {
           icon={User}
           iconClassName={theme.partySectionIcon}
         >
-          {config.type === "receipt_voucher" ? (
+          {config.type === "receipt_voucher" || config.type === "payment_voucher" ? (
             <ReceiptCustomerField
               control={control}
               errors={errors}
@@ -94,7 +94,7 @@ export function VoucherStudioForm() {
               <Input placeholder={t(labels.partyPlaceholder)} {...register("party_name")} />
             </StudioField>
           )}
-          {config.type === "receipt_voucher" && (
+          {(config.type === "receipt_voucher" || config.type === "payment_voucher") && (
             <StudioField label={t(labels.partyLabel)} showValid={fieldValid("party_name")}>
               <Input readOnly className="bg-muted/60" {...register("party_name")} />
             </StudioField>
@@ -201,7 +201,11 @@ export function VoucherStudioForm() {
         <div className="flex items-start gap-2 rounded-xl border border-border/80 bg-muted/30 px-4 py-3">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="text-xs leading-relaxed text-muted-foreground">
-            {config.type === "receipt_voucher" ? t("receiptApprovalNote") : t("immutableNote")}
+            {config.type === "receipt_voucher"
+              ? t("receiptApprovalNote")
+              : config.type === "payment_voucher"
+                ? t("paymentApprovalNote")
+                : t("immutableNote")}
           </p>
         </div>
 
