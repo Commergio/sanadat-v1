@@ -90,7 +90,7 @@ export function ReceiptDetailClient({
                   <img
                     src={customerSignatureUrl}
                     alt={tDocs("approvedCustomerSignature")}
-                    className="max-h-28 rounded border bg-white p-2"
+                    className="max-h-28 max-w-full object-contain rounded border bg-white p-2"
                   />
                 ) : (
                   <p className="text-muted-foreground">{tDocs("noSavedSignature")}</p>

@@ -817,6 +817,8 @@ body {
   max-height: 52px;
   max-width: 140px;
   object-fit: contain;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .a4-signatures__stamp {

@@ -13,7 +13,10 @@ export function toReceiptListRow(receipt: DomainReceiptVoucher): DocumentListRow
   };
 }
 
-export function toReceiptDetail(receipt: DomainReceiptVoucher): ReceiptVoucher {
+export function toReceiptDetail(
+  receipt: DomainReceiptVoucher,
+  options?: { customerSignatureUrl?: string | null }
+): ReceiptVoucher {
   return {
     id: receipt.id,
     type: "receipt_voucher",
@@ -42,7 +45,7 @@ export function toReceiptDetail(receipt: DomainReceiptVoucher): ReceiptVoucher {
     approved_at: receipt.approvedAt ?? undefined,
     approved_by_name: receipt.approvedByName ?? undefined,
     approved_by_phone: receipt.approvedByPhone ?? undefined,
-    customer_signature_url: null,
+    customer_signature_url: options?.customerSignatureUrl ?? null,
     rejection_reason: receipt.rejectionReason ?? undefined,
     rejected_at: receipt.rejectedAt ?? undefined,
     issued_at: receipt.issuedAt ?? undefined,

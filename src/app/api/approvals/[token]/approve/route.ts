@@ -81,11 +81,24 @@ export async function POST(
       };
 
       const payload = await app.getReceiptApprovalByToken(token);
+
+      let existingSignaturePath: string | null = null;
+      if (body.use_existing_signature) {
+        existingSignaturePath = payload.customerSignaturePath?.trim() || null;
+        if (!existingSignaturePath && payload.customerId) {
+          const supabase = createServiceRoleClient();
+          const { data: customer } = await supabase
+            .from("customers")
+            .select("default_signature_path")
+            .eq("id", payload.customerId)
+            .maybeSingle();
+          existingSignaturePath =
+            (customer?.default_signature_path as string | null)?.trim() || null;
+        }
+      }
+
       const result = await app.approveReceiptByToken(token, {
-        useExistingSignaturePath:
-          body.use_existing_signature && payload.customerSignaturePath
-            ? payload.customerSignaturePath
-            : null,
+        useExistingSignaturePath: body.use_existing_signature ? existingSignaturePath : null,
         approvedByName: body.approved_by_name ?? null,
         approvedByPhone: body.approved_by_phone ?? null,
         ip,
