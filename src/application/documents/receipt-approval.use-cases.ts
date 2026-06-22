@@ -75,8 +75,11 @@ export function buildReceiptApprovalUseCases(deps: ReceiptApprovalUseCaseDeps) {
       try {
         const receipt = await deps.receiptRepository.getById(ctx, receiptId);
         if (!receipt) throw new UseCaseError("NOT_FOUND", "Receipt voucher not found");
-        if (receipt.lifecycleStatus !== "draft") {
-          throw new UseCaseError("VALIDATION", "Only draft receipts can be sent for approval");
+        if (receipt.lifecycleStatus !== "draft" && receipt.lifecycleStatus !== "pending_approval") {
+          throw new UseCaseError(
+            "VALIDATION",
+            "Only draft or pending approval receipts can be sent for approval"
+          );
         }
         if (!receipt.customerId) {
           throw new UseCaseError("VALIDATION", "Receipt must be linked to a customer");

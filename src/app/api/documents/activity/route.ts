@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       if (documentType === "receipt_voucher") {
         const { data: receipt, error } = await supabase
           .from("receipt_vouchers")
-          .select("lifecycle_status, display_number")
+          .select("lifecycle_status, display_number, status")
           .eq("id", body.entityId)
           .eq("company_id", ctx.companyId)
           .maybeSingle();
@@ -48,8 +48,9 @@ export async function POST(request: Request) {
 
         const lifecycle = receipt.lifecycle_status as DocumentLifecycleStatus | null;
         const displayNumber = receipt.display_number as string | null;
+        const status = receipt.status as "active" | "cancelled" | null;
 
-        if (!canExportReceipt(lifecycle, displayNumber)) {
+        if (!canExportReceipt(lifecycle, displayNumber, status)) {
           return NextResponse.json(
             {
               error: {
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
       if (documentType === "payment_voucher") {
         const { data: payment, error } = await supabase
           .from("payment_vouchers")
-          .select("lifecycle_status, display_number")
+          .select("lifecycle_status, display_number, status")
           .eq("id", body.entityId)
           .eq("company_id", ctx.companyId)
           .maybeSingle();
@@ -79,8 +80,9 @@ export async function POST(request: Request) {
 
         const lifecycle = payment.lifecycle_status as DocumentLifecycleStatus | null;
         const displayNumber = payment.display_number as string | null;
+        const status = payment.status as "active" | "cancelled" | null;
 
-        if (!canExportPayment(lifecycle, displayNumber)) {
+        if (!canExportPayment(lifecycle, displayNumber, status)) {
           return NextResponse.json(
             {
               error: {
@@ -96,7 +98,7 @@ export async function POST(request: Request) {
       if (documentType === "invoice") {
         const { data: invoice, error } = await supabase
           .from("invoices")
-          .select("lifecycle_status, display_number")
+          .select("lifecycle_status, display_number, status")
           .eq("id", body.entityId)
           .eq("company_id", ctx.companyId)
           .maybeSingle();
@@ -110,8 +112,9 @@ export async function POST(request: Request) {
 
         const lifecycle = invoice.lifecycle_status as DocumentLifecycleStatus | null;
         const displayNumber = invoice.display_number as string | null;
+        const status = invoice.status as "active" | "cancelled" | null;
 
-        if (!canExportInvoice(lifecycle, displayNumber)) {
+        if (!canExportInvoice(lifecycle, displayNumber, status)) {
           return NextResponse.json(
             {
               error: {
@@ -129,6 +132,9 @@ export async function POST(request: Request) {
     await repo.log(ctx, body.action, body.entityId, body.metadata ?? {});
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ ok: false }, { status: 200 });
+    return NextResponse.json(
+      { error: { code: "INTERNAL", message: "Failed to log activity" } },
+      { status: 500 }
+    );
   }
 }

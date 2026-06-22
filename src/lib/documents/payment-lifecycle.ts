@@ -13,8 +13,10 @@ export function isPaymentIssued(lifecycleStatus?: DocumentLifecycleStatus | null
 
 export function canExportPayment(
   lifecycleStatus?: DocumentLifecycleStatus | null,
-  displayNumber?: string | null
+  displayNumber?: string | null,
+  documentStatus?: "active" | "cancelled" | null
 ): boolean {
+  if (documentStatus === "cancelled") return false;
   if (!isPaymentIssued(lifecycleStatus)) return false;
   return Boolean(displayNumber?.trim());
 }

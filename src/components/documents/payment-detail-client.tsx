@@ -35,7 +35,7 @@ export function PaymentDetailClient({
   const tDash = useTranslations("dashboard");
   const tDocs = useTranslations("documents");
   const lifecycle = effectivePaymentLifecycle(document.lifecycle_status);
-  const exportEnabled = canExportPayment(lifecycle, document.display_number);
+  const exportEnabled = canExportPayment(lifecycle, document.display_number, document.status);
   const pendingApproval = lifecycle === "pending_approval";
   const isDraft = lifecycle === "draft";
   const isRejected = lifecycle === "rejected";
@@ -46,7 +46,10 @@ export function PaymentDetailClient({
   const showCancel =
     canCancel &&
     document.status === "active" &&
-    (lifecycle === "pending_approval" || lifecycle === "draft" || lifecycle === "rejected");
+    (lifecycle === "pending_approval" ||
+      lifecycle === "draft" ||
+      lifecycle === "rejected" ||
+      lifecycle === "issued");
 
   const header = (
     <>

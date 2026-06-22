@@ -75,8 +75,11 @@ export function buildPaymentApprovalUseCases(deps: PaymentApprovalUseCaseDeps) {
       try {
         const payment = await deps.paymentRepository.getById(ctx, paymentId);
         if (!payment) throw new UseCaseError("NOT_FOUND", "Payment voucher not found");
-        if (payment.lifecycleStatus !== "draft") {
-          throw new UseCaseError("VALIDATION", "Only draft payments can be sent for approval");
+        if (payment.lifecycleStatus !== "draft" && payment.lifecycleStatus !== "pending_approval") {
+          throw new UseCaseError(
+            "VALIDATION",
+            "Only draft or pending approval payments can be sent for approval"
+          );
         }
         if (!payment.customerId) {
           throw new UseCaseError("VALIDATION", "Payment must be linked to a customer");

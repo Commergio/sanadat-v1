@@ -1244,7 +1244,9 @@
     "approvedTitle": "تمت الموافقة",
     "approvedDesc": "شكراً — تم إصدار سند القبض بنجاح.",
     "rejectedTitle": "تم الرفض",
-    "rejectedDesc": "تم تسجيل رفضك لسند القبض."
+    "rejectedDesc": "تم تسجيل رفضك لسند القبض.",
+    "cancelledTitle": "تم إلغاء المستند",
+    "cancelledDesc": "أُلغي هذا المستند من قبل الشركة ولم يعد متاحاً للموافقة."
   },
   "paymentApproval": {
     "panelTitle": "موافقة العميل",
@@ -1320,7 +1322,9 @@
     "approvedTitle": "تمت الموافقة",
     "approvedDesc": "شكراً — تم إصدار الفاتورة.",
     "rejectedTitle": "تم الرفض",
-    "rejectedDesc": "تم تسجيل رفضك للفاتورة."
+    "rejectedDesc": "تم تسجيل رفضك للفاتورة.",
+    "cancelledTitle": "تم إلغاء المستند",
+    "cancelledDesc": "أُلغي هذا المستند من قبل الشركة ولم يعد متاحاً للموافقة."
   },
   "paymentApprovalPublic": {
     "title": "الموافقة على سند الصرف",
@@ -1354,7 +1358,9 @@
     "approvedTitle": "تمت الموافقة",
     "approvedDesc": "شكراً — تم إصدار سند الصرف بنجاح.",
     "rejectedTitle": "تم الرفض",
-    "rejectedDesc": "تم تسجيل رفضك لسند الصرف."
+    "rejectedDesc": "تم تسجيل رفضك لسند الصرف.",
+    "cancelledTitle": "تم إلغاء المستند",
+    "cancelledDesc": "أُلغي هذا المستند من قبل الشركة ولم يعد متاحاً للموافقة."
   },
   "customerVerification": {
     "title": "تأكيد بيانات العميل والتوقيع",

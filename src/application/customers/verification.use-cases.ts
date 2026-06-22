@@ -49,6 +49,9 @@ export function buildCustomerVerificationUseCases(deps: CustomerVerificationUseC
       try {
         const customer = await deps.customerRepository.getById(ctx, customerId);
         if (!customer) throw new UseCaseError("NOT_FOUND", "Customer not found");
+        if (customer.isVerified) {
+          throw new UseCaseError("CONFLICT", "Customer is already verified");
+        }
 
         const rawToken = generateVerificationToken();
         const tokenHash = hashVerificationToken(rawToken);

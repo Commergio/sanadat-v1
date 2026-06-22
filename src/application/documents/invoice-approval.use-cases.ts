@@ -84,8 +84,11 @@ export function buildInvoiceApprovalUseCases(deps: InvoiceApprovalUseCaseDeps) {
       try {
         const invoice = await deps.invoiceRepository.getById(ctx, invoiceId);
         if (!invoice) throw new UseCaseError("NOT_FOUND", "Invoice not found");
-        if (invoice.lifecycleStatus !== "draft") {
-          throw new UseCaseError("VALIDATION", "Only draft invoices can be sent for approval");
+        if (invoice.lifecycleStatus !== "draft" && invoice.lifecycleStatus !== "pending_approval") {
+          throw new UseCaseError(
+            "VALIDATION",
+            "Only draft or pending approval invoices can be sent for approval"
+          );
         }
         if (!invoice.customerId) {
           throw new UseCaseError("VALIDATION", "Invoice must be linked to a customer");

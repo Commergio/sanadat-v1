@@ -127,7 +127,7 @@ export default function CustomerVerificationPage({
     );
   }
 
-  if (done || payload.is_verified || payload.token_used) {
+  if (done || payload.is_verified) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 p-4" dir={locale === "ar" ? "rtl" : "ltr"}>
         <Card className="w-full max-w-md text-center">
@@ -138,6 +138,19 @@ export default function CustomerVerificationPage({
               <p className="mt-2 text-sm text-muted-foreground">{t("verifiedDesc")}</p>
             </div>
           </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (payload.token_used || !payload.token_valid) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 p-4" dir={locale === "ar" ? "rtl" : "ltr"}>
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>{t("invalidTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">{t("invalidDesc")}</CardContent>
         </Card>
       </div>
     );

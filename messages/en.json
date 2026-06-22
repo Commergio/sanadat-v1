@@ -1242,7 +1242,9 @@
     "approvedTitle": "Approved",
     "approvedDesc": "Thank you — the receipt voucher has been issued.",
     "rejectedTitle": "Rejected",
-    "rejectedDesc": "Your rejection of the receipt voucher has been recorded."
+    "rejectedDesc": "Your rejection of the receipt voucher has been recorded.",
+    "cancelledTitle": "Document cancelled",
+    "cancelledDesc": "This document was cancelled by the company and is no longer available for approval."
   },
   "paymentApproval": {
     "panelTitle": "Customer approval",
@@ -1318,7 +1320,9 @@
     "approvedTitle": "Approved",
     "approvedDesc": "Thank you — the invoice has been issued.",
     "rejectedTitle": "Rejected",
-    "rejectedDesc": "Your rejection of the invoice has been recorded."
+    "rejectedDesc": "Your rejection of the invoice has been recorded.",
+    "cancelledTitle": "Document cancelled",
+    "cancelledDesc": "This document was cancelled by the company and is no longer available for approval."
   },
   "paymentApprovalPublic": {
     "title": "Approve payment voucher",
@@ -1352,7 +1356,9 @@
     "approvedTitle": "Approved",
     "approvedDesc": "Thank you — the payment voucher has been issued.",
     "rejectedTitle": "Rejected",
-    "rejectedDesc": "Your rejection of the payment voucher has been recorded."
+    "rejectedDesc": "Your rejection of the payment voucher has been recorded.",
+    "cancelledTitle": "Document cancelled",
+    "cancelledDesc": "This document was cancelled by the company and is no longer available for approval."
   },
   "customerVerification": {
     "title": "Confirm your details and signature",

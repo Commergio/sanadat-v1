@@ -14,8 +14,10 @@ export function isReceiptIssued(lifecycleStatus?: DocumentLifecycleStatus | null
 
 export function canExportReceipt(
   lifecycleStatus?: DocumentLifecycleStatus | null,
-  displayNumber?: string | null
+  displayNumber?: string | null,
+  documentStatus?: "active" | "cancelled" | null
 ): boolean {
+  if (documentStatus === "cancelled") return false;
   if (!isReceiptIssued(lifecycleStatus)) return false;
   return Boolean(displayNumber?.trim());
 }

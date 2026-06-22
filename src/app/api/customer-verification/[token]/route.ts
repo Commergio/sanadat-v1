@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildCustomerVerificationPublicApp } from "@/application/customers/factory";
 import { UseCaseError } from "@/application/shared/use-case-error";
+import { isServiceRoleConfigured } from "@/lib/env";
 
 function mapStatus(code: string): number {
   if (code === "NOT_FOUND") return 404;
@@ -15,14 +16,22 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> }
 ) {
   try {
+    if (!isServiceRoleConfigured()) {
+      return NextResponse.json(
+        { error: { code: "NOT_CONFIGURED", message: "Verification service not configured" } },
+        { status: 503 }
+      );
+    }
+
     const { token } = await params;
     const app = buildCustomerVerificationPublicApp();
     const payload = await app.getCustomerVerificationByToken(token);
+    const redact = !payload.tokenValid;
     return NextResponse.json({
-      customer_id: payload.customerId,
+      customer_id: redact ? "" : payload.customerId,
       company_name: payload.companyName,
-      customer_name: payload.customerName,
-      customer_phone: payload.customerPhone,
+      customer_name: redact ? "" : payload.customerName,
+      customer_phone: redact ? "" : payload.customerPhone,
       is_verified: payload.isVerified,
       token_valid: payload.tokenValid,
       token_expired: payload.tokenExpired,

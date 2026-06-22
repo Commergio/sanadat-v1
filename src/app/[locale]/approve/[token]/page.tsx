@@ -237,15 +237,15 @@ export default function DocumentApprovalPage({
     );
   }
 
-  if (done === "approved" || payload.token_used || payload.lifecycle_status === "issued") {
+  if (payload.lifecycle_status === "cancelled") {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 p-4" dir={dir}>
         <Card className="w-full max-w-md text-center">
           <CardContent className="flex flex-col items-center gap-4 pt-8 pb-8">
-            <CheckCircle2 className="h-14 w-14 text-emerald-500" />
+            <XCircle className="h-14 w-14 text-muted-foreground" />
             <div>
-              <h1 className="text-lg font-bold">{t("approvedTitle")}</h1>
-              <p className="mt-2 text-sm text-muted-foreground">{t("approvedDesc")}</p>
+              <h1 className="text-lg font-bold">{t("cancelledTitle")}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">{t("cancelledDesc")}</p>
             </div>
           </CardContent>
         </Card>
@@ -262,6 +262,22 @@ export default function DocumentApprovalPage({
             <div>
               <h1 className="text-lg font-bold">{t("rejectedTitle")}</h1>
               <p className="mt-2 text-sm text-muted-foreground">{t("rejectedDesc")}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (done === "approved" || payload.lifecycle_status === "issued") {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center bg-muted/30 p-4" dir={dir}>
+        <Card className="w-full max-w-md text-center">
+          <CardContent className="flex flex-col items-center gap-4 pt-8 pb-8">
+            <CheckCircle2 className="h-14 w-14 text-emerald-500" />
+            <div>
+              <h1 className="text-lg font-bold">{t("approvedTitle")}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">{t("approvedDesc")}</p>
             </div>
           </CardContent>
         </Card>
