@@ -4,13 +4,10 @@ import { requireTenantContext } from "@/lib/auth/require-tenant";
 import { buildPaymentVoucherApp } from "@/application/documents/payment-voucher.factory";
 import { UseCaseError } from "@/application/shared/use-case-error";
 import { toPaymentListRow } from "@/application/documents/payment-voucher.presenter";
+import { mapDocumentStatus } from "../documents/_shared";
 
 function mapStatus(code: string): number {
-  if (code === "FORBIDDEN") return 403;
-  if (code === "NOT_FOUND") return 404;
-  if (code === "VALIDATION") return 400;
-  if (code === "CONFLICT") return 409;
-  return 500;
+  return mapDocumentStatus(code);
 }
 
 export async function GET(request: Request) {

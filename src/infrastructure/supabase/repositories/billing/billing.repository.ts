@@ -24,6 +24,8 @@ function mapSubscription(row: Row): SubscriptionModel {
     id: String(row.id),
     companyId: String(row.company_id),
     status: row.status as SubscriptionModel["status"],
+    subscriptionSource:
+      (row.subscription_source as SubscriptionModel["subscriptionSource"]) ?? "trial",
     amount: Number(row.amount),
     currency: String(row.currency ?? "SAR"),
     planCode: String(row.plan_code ?? "sanadat_annual"),
@@ -92,7 +94,7 @@ export class BillingRepository implements BillingRepositoryPort {
     const { data, error } = await this.readClient
       .from("subscriptions")
       .select(
-        "id, company_id, status, amount, currency, plan_code, billing_cycle, starts_at, expires_at, next_renewal_at, auto_renew, cancel_at_period_end, cancelled_at, created_at, updated_at"
+        "id, company_id, status, subscription_source, amount, currency, plan_code, billing_cycle, starts_at, expires_at, next_renewal_at, auto_renew, cancel_at_period_end, cancelled_at, created_at, updated_at"
       )
       .eq("company_id", ctx.companyId)
       .order("created_at", { ascending: false })
@@ -425,6 +427,7 @@ export class BillingRepository implements BillingRepositoryPort {
     startsAt: string;
     periodStart: string;
     periodEnd: string;
+    subscriptionSource?: "paid";
   }): Promise<void> {
     const { error } = await this.writeClient
       .from("subscriptions")
@@ -440,6 +443,7 @@ export class BillingRepository implements BillingRepositoryPort {
         cancel_at_period_end: false,
         cancelled_at: null,
         cancelled_by: null,
+        subscription_source: input.subscriptionSource ?? "paid",
         updated_at: new Date().toISOString(),
       })
       .eq("id", input.subscriptionId)
@@ -450,11 +454,48 @@ export class BillingRepository implements BillingRepositoryPort {
     }
   }
 
+  async activatePromoSubscription(input: {
+    subscriptionId: string;
+    companyId: string;
+    planCode: string;
+    amount: number;
+    startsAt: string;
+    expiresAt: string;
+  }): Promise<void> {
+    const { error } = await this.writeClient
+      .from("subscriptions")
+      .update({
+        status: "active",
+        subscription_source: "promo",
+        amount: input.amount,
+        plan_code: input.planCode,
+        billing_cycle: "yearly",
+        starts_at: input.startsAt,
+        expires_at: input.expiresAt,
+        next_renewal_at: input.expiresAt,
+        auto_renew: false,
+        cancel_at_period_end: false,
+        cancelled_at: null,
+        cancelled_by: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", input.subscriptionId)
+      .eq("company_id", input.companyId);
+
+    if (error) {
+      throw new RepositoryError(
+        "VALIDATION",
+        error.message || "Failed to activate promo subscription",
+        error
+      );
+    }
+  }
+
   async getSubscriptionByCompanyId(companyId: string): Promise<SubscriptionModel | null> {
     const { data, error } = await this.writeClient
       .from("subscriptions")
       .select(
-        "id, company_id, status, amount, currency, plan_code, billing_cycle, starts_at, expires_at, next_renewal_at, auto_renew, cancel_at_period_end, cancelled_at, created_at, updated_at"
+        "id, company_id, status, subscription_source, amount, currency, plan_code, billing_cycle, starts_at, expires_at, next_renewal_at, auto_renew, cancel_at_period_end, cancelled_at, created_at, updated_at"
       )
       .eq("company_id", companyId)
       .order("created_at", { ascending: false })
@@ -477,5 +518,62 @@ export class BillingRepository implements BillingRepositoryPort {
 
     if (error) throw toRepositoryError(error, "Failed to resolve company owner");
     return data?.user_id ? String(data.user_id) : null;
+  }
+
+  async createCompletedManualPayment(input: {
+    companyId: string;
+    subscriptionId: string | null;
+    amount: number;
+    currency: string;
+    planCode: string;
+    billingCycle: "yearly";
+    paidAt: string;
+    periodStart: string;
+    periodEnd: string;
+    initiatedBy: string;
+    manualPaymentRequestId: string;
+    proofFilePath: string;
+  }): Promise<string> {
+    const providerEventId = `manual_payment:${input.manualPaymentRequestId}`;
+    const gatewayReference = `manual:${input.manualPaymentRequestId}`;
+
+    const { data, error } = await this.writeClient
+      .from("payments")
+      .insert({
+        company_id: input.companyId,
+        subscription_id: input.subscriptionId,
+        gateway: "manual",
+        amount: input.amount,
+        currency: input.currency,
+        status: "completed",
+        provider_event_id: providerEventId,
+        gateway_reference: gatewayReference,
+        paid_at: input.paidAt,
+        period_start: input.periodStart,
+        period_end: input.periodEnd,
+        metadata: {
+          plan_code: input.planCode,
+          billing_cycle: input.billingCycle,
+          initiated_by: input.initiatedBy,
+          manual_payment_request_id: input.manualPaymentRequestId,
+          proof_file_path: input.proofFilePath,
+        },
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      if (error.code === "23505") {
+        const existing = await this.findPaymentByProviderEventId("manual", providerEventId);
+        if (existing) return existing.id;
+      }
+      throw new RepositoryError(
+        "VALIDATION",
+        error.message || "Failed to create manual payment",
+        error
+      );
+    }
+
+    return String(data.id);
   }
 }

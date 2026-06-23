@@ -8,6 +8,7 @@ import {
 } from "@/infrastructure/supabase/repositories";
 import { PaymentApprovalRepository } from "@/infrastructure/supabase/repositories/documents/payment-approval.repository";
 import { uploadPaymentApprovalSignature } from "@/lib/storage/customer-signature";
+import { createTrialDocumentGuard } from "@/application/billing/trial-document-guard";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 export function buildPaymentVoucherApp(supabase: SupabaseClient) {
@@ -15,10 +16,12 @@ export function buildPaymentVoucherApp(supabase: SupabaseClient) {
   const activityLog = new ActivityLogRepository(supabase);
   const customerRepository = new CustomerRepository(supabase);
   const approvalRepository = new PaymentApprovalRepository(supabase);
+  const trialGuard = createTrialDocumentGuard(supabase);
 
   const paymentUseCases = buildPaymentVoucherUseCases({
     repository,
     activityLog,
+    trialGuard,
   });
 
   const approvalUseCases = buildPaymentApprovalUseCases({

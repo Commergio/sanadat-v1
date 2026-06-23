@@ -80,7 +80,30 @@ export interface BillingRepositoryPort {
     startsAt: string;
     periodStart: string;
     periodEnd: string;
+    subscriptionSource?: "paid";
+  }): Promise<void>;
+  activatePromoSubscription(input: {
+    subscriptionId: string;
+    companyId: string;
+    planCode: string;
+    amount: number;
+    startsAt: string;
+    expiresAt: string;
   }): Promise<void>;
   getSubscriptionByCompanyId(companyId: string): Promise<SubscriptionModel | null>;
   resolveCompanyOwnerUserId(companyId: string): Promise<string | null>;
+  createCompletedManualPayment(input: {
+    companyId: string;
+    subscriptionId: string | null;
+    amount: number;
+    currency: string;
+    planCode: string;
+    billingCycle: "yearly";
+    paidAt: string;
+    periodStart: string;
+    periodEnd: string;
+    initiatedBy: string;
+    manualPaymentRequestId: string;
+    proofFilePath: string;
+  }): Promise<string>;
 }

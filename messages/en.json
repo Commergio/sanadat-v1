@@ -176,8 +176,8 @@
     "aboutUs": "About us",
     "privacy": "Privacy policy",
     "terms": "Terms of service",
-    "contactEmail": "info@sanadat.sa",
-    "contactPhone": "+966 50 000 0000",
+    "contactEmail": "tech@commergio.com",
+    "contactPhone": "+966 56 739 5986",
     "contactHours": "Sun – Thu · 9am – 6pm",
     "newsletter": "Product updates"
   },
@@ -193,6 +193,8 @@
     "confirmPassword": "Confirm password",
     "companyName": "Business name",
     "phone": "Mobile number",
+    "invitationCode": "Invitation or promo code (optional)",
+    "invitationCodePlaceholder": "INVITE2026",
     "submit": "Continue",
     "signIn": "Sign in",
     "signingIn": "Signing in...",
@@ -203,6 +205,10 @@
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "terms": "By registering you agree to the terms and privacy policy",
+    "termsPrefix": "By registering you agree to the",
+    "termsLink": "Terms of Service",
+    "termsAnd": "and",
+    "privacyLink": "Privacy Policy",
     "backToLogin": "Back to sign in",
     "emailSent": "Reset link sent to",
     "emailConfirmSent": "Confirmation link sent to your email",
@@ -302,7 +308,14 @@
       "manage": "Manage plan",
       "autoRenewOn": "Auto-renew enabled",
       "autoRenewOff": "Cancels at period end",
-      "periodProgress": "Billing period"
+      "periodProgress": "Billing period",
+      "promoAccess": "Promotional access"
+    },
+    "trialUsage": {
+      "title": "Free trial documents remaining",
+      "usedOfLimit": "{used} of {limit} used",
+      "remaining": "Remaining: {remaining}",
+      "subscribeCta": "Subscribe to continue"
     },
     "stats": {
       "receipts": "Receipt vouchers",
@@ -516,6 +529,17 @@
     "immutableNote": "Documents cannot be edited after creation. Only cancellation with a reason is allowed.",
     "createSuccess": "Document created successfully — cannot be edited",
     "createFailed": "Failed to create document",
+    "trialLimitReached": "Trial limit reached. You can create up to 5 documents during the trial. Please subscribe to continue.",
+    "subscriptionInactiveCreate": "An active subscription is required to create documents. Please renew your subscription.",
+    "createForbidden": "You do not have permission to create documents.",
+    "createValidationFailed": "Please check required fields and try again.",
+    "createTenantNotFound": "Session expired. Please refresh and try again.",
+    "createConflict": "Document number conflict. Please retry.",
+    "trialRemainingBanner": "Trial: {remaining} document(s) remaining",
+    "trialUsedOfLimit": "{used} of {limit} trial documents used",
+    "trialLimitBannerTitle": "Trial document limit reached",
+    "trialLimitBannerHint": "Subscribe to create more receipt vouchers, payment vouchers, and invoices.",
+    "trialSubscribeCta": "Subscribe now to continue",
     "cancelDoc": "Cancel document",
     "print": "Print",
     "exportPdf": "Export PDF",
@@ -735,7 +759,36 @@
     "paymentRefunded": "Refunded",
     "gateways": "Supported: Moyasar · HyperPay · STC Pay · Mada · Visa · Apple Pay",
     "paymentReady": "Payment gateway ready — add API keys to activate",
-    "paymentFailed": "Failed to start payment"
+    "paymentFailed": "Failed to start payment",
+    "gatewayManual": "Bank transfer",
+    "manualTransferTitle": "Bank transfer payment",
+    "manualTransferInstructionsTitle": "Bank transfer instructions",
+    "manualTransferInstructions": "Transfer 399 SAR to the Sanadat bank account.\n\nBank: [Bank name]\nIBAN: [IBAN]\nAccount name: [Account name]\n\nInclude your company name in the transfer reference.",
+    "manualTransferProofLabel": "Upload transfer receipt",
+    "manualTransferFileHint": "PDF, PNG, or JPG — max 5 MB",
+    "manualTransferFileRequired": "Please attach your transfer receipt",
+    "manualTransferSubmit": "Submit receipt for review",
+    "manualTransferSubmitting": "Uploading...",
+    "manualTransferSubmitFailed": "Failed to submit transfer receipt",
+    "manualTransferSubmittedToast": "Transfer receipt submitted",
+    "manualTransferPendingTitle": "Transfer under review",
+    "manualTransferPendingMessage": "Your transfer receipt has been submitted. Our team will review it and activate your subscription after confirmation.",
+    "manualTransferPendingExists": "You already have a bank transfer request under review.",
+    "subscriptionSource": "Access type",
+    "subscriptionSourceTrial": "Trial",
+    "subscriptionSourcePaid": "Paid subscription",
+    "subscriptionSourcePromo": "Promotional access",
+    "subscriptionSourceAdminGrant": "Admin grant",
+    "invitationCodeTitle": "Have an invitation code?",
+    "invitationCodeHint": "Enter your invitation code to activate free promotional access.",
+    "invitationCodeLabel": "Invitation code",
+    "invitationCodePlaceholder": "INVITE2026",
+    "invitationCodeApply": "Activate code",
+    "invitationCodeApplying": "Activating...",
+    "invitationCodeRequired": "Enter an invitation code",
+    "invitationCodeSuccess": "Free promotional access activated until {expiresAt}",
+    "invitationCodeFailed": "Could not activate invitation code",
+    "invitationCodePendingHint": "Enter your invitation code to activate the free promotional period."
   },
   "onboarding": {
     "company": "Company details",
@@ -760,6 +813,49 @@
     "subscriptionsDesc": "Track active and expired subscriptions",
     "payments": "Payments",
     "paymentsDesc": "Transaction and payment history",
+    "manualPaymentsNav": "Bank transfers",
+    "manualPaymentsDesc": "Review tenant bank transfer receipts and activate subscriptions",
+    "manualPaymentsPending": "Pending",
+    "manualPaymentsApproved": "Approved",
+    "manualPaymentsRejected": "Rejected",
+    "manualPaymentsEmpty": "No transfer requests",
+    "manualPaymentsEmptyDesc": "No bank transfer requests match the current filter",
+    "manualPaymentsReview": "Review",
+    "manualPaymentsReviewTitle": "Review bank transfer",
+    "manualPaymentsPlan": "Plan",
+    "manualPaymentsViewProof": "View / download receipt",
+    "manualPaymentsProofUnavailable": "Receipt preview is not available",
+    "manualPaymentsApprove": "Approve and activate subscription",
+    "manualPaymentsApproveNote": "Admin note (optional)",
+    "manualPaymentsApproveNotePlaceholder": "Optional note for internal records",
+    "manualPaymentsApproveSuccess": "Transfer approved and subscription activated",
+    "manualPaymentsApproveFailed": "Failed to approve transfer",
+    "manualPaymentsReject": "Reject transfer",
+    "manualPaymentsRejectNote": "Rejection reason (required)",
+    "manualPaymentsRejectNotePlaceholder": "Explain why the transfer was rejected",
+    "manualPaymentsRejectNoteRequired": "Rejection reason is required",
+    "manualPaymentsRejectReason": "Rejection reason",
+    "manualPaymentsRejectSuccess": "Transfer rejected",
+    "manualPaymentsRejectFailed": "Failed to reject transfer",
+    "manualPaymentsLoadFailed": "Failed to load transfer request",
+    "manualPaymentsClose": "Close",
+    "manualPaymentsSupportReadOnly": "Only platform admins can approve or reject transfers",
+    "trialUsageTitle": "Trial document usage",
+    "trialUsageTotal": "Documents used (trial)",
+    "trialUsageRemaining": "Remaining",
+    "trialUsageReceipts": "Receipt vouchers",
+    "trialUsagePayments": "Payment vouchers",
+    "trialUsageInvoices": "Invoices",
+    "subscriptionSourceCol": "Subscription source",
+    "subscriptionSource_trial": "Trial",
+    "subscriptionSource_paid": "Paid",
+    "subscriptionSource_promo": "Promotional",
+    "subscriptionSource_admin_grant": "Admin grant",
+    "promoRedemptionsTitle": "Invitation promo redemptions",
+    "promoCodeCol": "Code used",
+    "promoGrantedDaysCol": "Granted days",
+    "promoStartsCol": "Starts",
+    "promoExpiresCol": "Expires",
     "messages": "Messages",
     "messagesDesc": "WhatsApp templates for client communication",
     "settings": "Settings",
@@ -861,6 +957,8 @@
     "actionsNav": "Audit log",
     "announcementsNav": "Announcements",
     "couponsNav": "Coupons",
+    "invitationCodesNav": "Invitation codes",
+    "invitationCodesDesc": "Manage invitation and promotional access codes",
     "staffNav": "Platform Staff",
     "supportNav": "Support tickets",
     "actionsDesc": "Platform admin actions and interventions",
@@ -1047,6 +1145,67 @@
       "validationName": "Name is required",
       "validationDiscountValue": "Discount value must be greater than zero",
       "validationPercentageMax": "Percentage cannot exceed 100",
+      "validationPerCompany": "Per company limit must be at least 1",
+      "validationDates": "End date must be after start date"
+    },
+    "invitationCodes": {
+      "pageTitle": "Invitation codes",
+      "pageDesc": "Grant companies free promotional subscription access",
+      "searchPlaceholder": "Search by code or name...",
+      "search": "Search",
+      "create": "New code",
+      "createTitle": "Create invitation code",
+      "editTitle": "Edit invitation code",
+      "emptyTitle": "No invitation codes",
+      "emptyDesc": "Create a code to grant promotional subscription access",
+      "codeCol": "Code",
+      "nameCol": "Name",
+      "durationCol": "Duration",
+      "activeCol": "Active",
+      "startsCol": "Starts at",
+      "expiresCol": "Expires at",
+      "usageCol": "Usage count",
+      "remainingCol": "Remaining",
+      "actionsCol": "Actions",
+      "daysUnit": "days",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "statusExpired": "Expired",
+      "filterAll": "All",
+      "filterActive": "Active",
+      "filterInactive": "Inactive",
+      "filterExpired": "Expired",
+      "enable": "Enable",
+      "disable": "Disable",
+      "enabled": "Code enabled",
+      "disabled": "Code disabled",
+      "fieldCode": "Code",
+      "fieldName": "Name",
+      "fieldDescription": "Description",
+      "fieldDurationDays": "Duration (days)",
+      "fieldMaxRedemptions": "Max redemptions",
+      "fieldPerCompanyLimit": "Per company limit",
+      "fieldStartsAt": "Start date",
+      "fieldExpiresAt": "End date",
+      "fieldActive": "Active",
+      "unlimited": "Unlimited",
+      "created": "Invitation code created",
+      "updated": "Invitation code updated",
+      "deleted": "Invitation code deleted",
+      "saveFailed": "Could not save invitation code",
+      "deleteFailed": "Could not delete invitation code",
+      "deleteTitle": "Delete invitation code?",
+      "deleteDesc": "This cannot be undone. Existing redemptions will block deletion.",
+      "deleteConfirm": "Delete",
+      "cancel": "Cancel",
+      "save": "Save",
+      "retry": "Retry",
+      "pagePrev": "Previous",
+      "pageNext": "Next",
+      "pageLabel": "Page",
+      "validationCode": "Code is required",
+      "validationName": "Name is required",
+      "validationDuration": "Duration must be at least 1 day",
       "validationPerCompany": "Per company limit must be at least 1",
       "validationDates": "End date must be after start date"
     },
@@ -1383,5 +1542,100 @@
   "errors": {
     "unexpected": "An unexpected error occurred",
     "tryAgain": "Please try again"
+  },
+  "staticPages": {
+    "contact": {
+      "title": "Contact us",
+      "updated": "Last updated: June 2026",
+      "intro": "Questions about Sanadat, billing, or your account? Reach our team using the details below.",
+      "emailLabel": "Email",
+      "emailValue": "tech@commergio.com",
+      "phoneLabel": "WhatsApp",
+      "phoneValue": "+966 56 739 5986",
+      "hoursLabel": "Business hours",
+      "hoursValue": "Sunday – Thursday · 9am – 6pm (Riyadh time)",
+      "supportTitle": "Existing customers",
+      "supportBody": "Signed-in users can open a support ticket from Dashboard → Support for faster help with documents, billing, or team access."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "updated": "Last updated: June 2026",
+      "sections": {
+        "intro": {
+          "title": "Overview",
+          "body": "Sanadat (“we”, “our”) provides a document management platform for Saudi businesses. This policy explains what personal data we collect, how we use it, and your rights."
+        },
+        "dataCollected": {
+          "title": "Data we collect",
+          "body": "Account data: name, email, phone, company name.\nBusiness documents: receipt vouchers, payment vouchers, invoices, customer records, approval signatures.\nBilling: subscription status, payment references from Moyasar (we do not store full card numbers).\nTechnical: IP address, browser type, and usage logs for security and support."
+        },
+        "usage": {
+          "title": "How we use data",
+          "body": "We use your data to provide the service, issue and store documents, process subscriptions, send transactional emails (confirmation, password reset), improve security, and respond to support requests."
+        },
+        "sharing": {
+          "title": "Sharing",
+          "body": "We do not sell personal data. We share data only with infrastructure providers required to run Sanadat (hosting, database, email, payment gateway) under appropriate agreements, or when required by Saudi law."
+        },
+        "retention": {
+          "title": "Retention",
+          "body": "We retain account and document data while your subscription is active and as needed for legal, tax, or dispute resolution purposes. You may request deletion subject to applicable retention obligations."
+        },
+        "security": {
+          "title": "Security",
+          "body": "We use encryption in transit, tenant isolation, role-based access, and signed URLs for private files such as customer signatures. Access to production systems is restricted to authorized personnel."
+        },
+        "rights": {
+          "title": "Your rights",
+          "body": "You may access, correct, or request deletion of your personal data by contacting us. Saudi users may exercise rights under applicable personal data protection regulations."
+        },
+        "contact": {
+          "title": "Contact",
+          "body": "Privacy questions: tech@commergio.com"
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "updated": "Last updated: June 2026",
+      "sections": {
+        "intro": {
+          "title": "Agreement",
+          "body": "By creating an account or using Sanadat you agree to these Terms. If you do not agree, do not use the service."
+        },
+        "service": {
+          "title": "The service",
+          "body": "Sanadat helps businesses create, number, print, and share receipt vouchers, payment vouchers, and non-tax invoices. Features may change; we will notify users of material changes when practical."
+        },
+        "accounts": {
+          "title": "Accounts",
+          "body": "You are responsible for accurate registration information, safeguarding credentials, and all activity under your account. Team members access data according to roles assigned by the account owner."
+        },
+        "documents": {
+          "title": "Documents & approvals",
+          "body": "Documents created in Sanadat are intended as business records. Customer approval links and signatures are provided as a workflow aid; you remain responsible for the accuracy of document content and lawful use of customer data."
+        },
+        "billing": {
+          "title": "Subscription & billing",
+          "body": "Paid plans are billed annually in SAR via Moyasar unless otherwise stated. Fees are non-refundable except where required by law. Failure to pay may suspend access."
+        },
+        "acceptableUse": {
+          "title": "Acceptable use",
+          "body": "You may not use Sanadat for unlawful activity, fraud, harassment, malware, or attempts to bypass security or access other tenants’ data."
+        },
+        "liability": {
+          "title": "Limitation of liability",
+          "body": "Sanadat is provided “as is” to the maximum extent permitted by law. We are not liable for indirect or consequential damages arising from use of the platform."
+        },
+        "changes": {
+          "title": "Changes",
+          "body": "We may update these Terms. Continued use after changes constitutes acceptance. Material changes will be communicated via the app or email."
+        },
+        "contact": {
+          "title": "Contact",
+          "body": "Legal inquiries: tech@commergio.com"
+        }
+      }
+    }
   }
 }

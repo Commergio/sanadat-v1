@@ -17,6 +17,7 @@ import {
 import { buildAuthCallbackUrl } from "@/lib/auth/callback-url";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { Locale } from "@/i18n/routing";
+import { PENDING_INVITATION_CODE_KEY } from "@/hooks/use-invitation-codes";
 
 export function RegisterForm() {
   const t = useTranslations("auth");
@@ -56,6 +57,11 @@ export function RegisterForm() {
       });
 
       if (error) throw error;
+
+      const invitationCode = data.invitationCode?.trim().toUpperCase();
+      if (invitationCode) {
+        window.localStorage.setItem(PENDING_INVITATION_CODE_KEY, invitationCode);
+      }
 
       if (signUpData.session) {
         toast.success(t("registerSuccess"));
@@ -119,6 +125,21 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="invitationCode">{t("invitationCode")}</Label>
+        <Input
+          id="invitationCode"
+          dir="ltr"
+          className="font-mono uppercase text-start"
+          placeholder={t("invitationCodePlaceholder")}
+          disabled={loading}
+          {...register("invitationCode")}
+        />
+        {errors.invitationCode && (
+          <p className="text-xs text-destructive">{errors.invitationCode.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="password">{t("password")}</Label>
         <Input
           id="password"
@@ -154,7 +175,16 @@ export function RegisterForm() {
         {loading ? t("creating") : t("createAccount")}
       </Button>
 
-      <p className="text-center text-xs text-muted-foreground">{t("terms")}</p>
+      <p className="text-center text-xs text-muted-foreground">
+        {t("termsPrefix")}{" "}
+        <Link href="/terms" className="text-primary hover:underline">
+          {t("termsLink")}
+        </Link>{" "}
+        {t("termsAnd")}{" "}
+        <Link href="/privacy" className="text-primary hover:underline">
+          {t("privacyLink")}
+        </Link>
+      </p>
 
       <p className="text-center text-sm text-muted-foreground">
         {t("hasAccount")}{" "}

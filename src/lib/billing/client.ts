@@ -1,9 +1,10 @@
-import type { BillingCycle, PaymentGateway, PaymentStatus, SubscriptionStatus } from "@/lib/types";
+import type { BillingCycle, PaymentGateway, PaymentStatus, SubscriptionSource, SubscriptionStatus } from "@/lib/types";
 
 export interface BillingSubscriptionApi {
   id: string;
   companyId: string;
   status: SubscriptionStatus;
+  subscriptionSource: SubscriptionSource;
   amount: number;
   currency: string;
   planCode: string;

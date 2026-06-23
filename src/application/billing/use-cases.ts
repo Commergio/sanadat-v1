@@ -1,4 +1,4 @@
-import { isServiceRoleConfigured, validateMoyasarSandboxEnv } from "@/lib/env";
+import { isServiceRoleConfigured, validateMoyasarPaymentsEnv } from "@/lib/env";
 import { MoyasarGatewayError } from "@/infrastructure/billing/gateways/moyasar.errors";
 import type { TenantContext } from "@/lib/tenant";
 import { RepositoryError } from "@/application/shared/errors";
@@ -96,7 +96,7 @@ export function buildBillingUseCases(deps: BillingUseCaseDeps) {
       }
 
       if (parsed.data.gateway === "moyasar") {
-        const moyasarEnv = validateMoyasarSandboxEnv();
+        const moyasarEnv = validateMoyasarPaymentsEnv();
         if (!moyasarEnv.ok) {
           throw new UseCaseError("NOT_IMPLEMENTED", moyasarEnv.message ?? "Moyasar is not configured");
         }

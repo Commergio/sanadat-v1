@@ -2,10 +2,13 @@ import type { BillingCycle, PaymentGateway, PaymentStatus, SubscriptionStatus } 
 
 export type BillingGateway = "moyasar" | "hyperpay" | "stcpay" | "manual";
 
+export type SubscriptionSource = "trial" | "paid" | "promo" | "admin_grant";
+
 export interface SubscriptionModel {
   id: string;
   companyId: string;
   status: SubscriptionStatus;
+  subscriptionSource: SubscriptionSource;
   amount: number;
   currency: string;
   planCode: string;

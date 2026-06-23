@@ -8,6 +8,7 @@ import {
 } from "@/infrastructure/supabase/repositories";
 import { InvoiceApprovalRepository } from "@/infrastructure/supabase/repositories/documents/invoice-approval.repository";
 import { uploadInvoiceApprovalSignature } from "@/lib/storage/customer-signature";
+import { createTrialDocumentGuard } from "@/application/billing/trial-document-guard";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 export function buildInvoiceApp(supabase: SupabaseClient) {
@@ -15,10 +16,12 @@ export function buildInvoiceApp(supabase: SupabaseClient) {
   const activityLog = new ActivityLogRepository(supabase);
   const customerRepository = new CustomerRepository(supabase);
   const approvalRepository = new InvoiceApprovalRepository(supabase);
+  const trialGuard = createTrialDocumentGuard(supabase);
 
   const invoiceUseCases = buildInvoiceUseCases({
     repository,
     activityLog,
+    trialGuard,
   });
 
   const approvalUseCases = buildInvoiceApprovalUseCases({

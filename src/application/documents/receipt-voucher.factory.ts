@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildReceiptVoucherUseCases } from "@/application/documents";
 import { buildReceiptApprovalUseCases } from "@/application/documents/receipt-approval.use-cases";
+import { createTrialDocumentGuard } from "@/application/billing/trial-document-guard";
 import {
   ActivityLogRepository,
   CustomerRepository,
@@ -16,9 +17,12 @@ export function buildReceiptVoucherApp(supabase: SupabaseClient) {
   const customerRepository = new CustomerRepository(supabase);
   const approvalRepository = new ReceiptApprovalRepository(supabase);
 
+  const trialGuard = createTrialDocumentGuard(supabase);
+
   const receiptUseCases = buildReceiptVoucherUseCases({
     repository,
     activityLog,
+    trialGuard,
   });
 
   const approvalUseCases = buildReceiptApprovalUseCases({

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
+import { SUPPORT_WHATSAPP_E164 } from "@/lib/constants";
 export async function MarketingFooter() {
   const t = await getTranslations("footer");
   const tApp = await getTranslations("app");
@@ -22,8 +23,9 @@ export async function MarketingFooter() {
   ];
 
   const legalLinks = [
-    { href: "#faq", label: t("privacy") },
-    { href: "#pricing", label: t("terms") },
+    { href: "/privacy", label: t("privacy") },
+    { href: "/terms", label: t("terms") },
+    { href: "/contact", label: t("contact") },
   ];
 
   return (
@@ -85,12 +87,12 @@ export async function MarketingFooter() {
               <ul className="space-y-3">
                 {legalLinks.map((link) => (
                   <li key={link.label}>
-                    <a
+                    <Link
                       href={link.href}
                       className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -111,7 +113,9 @@ export async function MarketingFooter() {
               </li>
               <li>
                 <a
-                  href={`tel:${t("contactPhone").replace(/\s/g, "")}`}
+                  href={`https://wa.me/${SUPPORT_WHATSAPP_E164}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-start gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -134,9 +138,9 @@ export async function MarketingFooter() {
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-xs text-muted-foreground">
             {legalLinks.map((link) => (
-              <a key={link.label} href={link.href} className="hover:text-foreground transition-colors">
+              <Link key={link.label} href={link.href} className="hover:text-foreground transition-colors">
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>

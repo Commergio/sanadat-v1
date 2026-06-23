@@ -18,8 +18,9 @@ Set these in **Vercel → Project → Settings → Environment Variables**:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Server only — billing checkout & webhooks |
 | `NEXT_PUBLIC_APP_URL` | ✅ Production | `https://sanadat-v1-go457cy2u-commergios-projects.vercel.app` |
-| `MOYASAR_SECRET_KEY` | Billing | `sk_test_...` (sandbox) |
-| `MOYASAR_PUBLIC_KEY` | Billing | `pk_test_...` (sandbox) |
+| `PAYMENTS_MODE` | Billing | `sandbox` (default) or `live` |
+| `MOYASAR_SECRET_KEY` | Billing | `sk_test_...` (sandbox) or `sk_live_...` (when `PAYMENTS_MODE=live`) |
+| `MOYASAR_PUBLIC_KEY` | Billing | `pk_test_...` or `pk_live_...` — must match secret key type |
 | `MOYASAR_WEBHOOK_SECRET` | Billing | Same secret as Moyasar Dashboard webhook |
 | `BILLING_MANUAL_WEBHOOK_SECRET` | Optional | Manual webhook testing only |
 

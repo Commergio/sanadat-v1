@@ -8,11 +8,13 @@ import type { ReceiptRepositoryPort } from "./repository-ports";
 import { assertCanCreateOrCancel, assertCanRead } from "./authorization";
 import { receiptVoucherInputSchema } from "./schemas";
 import { UseCaseError } from "@/application/shared/use-case-error";
+import type { TrialDocumentGuard } from "@/application/billing/trial-document-guard";
 import type { ActivityLogPort } from "./activity-log.port";
 
 interface ReceiptVoucherUseCaseDeps {
   repository: ReceiptRepositoryPort;
   activityLog: ActivityLogPort;
+  trialGuard: TrialDocumentGuard;
 }
 
 export function buildReceiptVoucherUseCases(deps: ReceiptVoucherUseCaseDeps) {
@@ -22,6 +24,7 @@ export function buildReceiptVoucherUseCases(deps: ReceiptVoucherUseCaseDeps) {
       input: CreateReceiptInput
     ): Promise<ReceiptVoucher> {
       assertCanCreateOrCancel(ctx);
+      await deps.trialGuard.assertCanCreate(ctx);
       const parsed = receiptVoucherInputSchema.safeParse(input);
       if (!parsed.success) {
         throw new UseCaseError("VALIDATION", "Invalid receipt voucher input", parsed.error.flatten());

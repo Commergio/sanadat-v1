@@ -35,6 +35,7 @@ export function SubscriptionWidget() {
   const days = daysUntil(expiresAtValue);
   const progress = Math.max(0, Math.min(100, ((365 - days) / 365) * 100));
   const isActive = status === "active";
+  const isPromo = subscription?.subscriptionSource === "promo" && isActive;
   const price = subscription && subscription.amount > 0 ? subscription.amount : SUBSCRIPTION_PRICE;
   const statusLabel =
     status === "active"
@@ -61,6 +62,9 @@ export function SubscriptionWidget() {
               {ts("subscription")}
             </p>
             <p className="mt-0.5 text-lg font-semibold tracking-tight">{statusLabel}</p>
+            {isPromo ? (
+              <p className="mt-0.5 text-xs font-medium text-primary">{t("promoAccess")}</p>
+            ) : null}
             <p className="mt-1 text-xs text-muted-foreground">
               {ts("expiresIn", { days })}{" "}
               <span className="text-foreground/80">· {formatDate(expiresAtValue, locale)}</span>

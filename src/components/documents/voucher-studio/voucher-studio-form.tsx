@@ -30,6 +30,7 @@ export function VoucherStudioForm() {
     fieldValid,
     paymentMethod,
     loading,
+    trialCreateBlocked,
   } = useVoucherStudio();
 
   const { labels, theme } = config;
@@ -210,7 +211,7 @@ export function VoucherStudioForm() {
         </div>
 
         <div className="flex gap-3 pb-4 lg:hidden">
-          <Button type="submit" className="flex-1" disabled={loading}>
+          <Button type="submit" className="flex-1" disabled={loading || trialCreateBlocked}>
             {loading ? t("creating") : t("save")}
           </Button>
           <Button type="button" variant="outline" onClick={() => router.back()}>

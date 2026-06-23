@@ -13,6 +13,21 @@ import {
 import { validateBillingCoupon, type CouponValidateResponse } from "@/hooks/use-coupons";
 import { useCompany } from "@/hooks/use-company";
 
+export interface ManualPaymentRequestApi {
+  id: string;
+  companyId: string;
+  subscriptionId: string | null;
+  amount: number;
+  currency: string;
+  planCode: string;
+  billingCycle: "yearly";
+  status: "pending" | "approved" | "rejected";
+  adminNote: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export function useBilling() {
   const { tenantRole } = useCompany();
   const [subscription, setSubscription] = useState<BillingSubscriptionApi | null>(null);
@@ -26,6 +41,9 @@ export function useBilling() {
   const [appliedCoupon, setAppliedCoupon] = useState<CouponValidateResponse | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [pendingManualRequest, setPendingManualRequest] = useState<ManualPaymentRequestApi | null>(
+    null
+  );
 
   const canManage =
     tenantRole != null && hasMinimumTenantRole(tenantRole as TenantRole, "admin");
@@ -34,13 +52,15 @@ export function useBilling() {
     setLoading(true);
     setLoadError(null);
     try {
-      const [subRes, payRes] = await Promise.all([
+      const [subRes, payRes, manualRes] = await Promise.all([
         fetch("/api/billing/subscription", { cache: "no-store" }),
         fetch("/api/billing/payments", { cache: "no-store" }),
+        fetch("/api/billing/manual-payment", { cache: "no-store" }),
       ]);
 
       const subPayload = await subRes.json();
       const payPayload = await payRes.json();
+      const manualPayload = await manualRes.json();
 
       if (!subRes.ok) {
         setLoadError(mapBillingError(subPayload, "Failed to load subscription"));
@@ -56,10 +76,19 @@ export function useBilling() {
         const rawItems = (payPayload.items ?? []) as Record<string, unknown>[];
         setPayments(rawItems.map(mapPaymentFromApi));
       }
+
+      if (!manualRes.ok) {
+        setPendingManualRequest(null);
+      } else {
+        setPendingManualRequest(
+          (manualPayload.request as ManualPaymentRequestApi | null) ?? null
+        );
+      }
     } catch {
       setLoadError({ code: "INTERNAL", message: "Failed to load billing data" });
       setSubscription(null);
       setPayments([]);
+      setPendingManualRequest(null);
     } finally {
       setLoading(false);
     }
@@ -187,5 +216,6 @@ export function useBilling() {
     latestPayment,
     latestPendingPayment,
     latestFailedPayment,
+    pendingManualRequest,
   };
 }

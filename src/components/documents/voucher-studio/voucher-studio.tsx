@@ -30,6 +30,14 @@ import {
 import { isRtlLocale } from "@/i18n/routing";
 import type { PaymentMethod } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import {
+  TrialDocumentCreateNotice,
+  useTrialCreateBlocked,
+} from "@/components/dashboard/trial-usage-widget";
+import {
+  mapDocumentCreateError,
+  shouldRedirectToSubscription,
+} from "@/lib/documents/create-errors";
 
 const defaultFormValues: Partial<VoucherStudioFormData> = {
   date: new Date().toISOString().split("T")[0],
@@ -56,6 +64,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
   const [loading, setLoading] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<StudioViewMode>("edit");
+  const { blocked: trialCreateBlocked } = useTrialCreateBlocked();
 
   const { number, displayNumber, displayNumberEn } = useMemo(
     () => config.getNextNumber(),
@@ -148,16 +157,11 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           const payload = await response.json();
           if (!response.ok) {
             const code = payload?.error?.code as string | undefined;
-            const message = code === "VALIDATION"
-              ? "Validation error: please check required fields and amount."
-              : code === "FORBIDDEN"
-                ? `You do not have permission to create ${config.type === "receipt_voucher" ? "receipts" : "payment vouchers"}.`
-                : code === "NOT_FOUND"
-                  ? "Tenant context not found. Please refresh and try again."
-                  : code === "CONFLICT"
-                    ? "Document number conflict. Please retry."
-                    : payload?.error?.message || "Supabase/RLS error while creating document.";
+            const message = mapDocumentCreateError(code, t, payload?.error?.message);
             toast.error(message);
+            if (shouldRedirectToSubscription(code)) {
+              router.push("/dashboard/subscription");
+            }
             return;
           }
           clearDraft(config.draftStorageKey);
@@ -180,7 +184,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
         setLoading(false);
       }
     },
-    [router, t, config.draftStorageKey, config.redirectPath]
+    [router, t, config.draftStorageKey, config.redirectPath, config.type]
   );
 
   const BackChevron = isRtl ? ChevronRight : ArrowRight;
@@ -200,6 +204,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
       fieldValid,
       paymentMethod,
       loading,
+      trialCreateBlocked,
       viewMode,
       setViewMode,
     }),
@@ -217,6 +222,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
       fieldValid,
       paymentMethod,
       loading,
+      trialCreateBlocked,
       viewMode,
     ]
   );
@@ -266,6 +272,7 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
           amountLabel={amountLabel}
           documentTitle={t(labels.documentTitle)}
           saving={loading}
+          saveDisabled={trialCreateBlocked}
           onSave={handleSubmit(onSubmit)}
           onCancel={() => router.back()}
           viewMode={viewMode}
@@ -289,6 +296,10 @@ export function VoucherStudio({ config }: VoucherStudioProps) {
             </span>
           }
         />
+
+        <div className="no-print border-b border-border/60 px-3 py-2 sm:px-4 lg:px-6">
+          <TrialDocumentCreateNotice />
+        </div>
 
         <div
           className={cn(

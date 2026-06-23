@@ -15,7 +15,7 @@ import type {
 import { RepositoryError } from "@/application/shared/errors";
 import { toRepositoryError } from "../shared/errors";
 import { toRpcRepositoryError } from "./rpc-errors";
-import type { PaymentGateway, PaymentStatus, PlatformRole, SubscriptionStatus } from "@/lib/types";
+import type { PaymentGateway, PaymentStatus, PlatformRole, SubscriptionSource, SubscriptionStatus } from "@/lib/types";
 
 type CompanyRow = Record<string, unknown>;
 type PaymentRow = Record<string, unknown>;
@@ -55,6 +55,7 @@ function mapCompanyRow(row: CompanyRow): CompanySubscriptionCurrentModel {
     companyCreatedAt: String(row.company_created_at),
     subscriptionId: row.subscription_id ? String(row.subscription_id) : null,
     subscriptionStatus: (row.subscription_status as SubscriptionStatus | null) ?? null,
+    subscriptionSource: (row.subscription_source as SubscriptionSource | null) ?? null,
     planCode: row.plan_code ? String(row.plan_code) : null,
     billingCycle: row.billing_cycle ? String(row.billing_cycle) : null,
     planAmount: row.plan_amount != null ? Number(row.plan_amount) : null,

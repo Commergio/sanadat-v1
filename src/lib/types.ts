@@ -57,10 +57,13 @@ export interface Company {
   updated_at: string;
 }
 
+export type SubscriptionSource = "trial" | "paid" | "promo" | "admin_grant";
+
 export interface Subscription {
   id: string;
   company_id: string;
   status: SubscriptionStatus;
+  subscription_source?: SubscriptionSource;
   amount: number;
   starts_at: string;
   expires_at: string;

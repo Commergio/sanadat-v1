@@ -64,15 +64,18 @@ Before creating a new Moyasar checkout, the server checks for an existing **pend
 
 ---
 
-## Environment safety (sandbox only)
+## Environment safety (sandbox & live)
 
-`validateMoyasarSandboxEnv()` rejects:
+`validateMoyasarPaymentsEnv()` enforces `PAYMENTS_MODE`:
 
-- Missing keys
-- Live keys (`sk_live_` / `pk_live_`)
-- Non-test key prefixes
+| Mode | Allowed keys |
+|------|----------------|
+| `sandbox` (default) | `sk_test_` + `pk_test_` |
+| `live` | `sk_live_` + `pk_live_` (requires explicit `PAYMENTS_MODE=live`) |
 
-Required: `sk_test_...`, `pk_test_...`, `MOYASAR_WEBHOOK_SECRET`.
+Rejects: missing keys, mixed test/live pairs, live keys without `PAYMENTS_MODE=live`.
+
+Required: matching Moyasar key pair + `MOYASAR_WEBHOOK_SECRET`.
 
 ---
 
@@ -84,7 +87,7 @@ Required: `sk_test_...`, `pk_test_...`, `MOYASAR_WEBHOOK_SECRET`.
 - [x] Failed webhook marks payment failed without activating subscription
 - [x] Webhook idempotency returns 200 on duplicates
 - [x] Payment history labels (AR): قيد الانتظار / مكتمل / فشل
-- [x] Sandbox key restriction enforced
+- [x] Moyasar key validation enforces `PAYMENTS_MODE` (sandbox vs live)
 - [x] `npm run build` passes
 
 ---

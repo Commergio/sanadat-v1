@@ -55,18 +55,30 @@ export function isManualWebhookConfigured(): boolean {
   return getManualWebhookSecret() !== null;
 }
 
-/** Moyasar sandbox secret key (`sk_test_...`) — server only. */
+/** Moyasar secret key (`sk_test_...` or `sk_live_...`) — server only. */
 export function getMoyasarSecretKey(): string | null {
   const key = readEnv(process.env.MOYASAR_SECRET_KEY);
   if (!key || PLACEHOLDER_VALUES.has(key)) return null;
   return key;
 }
 
-/** Moyasar sandbox publishable key (`pk_test_...`) — safe for client if needed later. */
+/** Moyasar publishable key (`pk_test_...` or `pk_live_...`) — safe for client if needed later. */
 export function getMoyasarPublicKey(): string | null {
   const key = readEnv(process.env.MOYASAR_PUBLIC_KEY);
   if (!key || PLACEHOLDER_VALUES.has(key)) return null;
   return key;
+}
+
+export type PaymentsMode = "sandbox" | "live";
+
+/**
+ * Moyasar payments environment. Defaults to `sandbox` when unset.
+ * Set `PAYMENTS_MODE=live` explicitly to allow `sk_live_` / `pk_live_` keys.
+ */
+export function getPaymentsMode(): PaymentsMode {
+  const raw = readEnv(process.env.PAYMENTS_MODE).toLowerCase();
+  if (raw === "live") return "live";
+  return "sandbox";
 }
 
 export interface MoyasarEnvValidation {
@@ -74,47 +86,117 @@ export interface MoyasarEnvValidation {
   message?: string;
 }
 
+type MoyasarKeyKind = "test" | "live" | "invalid";
+
+function classifyMoyasarKey(
+  key: string,
+  kind: "secret" | "public"
+): MoyasarKeyKind {
+  const testPrefix = kind === "secret" ? "sk_test_" : "pk_test_";
+  const livePrefix = kind === "secret" ? "sk_live_" : "pk_live_";
+  if (key.startsWith(testPrefix)) return "test";
+  if (key.startsWith(livePrefix)) return "live";
+  return "invalid";
+}
+
 /**
- * P2.5.1: only sandbox test keys are allowed.
- * Rejects missing, placeholder, and live (`sk_live_` / `pk_live_`) keys.
+ * Validates Moyasar keys against PAYMENTS_MODE (sandbox | live).
+ * Rejects missing keys, mixed test/live pairs, and live keys without PAYMENTS_MODE=live.
  */
-export function validateMoyasarSandboxEnv(): MoyasarEnvValidation {
+export function validateMoyasarPaymentsEnv(): MoyasarEnvValidation {
+  const mode = getPaymentsMode();
+  const modeRaw = readEnv(process.env.PAYMENTS_MODE);
+
+  if (modeRaw && modeRaw.toLowerCase() !== "sandbox" && modeRaw.toLowerCase() !== "live") {
+    return {
+      ok: false,
+      message: "PAYMENTS_MODE must be 'sandbox' or 'live'",
+    };
+  }
+
   const secret = getMoyasarSecretKey();
   const publicKey = getMoyasarPublicKey();
 
   if (!secret || !publicKey) {
     return {
       ok: false,
-      message: "MOYASAR_SECRET_KEY and MOYASAR_PUBLIC_KEY are required for Moyasar checkout",
+      message: `MOYASAR_SECRET_KEY and MOYASAR_PUBLIC_KEY are required (PAYMENTS_MODE=${mode})`,
     };
   }
 
-  if (secret.startsWith("sk_live_") || publicKey.startsWith("pk_live_")) {
+  const secretKind = classifyMoyasarKey(secret, "secret");
+  const publicKind = classifyMoyasarKey(publicKey, "public");
+
+  if (
+    (secretKind === "live" && publicKind === "test") ||
+    (secretKind === "test" && publicKind === "live")
+  ) {
     return {
       ok: false,
-      message: "Live Moyasar keys are not allowed — use sandbox test keys only (sk_test_ / pk_test_)",
+      message:
+        "Moyasar keys must match: cannot mix sk_live_ with pk_test_ or sk_test_ with pk_live_",
     };
   }
 
-  if (!secret.startsWith("sk_test_")) {
-    return {
-      ok: false,
-      message: "MOYASAR_SECRET_KEY must be a sandbox test key (sk_test_...)",
-    };
+  if (mode === "sandbox") {
+    if (secretKind !== "test") {
+      return {
+        ok: false,
+        message:
+          secretKind === "live"
+            ? "PAYMENTS_MODE=sandbox does not allow sk_live_ keys — set PAYMENTS_MODE=live for production Moyasar keys"
+            : "PAYMENTS_MODE=sandbox requires MOYASAR_SECRET_KEY to start with sk_test_",
+      };
+    }
+    if (publicKind !== "test") {
+      return {
+        ok: false,
+        message:
+          publicKind === "live"
+            ? "PAYMENTS_MODE=sandbox does not allow pk_live_ keys — set PAYMENTS_MODE=live for production Moyasar keys"
+            : "PAYMENTS_MODE=sandbox requires MOYASAR_PUBLIC_KEY to start with pk_test_",
+      };
+    }
+    return { ok: true };
   }
 
-  if (!publicKey.startsWith("pk_test_")) {
+  if (secretKind !== "live") {
     return {
       ok: false,
-      message: "MOYASAR_PUBLIC_KEY must be a sandbox test key (pk_test_...)",
+      message:
+        secretKind === "test"
+          ? "PAYMENTS_MODE=live requires MOYASAR_SECRET_KEY to start with sk_live_"
+          : "PAYMENTS_MODE=live requires MOYASAR_SECRET_KEY to start with sk_live_",
+    };
+  }
+  if (publicKind !== "live") {
+    return {
+      ok: false,
+      message:
+        publicKind === "test"
+          ? "PAYMENTS_MODE=live requires MOYASAR_PUBLIC_KEY to start with pk_live_"
+          : "PAYMENTS_MODE=live requires MOYASAR_PUBLIC_KEY to start with pk_live_",
     };
   }
 
   return { ok: true };
 }
 
+/** @deprecated Use validateMoyasarPaymentsEnv */
+export function validateMoyasarSandboxEnv(): MoyasarEnvValidation {
+  return validateMoyasarPaymentsEnv();
+}
+
+export function isMoyasarPaymentsConfigured(): boolean {
+  return validateMoyasarPaymentsEnv().ok;
+}
+
 export function isMoyasarSandboxConfigured(): boolean {
-  return validateMoyasarSandboxEnv().ok;
+  return getPaymentsMode() === "sandbox" && validateMoyasarPaymentsEnv().ok;
+}
+
+export function isMoyasarLiveConfigured(): boolean {
+  return getPaymentsMode() === "live" && validateMoyasarPaymentsEnv().ok;
 }
 
 /** Shared secret for Moyasar webhook `secret_token` / signature verification. */

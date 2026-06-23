@@ -6,6 +6,7 @@ import { DocumentsTimeline } from "@/components/dashboard/documents-timeline";
 import { FirstDocumentOnboarding } from "@/components/dashboard/first-document-onboarding";
 import { MonthlyActivity } from "@/components/dashboard/monthly-activity";
 import { SubscriptionCompact } from "@/components/dashboard/subscription-compact";
+import { TrialUsageWidget } from "@/components/dashboard/trial-usage-widget";
 import { AnnouncementBanners } from "@/components/dashboard/announcement-banners";
 import { SubscriptionAlert } from "@/components/dashboard/subscription-alert";
 import { EmptyState } from "@/components/dashboard/empty-state";
@@ -68,6 +69,7 @@ export function DashboardHome({ stats, loadError = false, loadErrorCode }: Dashb
         </div>
 
         <aside className="space-y-6">
+          <TrialUsageWidget />
           <MonthlyActivity compact data={stats.monthlyActivity} />
           <SubscriptionCompact />
         </aside>

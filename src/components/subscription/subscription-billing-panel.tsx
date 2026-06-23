@@ -14,9 +14,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { SUBSCRIPTION_PRICE } from "@/lib/constants";
 import { daysUntil } from "@/lib/utils";
+import { ManualBankTransferSection } from "@/components/subscription/manual-bank-transfer-section";
+import { InvitationCodeSection } from "@/components/subscription/invitation-code-section";
 import type { BillingPaymentApi, BillingSubscriptionApi } from "@/lib/billing/client";
-import type { PaymentStatus, SubscriptionStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import type { PaymentStatus, SubscriptionStatus } from "@/lib/types";
 
 function subscriptionBadgeVariant(
   status: SubscriptionStatus
@@ -69,6 +71,7 @@ export function SubscriptionBillingPanel() {
     refresh,
     latestPendingPayment,
     latestFailedPayment,
+    pendingManualRequest,
   } = useBilling();
 
   const checkoutReturn = searchParams.get("checkout");
@@ -134,6 +137,21 @@ export function SubscriptionBillingPanel() {
       refunded: t("paymentRefunded"),
     };
     return map[status] ?? status;
+  };
+
+  const gatewayLabel = (gateway: string) => {
+    if (gateway === "manual") return t("gatewayManual");
+    return gateway;
+  };
+
+  const subscriptionSourceLabel = (source: BillingSubscriptionApi["subscriptionSource"]) => {
+    const map: Record<BillingSubscriptionApi["subscriptionSource"], string> = {
+      trial: t("subscriptionSourceTrial"),
+      paid: t("subscriptionSourcePaid"),
+      promo: t("subscriptionSourcePromo"),
+      admin_grant: t("subscriptionSourceAdminGrant"),
+    };
+    return map[source] ?? source;
   };
 
   if (loading) {
@@ -225,9 +243,12 @@ export function SubscriptionBillingPanel() {
           subscription={subscription}
           locale={locale}
           statusLabel={statusLabel}
+          subscriptionSourceLabel={subscriptionSourceLabel}
           t={t}
         />
       )}
+
+      <InvitationCodeSection canManage={canManage} onApplied={refresh} />
 
       <Card>
         <CardHeader>
@@ -238,6 +259,8 @@ export function SubscriptionBillingPanel() {
             payments={payments}
             locale={locale}
             paymentStatusLabel={paymentStatusLabel}
+            gatewayLabel={gatewayLabel}
+            pendingManualReview={pendingManualRequest?.status === "pending"}
             emptyLabel={t("noPayments")}
             labels={{
               amount: t("colAmount"),
@@ -250,10 +273,18 @@ export function SubscriptionBillingPanel() {
               couponCode: t("colCouponCode"),
               discountAmount: t("colDiscountAmount"),
               finalAmount: t("colFinalAmount"),
+              manualReviewTitle: t("manualTransferPendingTitle"),
+              manualReviewHint: t("manualTransferPendingMessage"),
             }}
           />
         </CardContent>
       </Card>
+
+      <ManualBankTransferSection
+        canManage={canManage}
+        pendingRequest={pendingManualRequest}
+        onSubmitted={refresh}
+      />
 
       <Card>
         <CardHeader>
@@ -387,11 +418,13 @@ function SubscriptionDetailsCard({
   subscription,
   locale,
   statusLabel,
+  subscriptionSourceLabel,
   t,
 }: {
   subscription: BillingSubscriptionApi;
   locale: string;
   statusLabel: (s: SubscriptionStatus) => string;
+  subscriptionSourceLabel: (s: BillingSubscriptionApi["subscriptionSource"]) => string;
   t: ReturnType<typeof useTranslations<"subscription">>;
 }) {
   const days = daysUntil(subscription.expiresAt);
@@ -411,6 +444,10 @@ function SubscriptionDetailsCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
+        <DetailRow
+          label={t("subscriptionSource")}
+          value={subscriptionSourceLabel(subscription.subscriptionSource)}
+        />
         <DetailRow label={t("planCode")} value={subscription.planCode} />
         <DetailRow
           label={t("billingCycle")}
@@ -444,16 +481,20 @@ function PaymentHistoryTable({
   payments,
   locale,
   paymentStatusLabel,
+  gatewayLabel,
+  pendingManualReview,
   emptyLabel,
   labels,
 }: {
   payments: BillingPaymentApi[];
   locale: string;
   paymentStatusLabel: (s: PaymentStatus) => string;
+  gatewayLabel: (gateway: string) => string;
+  pendingManualReview?: boolean;
   emptyLabel: string;
   labels: Record<string, string>;
 }) {
-  if (payments.length === 0) {
+  if (payments.length === 0 && !pendingManualReview) {
     return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
   }
 
@@ -462,6 +503,16 @@ function PaymentHistoryTable({
   );
 
   return (
+    <>
+      {pendingManualReview && (
+        <div className="mb-4 rounded-lg border border-amber-200/80 bg-amber-50/90 p-3 text-sm dark:border-amber-900/60 dark:bg-amber-950/40">
+          <p className="font-medium text-amber-800 dark:text-amber-200">
+            {labels.manualReviewTitle}
+          </p>
+          <p className="mt-0.5 text-amber-700/90 dark:text-amber-400">{labels.manualReviewHint}</p>
+        </div>
+      )}
+      {payments.length === 0 ? null : (
     <>
       <div className="space-y-3 md:hidden">
         {payments.map((p) => (
@@ -479,7 +530,7 @@ function PaymentHistoryTable({
             </div>
             <div className="grid gap-1 text-xs text-muted-foreground">
               <p>
-                {labels.gateway}: {p.gateway}
+                {labels.gateway}: {gatewayLabel(p.gateway)}
               </p>
               {showCouponColumns && p.couponCode ? (
                 <p>
@@ -558,7 +609,7 @@ function PaymentHistoryTable({
                 </>
               ) : null}
               <td className="py-2.5 pe-3">{p.currency}</td>
-              <td className="py-2.5 pe-3">{p.gateway}</td>
+              <td className="py-2.5 pe-3">{gatewayLabel(p.gateway)}</td>
               <td className="py-2.5 pe-3">
                 <Badge variant={paymentBadgeVariant(p.status)} className="font-normal">
                   {paymentStatusLabel(p.status)}
@@ -580,6 +631,8 @@ function PaymentHistoryTable({
         </tbody>
       </table>
       </div>
+    </>
+      )}
     </>
   );
 }

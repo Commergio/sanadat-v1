@@ -14,6 +14,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createInvoiceSchema, type InvoiceInput } from "@/lib/validations";
 import { formatCurrency } from "@/lib/format";
 import { useCustomers, createCustomer } from "@/hooks/use-customers";
+import {
+  TrialDocumentCreateNotice,
+  useTrialCreateBlocked,
+} from "@/components/dashboard/trial-usage-widget";
+import {
+  mapDocumentCreateError,
+  shouldRedirectToSubscription,
+} from "@/lib/documents/create-errors";
 
 export function InvoiceForm() {
   const router = useRouter();
@@ -27,6 +35,7 @@ export function InvoiceForm() {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [creating, setCreating] = useState(false);
+  const { blocked: trialCreateBlocked } = useTrialCreateBlocked();
   const { customers, loading: customersLoading, refresh } = useCustomers(search);
 
   const schema = useMemo(() => createInvoiceSchema(tv), [tv]);
@@ -109,14 +118,11 @@ export function InvoiceForm() {
       const result = await response.json();
       if (!response.ok) {
         const code = result?.error?.code as string | undefined;
-        const message = code === "VALIDATION"
-          ? "Validation error: invoice must include valid items and totals."
-          : code === "FORBIDDEN"
-            ? "You do not have permission to create invoices."
-            : code === "NOT_FOUND"
-              ? "Tenant context not found. Please refresh and try again."
-              : result?.error?.message || "Supabase/RLS error while creating invoice.";
+        const message = mapDocumentCreateError(code, t, result?.error?.message);
         toast.error(message);
+        if (shouldRedirectToSubscription(code)) {
+          router.push("/dashboard/subscription");
+        }
         return;
       }
 
@@ -131,6 +137,8 @@ export function InvoiceForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-6">
+      <TrialDocumentCreateNotice />
+
       <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
         {t("invoiceApprovalNote")}
       </p>
@@ -290,7 +298,7 @@ export function InvoiceForm() {
       </Card>
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || trialCreateBlocked}>
           {loading ? t("creatingInvoice") : t("createInvoice")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>

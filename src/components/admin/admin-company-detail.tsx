@@ -42,7 +42,7 @@ export function AdminCompanyDetail({ companyId }: AdminCompanyDetailProps) {
   const t = useTranslations("admin");
   const locale = useLocale();
   const { canManage } = usePlatformSession();
-  const { company, payments, companyActions, loading, error, refresh } =
+  const { company, trialUsage, promoRedemptions, payments, companyActions, loading, error, refresh } =
     usePlatformCompany(companyId);
   const [busy, setBusy] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
@@ -199,6 +199,14 @@ export function AdminCompanyDetail({ companyId }: AdminCompanyDetailProps) {
             </dd>
           </div>
           <div>
+            <dt className="text-muted-foreground">{t("subscriptionSourceCol")}</dt>
+            <dd className="font-medium">
+              {company.subscriptionSource
+                ? t(`subscriptionSource_${company.subscriptionSource}`)
+                : "—"}
+            </dd>
+          </div>
+          <div>
             <dt className="text-muted-foreground">{t("planCode")}</dt>
             <dd className="font-medium">{company.planCode ?? "—"}</dd>
           </div>
@@ -240,6 +248,77 @@ export function AdminCompanyDetail({ companyId }: AdminCompanyDetailProps) {
           </p>
         ) : null}
       </div>
+
+      {company.subscriptionStatus === "trialing" && trialUsage ? (
+        <div className="dashboard-card p-5 space-y-3">
+          <p className="text-sm font-semibold">{t("trialUsageTitle")}</p>
+          <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+            <div>
+              <dt className="text-muted-foreground">{t("trialUsageTotal")}</dt>
+              <dd className="font-medium tabular-nums">
+                {formatNumber(trialUsage.totalDocuments, locale)} /{" "}
+                {formatNumber(trialUsage.trialLimit, locale)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">{t("trialUsageRemaining")}</dt>
+              <dd className="font-medium tabular-nums">
+                {formatNumber(trialUsage.remainingDocuments, locale)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">{t("trialUsageReceipts")}</dt>
+              <dd className="font-medium tabular-nums">
+                {formatNumber(trialUsage.receiptsCount, locale)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">{t("trialUsagePayments")}</dt>
+              <dd className="font-medium tabular-nums">
+                {formatNumber(trialUsage.paymentsCount, locale)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">{t("trialUsageInvoices")}</dt>
+              <dd className="font-medium tabular-nums">
+                {formatNumber(trialUsage.invoicesCount, locale)}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      ) : null}
+
+      {promoRedemptions && promoRedemptions.length > 0 ? (
+        <div className="dashboard-card p-5 space-y-3">
+          <p className="text-sm font-semibold">{t("promoRedemptionsTitle")}</p>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[32rem] text-sm">
+              <thead>
+                <tr className="border-b text-muted-foreground text-start">
+                  <th className="pb-2 pe-3 font-medium">{t("promoCodeCol")}</th>
+                  <th className="pb-2 pe-3 font-medium">{t("promoGrantedDaysCol")}</th>
+                  <th className="pb-2 pe-3 font-medium">{t("promoStartsCol")}</th>
+                  <th className="pb-2 font-medium">{t("promoExpiresCol")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {promoRedemptions.map((row) => (
+                  <tr key={row.id} className="border-b border-border/60 last:border-0">
+                    <td className="py-2 pe-3 font-mono text-xs" dir="ltr">
+                      {row.promoCode ?? "—"}
+                    </td>
+                    <td className="py-2 pe-3 tabular-nums">
+                      {formatNumber(row.grantedDays, locale)}
+                    </td>
+                    <td className="py-2 pe-3">{formatDate(row.startsAt, locale)}</td>
+                    <td className="py-2">{formatDate(row.expiresAt, locale)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
 
       <div className="dashboard-card p-5 space-y-4">
         <p className="text-sm font-semibold">{t("paymentsSummary")}</p>

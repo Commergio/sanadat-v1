@@ -35,6 +35,7 @@ export interface VoucherStudioContextValue {
   fieldValid: (name: keyof VoucherStudioFormData) => boolean;
   paymentMethod: PaymentMethod;
   loading: boolean;
+  trialCreateBlocked?: boolean;
   viewMode: StudioViewMode;
   setViewMode: (mode: StudioViewMode) => void;
 }

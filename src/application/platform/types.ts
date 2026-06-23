@@ -1,4 +1,4 @@
-import type { PaymentGateway, PaymentStatus, SubscriptionStatus } from "@/lib/types";
+import type { PaymentGateway, PaymentStatus, SubscriptionSource, SubscriptionStatus } from "@/lib/types";
 import type { PlatformRole } from "@/lib/types";
 
 export type CompanyAccountStatus = "active" | "suspended";
@@ -27,6 +27,7 @@ export interface CompanySubscriptionCurrentModel {
   companyCreatedAt: string;
   subscriptionId: string | null;
   subscriptionStatus: SubscriptionStatus | null;
+  subscriptionSource: SubscriptionSource | null;
   planCode: string | null;
   billingCycle: string | null;
   planAmount: number | null;

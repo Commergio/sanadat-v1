@@ -8,11 +8,13 @@ import type { InvoiceRepositoryPort } from "./repository-ports";
 import { assertCanCreateOrCancel, assertCanRead } from "./authorization";
 import { invoiceInputSchema } from "./schemas";
 import { UseCaseError } from "@/application/shared/use-case-error";
+import type { TrialDocumentGuard } from "@/application/billing/trial-document-guard";
 import type { ActivityLogPort } from "./activity-log.port";
 
 interface InvoiceUseCaseDeps {
   repository: InvoiceRepositoryPort;
   activityLog: ActivityLogPort;
+  trialGuard: TrialDocumentGuard;
 }
 
 export function buildInvoiceUseCases(deps: InvoiceUseCaseDeps) {
@@ -22,6 +24,7 @@ export function buildInvoiceUseCases(deps: InvoiceUseCaseDeps) {
       input: CreateInvoiceInput
     ): Promise<Invoice> {
       assertCanCreateOrCancel(ctx);
+      await deps.trialGuard.assertCanCreate(ctx);
       const parsed = invoiceInputSchema.safeParse(input);
       if (!parsed.success) {
         throw new UseCaseError("VALIDATION", "Invalid invoice input", parsed.error.flatten());

@@ -15,6 +15,7 @@ interface DocumentStudioToolbarProps {
   amountLabel: string;
   documentTitle?: string;
   saving?: boolean;
+  saveDisabled?: boolean;
   onSave: () => void;
   onCancel: () => void;
   viewMode?: StudioViewMode;
@@ -34,6 +35,7 @@ export function DocumentStudioToolbar({
   amountLabel,
   documentTitle,
   saving,
+  saveDisabled,
   onSave,
   onCancel,
   viewMode = "edit",
@@ -63,7 +65,7 @@ export function DocumentStudioToolbar({
       )}
     >
       <div className="hidden items-center gap-2 lg:flex">
-        <Button type="button" size="sm" className="gap-2" onClick={onSave} disabled={saving}>
+        <Button type="button" size="sm" className="gap-2" onClick={onSave} disabled={saving || saveDisabled}>
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {saving ? t("creating") : t("save")}
         </Button>

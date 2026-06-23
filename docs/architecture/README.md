@@ -13,7 +13,7 @@ Production architecture for a scalable, multi-tenant Saudi document SaaS.
 | [P2 billing data layer](./p2-billing-data-layer.md) | Implemented P2.1: subscription/payment schema, indexes, RLS |
 | [P2 billing checkout](./p2-billing-checkout.md) | Implemented P2.2: checkout use-cases, API, gateway adapter stub |
 | [P2 billing webhook](./p2-billing-webhook.md) | Implemented P2.3: manual webhook, subscription activation |
-| [P2.5.1 Moyasar sandbox](./p2-5-1-moyasar-sandbox.md) | Implemented: Moyasar invoice checkout (test keys) |
+| [P2.5.1 Moyasar checkout](./p2-5-1-moyasar-sandbox.md) | Implemented: Moyasar invoice checkout (`PAYMENTS_MODE` sandbox or live) |
 | [P2.5.2 Moyasar webhook](./p2-5-2-moyasar-webhook.md) | Implemented: Moyasar webhook → `processPaymentWebhook` |
 | [Platform admin blueprint](./platform-admin-phase-a-blueprint.md) | Phase A design: internal admin console |
 | [P A.1 platform admin data layer](./pA1-platform-admin-data-layer.md) | Implemented: account status, audit, view, RPCs, RLS (`012`–`014`) |
@@ -34,7 +34,7 @@ Production architecture for a scalable, multi-tenant Saudi document SaaS.
 | P2.1 billing data model | ✅ Migrations `010` — lifecycle fields, payment journal, RLS |
 | P2.2 billing checkout layer | ✅ Use-cases, API routes, gateway adapter port |
 | P2.3 billing webhook | ✅ Manual webhook route, activation, idempotency, activity logs |
-| P2.5.1 Moyasar sandbox checkout | ✅ Real Moyasar invoice sessions (`sk_test_` / `pk_test_` only) |
+| P2.5.1 Moyasar checkout | ✅ Moyasar invoice sessions — `PAYMENTS_MODE=sandbox` (`sk_test_`/`pk_test_`) or `live` (`sk_live_`/`pk_live_`) |
 | P2.5.2 Moyasar webhook | ✅ `POST /api/billing/webhook/moyasar` → subscription activation |
 | P A.1 platform admin data layer | ✅ Migrations `012`–`014` — account status, audit, view, RPCs |
 | P A.2 platform admin APIs | ✅ `/api/platform/*` — dashboard, companies, subscriptions, payments, actions |

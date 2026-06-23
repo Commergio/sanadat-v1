@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import {
+  Building2,
   LayoutDashboard,
   Users,
   CreditCard,
@@ -12,6 +13,7 @@ import {
   LifeBuoy,
   X,
   TicketPercent,
+  Gift,
   UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,7 +27,9 @@ const navItems = [
   { href: "/admin/clients", labelKey: "clients", icon: Users },
   { href: "/admin/subscriptions", labelKey: "subscriptions", icon: CreditCard },
   { href: "/admin/payments", labelKey: "payments", icon: Wallet },
+  { href: "/admin/manual-payments", labelKey: "manualPaymentsNav", icon: Building2 },
   { href: "/admin/coupons", labelKey: "couponsNav", icon: TicketPercent },
+  { href: "/admin/invitation-codes", labelKey: "invitationCodesNav", icon: Gift },
   { href: "/admin/staff", labelKey: "staffNav", icon: UserCog },
   { href: "/admin/actions", labelKey: "actionsNav", icon: ScrollText },
   { href: "/admin/announcements", labelKey: "announcementsNav", icon: Megaphone },

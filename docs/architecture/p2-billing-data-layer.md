@@ -58,7 +58,7 @@ stateDiagram-v2
 
 | Status | Meaning | Typical `expires_at` |
 |--------|---------|----------------------|
-| `trialing` | New company trial (14 days on signup) | Trial end |
+| `trialing` | New company trial (14 days on signup); **max 5 documents total** (receipts + payments + invoices, all statuses count) | Trial end |
 | `active` | Paid / entitled period | Current period end |
 | `expired` | No entitlement | Past |
 | `suspended` | Blocked by platform (abuse, non-payment policy) | — |
@@ -70,6 +70,7 @@ stateDiagram-v2
 2. **`next_renewal_at`** aligns with `expires_at` for yearly plans unless gateway schedules differ.
 3. **`cancel_at_period_end = true`** keeps `status = active` until `expires_at`, then move to `expired` or `cancelled` via backend job/RPC (P2.2+).
 4. **Activation** (`trialing` → `active`, extend `expires_at`) must **not** be done by the Supabase client — only service role or `SECURITY DEFINER` RPC/webhook handler.
+5. **Trial document cap:** While `status = trialing`, tenant may create at most **5** combined documents (`TRIAL_DOCUMENT_LIMIT`). Enforced server-side in document use cases; `GET /api/billing/trial-usage` exposes remaining count. Active subscription removes the cap.
 
 ---
 
@@ -138,6 +139,42 @@ Signup still creates trial subscriptions via `handle_new_user()` (`SECURITY DEFI
 | 006 / 010 | Signup trial + plan fields |
 | 010 | **P2.1** full hardening |
 | 017 | **P2.6.1** discount coupons + redemptions — see [p2-6-1-discount-coupons.md](./p2-6-1-discount-coupons.md) |
+| 029 | **P2.8** invitation promo codes + `subscription_source` — see below |
+
+---
+
+## Invitation promo codes (P2.8)
+
+**Migration:** `supabase/migrations/029_p28_invitation_promo_codes.sql`
+
+### Discount coupon vs invitation code
+
+| | Discount coupon | Invitation promo code |
+|---|-----------------|----------------------|
+| Purpose | Reduce Moyasar checkout amount | Grant free `active` access for N days |
+| Payment row | Yes (on successful checkout) | **No** |
+| `subscription_source` | Becomes `paid` after payment | `promo` |
+| Tables | `discount_coupons`, `coupon_redemptions` | `invitation_promo_codes`, `invitation_promo_redemptions` |
+
+### `subscription_source` on `subscriptions`
+
+| Value | Meaning |
+|-------|---------|
+| `trial` | Default signup trial |
+| `paid` | Moyasar or manual bank transfer |
+| `promo` | Invitation code redemption |
+| `admin_grant` | Reserved for platform manual grants |
+
+### Promo activation behavior
+
+- `status = active`, `plan_code = sanadat_annual`, `billing_cycle = yearly`
+- `starts_at` = now (or unchanged if extending from future `expires_at`)
+- `expires_at` = `starts_at + duration_days`
+- `next_renewal_at` = `expires_at`, `auto_renew = false`
+
+### Expiry
+
+No new cron in P2.8. Existing subscription guards treat expired promo like any expired subscription. User must pay (Moyasar or manual transfer) to regain access.
 
 ---
 

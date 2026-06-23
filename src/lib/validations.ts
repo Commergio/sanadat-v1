@@ -18,6 +18,7 @@ export const createRegisterSchema = (t: T) =>
         .regex(/^05\d{8}$/, t("phoneInvalid")),
       password: z.string().min(8, t("passwordMin8")),
       confirmPassword: z.string(),
+      invitationCode: z.string().optional(),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: t("passwordMismatch"),

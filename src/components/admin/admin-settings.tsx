@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { AdminReadOnlyHint } from "@/components/admin/admin-read-only-hint";
-import { Input } from "@/components/ui/input";
+import { SUPPORT_EMAIL, SUPPORT_WHATSAPP_E164 } from "@/lib/constants";
 import { Label } from "@/components/ui/label";
 
 export function AdminSettingsContent() {
@@ -25,7 +25,7 @@ export function AdminSettingsContent() {
           <div className="space-y-2">
             <Label>{t("supportEmail")}</Label>
             <Input
-              defaultValue="support@sanadat.sa"
+              defaultValue={SUPPORT_EMAIL}
               dir="ltr"
               className="text-start"
               readOnly
@@ -35,7 +35,7 @@ export function AdminSettingsContent() {
           <div className="space-y-2">
             <Label>{t("supportPhone")}</Label>
             <Input
-              defaultValue="966500000000"
+              defaultValue={SUPPORT_WHATSAPP_E164}
               dir="ltr"
               className="text-start font-mono"
               readOnly

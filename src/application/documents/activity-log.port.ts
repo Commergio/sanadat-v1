@@ -22,7 +22,10 @@ export type DocumentActivityAction =
   | "team.invite_revoked"
   | "billing.payment_completed"
   | "billing.payment_failed"
-  | "coupon.applied";
+  | "billing.manual_payment_approved"
+  | "billing.manual_payment_rejected"
+  | "coupon.applied"
+  | "promo_code.applied";
 
 export interface ActivityLogPort {
   log(

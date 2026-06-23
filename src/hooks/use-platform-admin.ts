@@ -152,6 +152,10 @@ function filterActionsForCompany(
 
 export function usePlatformCompany(companyId: string) {
   const [company, setCompany] = useState<CompanySubscriptionCurrentModel | null>(null);
+  const [trialUsage, setTrialUsage] = useState<PlatformCompanyResponse["trialUsage"]>(null);
+  const [promoRedemptions, setPromoRedemptions] = useState<
+    PlatformCompanyResponse["promoRedemptions"]
+  >([]);
   const [payments, setPayments] = useState<PlatformPaymentModel[]>([]);
   const [companyActions, setCompanyActions] = useState<PlatformAdminActionModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -175,6 +179,8 @@ export function usePlatformCompany(companyId: string) {
         ),
       ]);
       setCompany(companyRes.company);
+      setTrialUsage(companyRes.trialUsage ?? null);
+      setPromoRedemptions(companyRes.promoRedemptions ?? []);
       setPayments(paymentsRes.items);
       setCompanyActions(
         filterActionsForCompany(actionsRes.items, companyId).slice(0, 10)
@@ -182,6 +188,8 @@ export function usePlatformCompany(companyId: string) {
     } catch (err) {
       setError(err as PlatformApiError);
       setCompany(null);
+      setTrialUsage(null);
+      setPromoRedemptions([]);
       setPayments([]);
       setCompanyActions([]);
     } finally {
@@ -193,7 +201,7 @@ export function usePlatformCompany(companyId: string) {
     void refresh();
   }, [refresh]);
 
-  return { company, payments, companyActions, loading, error, refresh };
+  return { company, trialUsage, promoRedemptions, payments, companyActions, loading, error, refresh };
 }
 
 export async function setPlatformCompanyStatus(

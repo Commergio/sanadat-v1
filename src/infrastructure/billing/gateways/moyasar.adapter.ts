@@ -1,4 +1,4 @@
-import { getAppUrl, getMoyasarSecretKey } from "@/lib/env";
+import { getAppUrl, getMoyasarSecretKey, validateMoyasarPaymentsEnv } from "@/lib/env";
 import { routing } from "@/i18n/routing";
 import {
   extractMoyasarValidationDetails,
@@ -67,13 +67,20 @@ interface MoyasarInvoiceResponse {
 }
 
 /**
- * Moyasar sandbox checkout via hosted invoice page.
+ * Moyasar checkout via hosted invoice page (sandbox or live per PAYMENTS_MODE).
  * POST /v1/invoices — amount, currency, description, success_url, back_url.
  */
 export class MoyasarCheckoutGateway implements CheckoutGatewayPort {
   async createCheckoutSession(
     input: CreateCheckoutSessionInput
   ): Promise<CheckoutSessionResult> {
+    const moyasarEnv = validateMoyasarPaymentsEnv();
+    if (!moyasarEnv.ok) {
+      throw new MoyasarGatewayError(
+        moyasarEnv.message ?? "Moyasar payments environment is not configured"
+      );
+    }
+
     const secretKey = getMoyasarSecretKey();
     if (!secretKey) {
       throw new MoyasarGatewayError("Moyasar secret key is not configured");

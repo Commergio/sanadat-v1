@@ -176,8 +176,8 @@
     "aboutUs": "من نحن",
     "privacy": "سياسة الخصوصية",
     "terms": "شروط الاستخدام",
-    "contactEmail": "info@sanadat.sa",
-    "contactPhone": "+966 50 000 0000",
+    "contactEmail": "tech@commergio.com",
+    "contactPhone": "+966 56 739 5986",
     "contactHours": "الأحد – الخميس · 9ص – 6م",
     "newsletter": "اشترك لتصلك تحديثات المنتج"
   },
@@ -193,6 +193,8 @@
     "confirmPassword": "تأكيد كلمة المرور",
     "companyName": "اسم المنشأة",
     "phone": "رقم الجوال",
+    "invitationCode": "كود الدعوة أو العرض",
+    "invitationCodePlaceholder": "INVITE2026",
     "submit": "متابعة",
     "signIn": "تسجيل الدخول",
     "signingIn": "جاري الدخول...",
@@ -203,6 +205,10 @@
     "noAccount": "ليس لديك حساب؟",
     "hasAccount": "لديك حساب بالفعل؟",
     "terms": "بالتسجيل أنت توافق على شروط الاستخدام وسياسة الخصوصية",
+    "termsPrefix": "بالتسجيل أنت توافق على",
+    "termsLink": "شروط الاستخدام",
+    "termsAnd": "و",
+    "privacyLink": "سياسة الخصوصية",
     "backToLogin": "العودة لتسجيل الدخول",
     "emailSent": "تم إرسال الرابط إلى",
     "emailConfirmSent": "تم إرسال رابط التأكيد إلى بريدك الإلكتروني",
@@ -302,7 +308,14 @@
       "manage": "إدارة الاشتراك",
       "autoRenewOn": "التجديد التلقائي مفعّل",
       "autoRenewOff": "يلغى عند نهاية الفترة",
-      "periodProgress": "فترة الاشتراك"
+      "periodProgress": "فترة الاشتراك",
+      "promoAccess": "وصول ترويجي"
+    },
+    "trialUsage": {
+      "title": "المستندات المجانية المتبقية",
+      "usedOfLimit": "{used} من {limit} مستخدمة",
+      "remaining": "المتبقي: {remaining}",
+      "subscribeCta": "اشترك الآن للمتابعة"
     },
     "stats": {
       "receipts": "سندات القبض",
@@ -513,6 +526,17 @@
     "immutableNote": "المستندات غير قابلة للتعديل بعد الإنشاء. يمكن الإلغاء فقط مع ذكر السبب.",
     "createSuccess": "تم إنشاء المستند بنجاح — غير قابل للتعديل",
     "createFailed": "فشل إنشاء المستند",
+    "trialLimitReached": "انتهت حدود الفترة التجريبية. يمكنك إنشاء 5 مستندات فقط خلال التجربة. يرجى الاشتراك للمتابعة.",
+    "subscriptionInactiveCreate": "يتطلب إنشاء المستندات اشتراكاً نشطاً. يرجى تجديد اشتراكك.",
+    "createForbidden": "ليس لديك صلاحية إنشاء المستندات.",
+    "createValidationFailed": "يرجى التحقق من الحقول المطلوبة والمحاولة مرة أخرى.",
+    "createTenantNotFound": "انتهت الجلسة. يرجى تحديث الصفحة والمحاولة مرة أخرى.",
+    "createConflict": "تعارض في رقم المستند. يرجى المحاولة مرة أخرى.",
+    "trialRemainingBanner": "التجربة: متبقي {remaining} مستند",
+    "trialUsedOfLimit": "{used} من {limit} مستندات تجريبية مستخدمة",
+    "trialLimitBannerTitle": "انتهى حد المستندات التجريبية",
+    "trialLimitBannerHint": "اشترك لإنشاء المزيد من سندات القبض والصرف والفواتير.",
+    "trialSubscribeCta": "اشترك الآن للمتابعة",
     "cancelDoc": "إلغاء المستند",
     "print": "طباعة",
     "exportPdf": "تصدير PDF",
@@ -737,7 +761,36 @@
     "paymentRefunded": "مسترد",
     "gateways": "مدعوم: ميسر · هايبر باي · STC Pay · مدى · Visa · Apple Pay",
     "paymentReady": "بوابة الدفع جاهزة — أضف مفاتيح API للتفعيل",
-    "paymentFailed": "فشل بدء عملية الدفع"
+    "paymentFailed": "فشل بدء عملية الدفع",
+    "gatewayManual": "تحويل بنكي",
+    "manualTransferTitle": "الدفع بالتحويل البنكي",
+    "manualTransferInstructionsTitle": "تعليمات التحويل البنكي",
+    "manualTransferInstructions": "حوّل 399 ر.س إلى حساب سندات البنكي.\n\nالبنك: [اسم البنك]\nالآيبان: [IBAN]\nاسم الحساب: [اسم الحساب]\n\nاذكر اسم منشأتك في بيان التحويل.",
+    "manualTransferProofLabel": "رفع إيصال التحويل",
+    "manualTransferFileHint": "PDF أو PNG أو JPG — بحد أقصى 5 ميجابايت",
+    "manualTransferFileRequired": "يرجى إرفاق إيصال التحويل",
+    "manualTransferSubmit": "إرسال إيصال التحويل للمراجعة",
+    "manualTransferSubmitting": "جاري الرفع...",
+    "manualTransferSubmitFailed": "تعذر إرسال إيصال التحويل",
+    "manualTransferSubmittedToast": "تم إرسال إيصال التحويل",
+    "manualTransferPendingTitle": "طلب تحويل قيد المراجعة",
+    "manualTransferPendingMessage": "تم إرسال إيصال التحويل، سيتم مراجعته من الإدارة وتفعيل الاشتراك بعد التأكد.",
+    "manualTransferPendingExists": "لديك طلب تحويل بنكي قيد المراجعة.",
+    "subscriptionSource": "نوع الوصول",
+    "subscriptionSourceTrial": "تجريبي",
+    "subscriptionSourcePaid": "اشتراك مدفوع",
+    "subscriptionSourcePromo": "وصول ترويجي",
+    "subscriptionSourceAdminGrant": "منحة إدارية",
+    "invitationCodeTitle": "لديك كود دعوة؟",
+    "invitationCodeHint": "أدخل كود الدعوة لتفعيل الفترة المجانية الترويجية.",
+    "invitationCodeLabel": "كود الدعوة",
+    "invitationCodePlaceholder": "INVITE2026",
+    "invitationCodeApply": "تفعيل الكود",
+    "invitationCodeApplying": "جاري التفعيل...",
+    "invitationCodeRequired": "أدخل كود الدعوة",
+    "invitationCodeSuccess": "تم تفعيل الفترة المجانية حتى {expiresAt}",
+    "invitationCodeFailed": "تعذّر تفعيل كود الدعوة",
+    "invitationCodePendingHint": "أدخل كود الدعوة لتفعيل الفترة المجانية"
   },
   "onboarding": {
     "company": "بيانات المنشأة",
@@ -762,6 +815,49 @@
     "subscriptionsDesc": "متابعة الاشتراكات النشطة والمنتهية",
     "payments": "المدفوعات",
     "paymentsDesc": "سجل المعاملات والمدفوعات",
+    "manualPaymentsNav": "التحويلات البنكية",
+    "manualPaymentsDesc": "مراجعة إيصالات التحويل البنكي وتفعيل الاشتراكات",
+    "manualPaymentsPending": "قيد المراجعة",
+    "manualPaymentsApproved": "موافق عليه",
+    "manualPaymentsRejected": "مرفوض",
+    "manualPaymentsEmpty": "لا توجد طلبات تحويل",
+    "manualPaymentsEmptyDesc": "لا توجد طلبات تحويل بنكي تطابق الفلتر الحالي",
+    "manualPaymentsReview": "مراجعة",
+    "manualPaymentsReviewTitle": "مراجعة التحويل البنكي",
+    "manualPaymentsPlan": "الباقة",
+    "manualPaymentsViewProof": "عرض / تحميل الإيصال",
+    "manualPaymentsProofUnavailable": "معاينة الإيصال غير متاحة",
+    "manualPaymentsApprove": "موافقة وتفعيل الاشتراك",
+    "manualPaymentsApproveNote": "ملاحظة الإدارة (اختياري)",
+    "manualPaymentsApproveNotePlaceholder": "ملاحظة اختيارية للسجل الداخلي",
+    "manualPaymentsApproveSuccess": "تمت الموافقة على التحويل وتفعيل الاشتراك",
+    "manualPaymentsApproveFailed": "تعذرت الموافقة على التحويل",
+    "manualPaymentsReject": "رفض التحويل",
+    "manualPaymentsRejectNote": "سبب الرفض (مطلوب)",
+    "manualPaymentsRejectNotePlaceholder": "اشرح سبب رفض التحويل",
+    "manualPaymentsRejectNoteRequired": "سبب الرفض مطلوب",
+    "manualPaymentsRejectReason": "سبب الرفض",
+    "manualPaymentsRejectSuccess": "تم رفض التحويل",
+    "manualPaymentsRejectFailed": "تعذر رفض التحويل",
+    "manualPaymentsLoadFailed": "تعذر تحميل طلب التحويل",
+    "manualPaymentsClose": "إغلاق",
+    "manualPaymentsSupportReadOnly": "الموافقة والرفض متاحان لمسؤولي المنصة فقط",
+    "trialUsageTitle": "استخدام المستندات التجريبية",
+    "trialUsageTotal": "المستندات المستخدمة (تجريبي)",
+    "trialUsageRemaining": "المتبقي",
+    "trialUsageReceipts": "سندات القبض",
+    "trialUsagePayments": "سندات الصرف",
+    "trialUsageInvoices": "الفواتير",
+    "subscriptionSourceCol": "مصدر الاشتراك",
+    "subscriptionSource_trial": "تجريبي",
+    "subscriptionSource_paid": "مدفوع",
+    "subscriptionSource_promo": "ترويجي",
+    "subscriptionSource_admin_grant": "منحة إدارية",
+    "promoRedemptionsTitle": "استخدامات أكواد الدعوة",
+    "promoCodeCol": "الكود المستخدم",
+    "promoGrantedDaysCol": "الأيام الممنوحة",
+    "promoStartsCol": "البداية",
+    "promoExpiresCol": "الانتهاء",
     "messages": "الرسائل",
     "messagesDesc": "قوالب واتساب للتواصل مع العملاء",
     "settings": "الإعدادات",
@@ -863,6 +959,8 @@
     "actionsNav": "سجل التدقيق",
     "announcementsNav": "الإعلانات",
     "couponsNav": "كوبونات الخصم",
+    "invitationCodesNav": "أكواد الدعوة",
+    "invitationCodesDesc": "إدارة أكواد الدعوة والوصول الترويجي المجاني",
     "staffNav": "موظفو المنصة",
     "supportNav": "تذاكر الدعم",
     "actionsDesc": "إجراءات وتدخلات إدارة المنصة",
@@ -1049,6 +1147,67 @@
       "validationName": "الاسم مطلوب",
       "validationDiscountValue": "قيمة الخصم يجب أن تكون أكبر من صفر",
       "validationPercentageMax": "النسبة لا يمكن أن تتجاوز 100",
+      "validationPerCompany": "حد المنشأة يجب أن يكون 1 على الأقل",
+      "validationDates": "تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية"
+    },
+    "invitationCodes": {
+      "pageTitle": "أكواد الدعوة",
+      "pageDesc": "منح شركات وصول اشتراك ترويجي مجاني",
+      "searchPlaceholder": "بحث بالرمز أو الاسم...",
+      "search": "بحث",
+      "create": "كود جديد",
+      "createTitle": "إنشاء كود دعوة",
+      "editTitle": "تعديل كود الدعوة",
+      "emptyTitle": "لا توجد أكواد دعوة",
+      "emptyDesc": "أنشئ كوداً لمنح وصول اشتراك ترويجي",
+      "codeCol": "الرمز",
+      "nameCol": "الاسم",
+      "durationCol": "المدة",
+      "activeCol": "نشط",
+      "startsCol": "يبدأ",
+      "expiresCol": "ينتهي",
+      "usageCol": "عدد الاستخدام",
+      "remainingCol": "المتبقي",
+      "actionsCol": "إجراءات",
+      "daysUnit": "يوم",
+      "statusActive": "نشط",
+      "statusInactive": "معطّل",
+      "statusExpired": "منتهي",
+      "filterAll": "الكل",
+      "filterActive": "نشط",
+      "filterInactive": "معطّل",
+      "filterExpired": "منتهي",
+      "enable": "تفعيل",
+      "disable": "تعطيل",
+      "enabled": "تم تفعيل الكود",
+      "disabled": "تم تعطيل الكود",
+      "fieldCode": "الرمز",
+      "fieldName": "الاسم",
+      "fieldDescription": "الوصف",
+      "fieldDurationDays": "المدة (أيام)",
+      "fieldMaxRedemptions": "الحد الأقصى للاستخدام",
+      "fieldPerCompanyLimit": "حد المنشأة",
+      "fieldStartsAt": "تاريخ البداية",
+      "fieldExpiresAt": "تاريخ الانتهاء",
+      "fieldActive": "نشط",
+      "unlimited": "غير محدود",
+      "created": "تم إنشاء كود الدعوة",
+      "updated": "تم تحديث كود الدعوة",
+      "deleted": "تم حذف كود الدعوة",
+      "saveFailed": "تعذّر حفظ كود الدعوة",
+      "deleteFailed": "تعذّر حذف كود الدعوة",
+      "deleteTitle": "حذف كود الدعوة؟",
+      "deleteDesc": "لا يمكن التراجع. وجود استخدامات سابقاً يمنع الحذف.",
+      "deleteConfirm": "حذف",
+      "cancel": "إلغاء",
+      "save": "حفظ",
+      "retry": "إعادة المحاولة",
+      "pagePrev": "السابق",
+      "pageNext": "التالي",
+      "pageLabel": "صفحة",
+      "validationCode": "الرمز مطلوب",
+      "validationName": "الاسم مطلوب",
+      "validationDuration": "المدة يجب أن تكون يوماً واحداً على الأقل",
       "validationPerCompany": "حد المنشأة يجب أن يكون 1 على الأقل",
       "validationDates": "تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية"
     },
@@ -1385,5 +1544,100 @@
   "errors": {
     "unexpected": "حدث خطأ غير متوقع",
     "tryAgain": "حاول مرة أخرى"
+  },
+  "staticPages": {
+    "contact": {
+      "title": "تواصل معنا",
+      "updated": "آخر تحديث: يونيو 2026",
+      "intro": "لديك سؤال عن سندات أو الاشتراك أو حسابك؟ تواصل مع فريقنا عبر القنوات التالية.",
+      "emailLabel": "البريد الإلكتروني",
+      "emailValue": "tech@commergio.com",
+      "phoneLabel": "واتساب",
+      "phoneValue": "+966 56 739 5986",
+      "hoursLabel": "ساعات العمل",
+      "hoursValue": "الأحد – الخميس · 9ص – 6م (توقيت الرياض)",
+      "supportTitle": "للعملاء الحاليين",
+      "supportBody": "يمكن للمستخدمين المسجّلين فتح تذكرة دعم من لوحة التحكم ← الدعم للمساعدة في المستندات أو الفوترة أو صلاحيات الفريق."
+    },
+    "privacy": {
+      "title": "سياسة الخصوصية",
+      "updated": "آخر تحديث: يونيو 2026",
+      "sections": {
+        "intro": {
+          "title": "نظرة عامة",
+          "body": "سندات («نحن») منصة لإدارة المستندات المالية للمنشآت السعودية. توضّح هذه السياسة البيانات التي نجمعها وكيف نستخدمها وحقوقك."
+        },
+        "dataCollected": {
+          "title": "البيانات التي نجمعها",
+          "body": "بيانات الحساب: الاسم، البريد، الجوال، اسم المنشأة.\nمستندات العمل: سندات القبض والصرف والفواتير وسجلات العملاء وتوقيعات الموافقة.\nالفوترة: حالة الاشتراك ومراجع الدفع من ميسر (لا نخزّن أرقام البطاقات كاملة).\nتقنية: عنوان IP ونوع المتصفح وسجلات الاستخدام للأمان والدعم."
+        },
+        "usage": {
+          "title": "كيف نستخدم البيانات",
+          "body": "نستخدم بياناتك لتقديم الخدمة وإصدار المستندات ومعالجة الاشتراكات وإرسال رسائل المعاملات (تأكيد البريد، إعادة تعيين كلمة المرور) وتعزيز الأمان والرد على طلبات الدعم."
+        },
+        "sharing": {
+          "title": "المشاركة",
+          "body": "لا نبيع البيانات الشخصية. نشارك البيانات فقط مع مزودي البنية التحتية اللازمين لتشغيل سندات (الاستضافة، قاعدة البيانات، البريد، بوابة الدفع) بموجب اتفاقيات مناسبة، أو عندما يقتضي القانون السعودي ذلك."
+        },
+        "retention": {
+          "title": "الاحتفاظ",
+          "body": "نحتفظ ببيانات الحساب والمستندات طوال فترة اشتراكك النشط ووفق ما تقتضيه الالتزامات القانونية أو الضريبية أو تسوية النزاعات. يمكنك طلب الحذف وفق الالتزامات المعمول بها."
+        },
+        "security": {
+          "title": "الأمان",
+          "body": "نستخدم التشفير أثناء النقل وعزل المستأجرين والصلاحيات حسب الدور وروابط موقّعة للملفات الخاصة مثل توقيعات العملاء. يقتصر الوصول لأنظمة الإنتاج على الموظفين المخوّلين."
+        },
+        "rights": {
+          "title": "حقوقك",
+          "body": "يمكنك الوصول إلى بياناتك الشخصية أو تصحيحها أو طلب حذفها بالتواصل معنا. للمستخدمين في المملكة حقوق بموجب أنظمة حماية البيانات المعمول بها."
+        },
+        "contact": {
+          "title": "التواصل",
+          "body": "استفسارات الخصوصية: tech@commergio.com"
+        }
+      }
+    },
+    "terms": {
+      "title": "شروط الاستخدام",
+      "updated": "آخر تحديث: يونيو 2026",
+      "sections": {
+        "intro": {
+          "title": "الاتفاقية",
+          "body": "بإنشاء حساب أو استخدام سندات فإنك توافق على هذه الشروط. إن لم توافق، لا تستخدم الخدمة."
+        },
+        "service": {
+          "title": "الخدمة",
+          "body": "تساعدك سندات على إنشاء سندات القبض والصرف والفواتير غير الضريبية وترقيمها وطباعتها ومشاركتها. قد تتغير الميزات وسنُعلم المستخدمين بالتغييرات الجوهرية عند الإمكان."
+        },
+        "accounts": {
+          "title": "الحسابات",
+          "body": "أنت مسؤول عن دقة بيانات التسجيل وحماية بيانات الدخول وكل النشاط تحت حسابك. يصل أعضاء الفريق للبيانات وفق الأدوار التي يحددها مالك الحساب."
+        },
+        "documents": {
+          "title": "المستندات والموافقات",
+          "body": "المستندات في سندات مخصصة كسجلات عمل. روابط موافقة العملاء والتوقيعات أداة سير عمل؛ تبقى مسؤولاً عن دقة المحتوى والاستخدام النظامي لبيانات العملاء."
+        },
+        "billing": {
+          "title": "الاشتراك والفوترة",
+          "body": "الخطط المدفوعة تُفوتر سنوياً بالريال عبر ميسر ما لم يُذكر غير ذلك. الرسوم غير قابلة للاسترداد إلا حيث يقتضي القانون. قد يُعلّق الوصول عند عدم السداد."
+        },
+        "acceptableUse": {
+          "title": "الاستخدام المقبول",
+          "body": "يُحظر استخدام سندات في نشاط غير قانوني أو احتيال أو مضايقة أو برمجيات خبيثة أو محاولات اختراق الأمان أو الوصول لبيانات مستأجرين آخرين."
+        },
+        "liability": {
+          "title": "حدود المسؤولية",
+          "body": "تُقدَّم سندات «كما هي» في الحد الأقصى الذي يسمح به القانون. لا نتحمل أضراراً غير مباشرة أو تبعية ناتجة عن استخدام المنصة."
+        },
+        "changes": {
+          "title": "التعديلات",
+          "body": "قد نحدّث هذه الشروط. الاستمرار في الاستخدام بعد التعديل يعني الموافقة. سنُبلغ بالتغييرات الجوهرية عبر التطبيق أو البريد."
+        },
+        "contact": {
+          "title": "التواصل",
+          "body": "استفسارات قانونية: tech@commergio.com"
+        }
+      }
+    }
   }
 }

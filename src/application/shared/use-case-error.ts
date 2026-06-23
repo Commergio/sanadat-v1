@@ -10,7 +10,9 @@ export type UseCaseErrorCode =
   | "NOT_IMPLEMENTED"
   | "UNAUTHENTICATED"
   | "GATEWAY_ERROR"
-  | "RPC_ERROR";
+  | "RPC_ERROR"
+  | "TRIAL_LIMIT_REACHED"
+  | "SUBSCRIPTION_INACTIVE";
 
 export class UseCaseError extends Error {
   constructor(

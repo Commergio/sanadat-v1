@@ -28,6 +28,27 @@ export interface PlatformDashboardResponse {
 
 export interface PlatformCompanyResponse {
   company: CompanySubscriptionCurrentModel;
+  trialUsage?: {
+    receiptsCount: number;
+    paymentsCount: number;
+    invoicesCount: number;
+    totalDocuments: number;
+    trialLimit: number;
+    remainingDocuments: number;
+  } | null;
+  promoRedemptions?: {
+    id: string;
+    promoCodeId: string;
+    promoCode: string | null;
+    promoName: string | null;
+    companyId: string;
+    redeemedBy: string;
+    subscriptionId: string | null;
+    grantedDays: number;
+    startsAt: string;
+    expiresAt: string;
+    createdAt: string;
+  }[];
 }
 
 export interface PlatformStatusResult {

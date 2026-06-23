@@ -7,21 +7,16 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const gateway = request.headers.get("x-payment-gateway") || body.gateway;
 
     // TODO: Verify webhook signature per gateway
     // Moyasar: verify secret hash
     // HyperPay: verify notification signature
     // STC Pay: verify merchant signature
 
-    const { reference, status, amount, company_id } = body;
+    const { status } = body;
 
     if (status === "paid" || status === "completed") {
-      // Activate subscription
-      // await supabase.from('subscriptions').update({ status: 'active', ... })
-      // await supabase.from('payments').insert({ ... })
-
-      console.log(`Payment verified: ${reference} - ${amount} SAR via ${gateway} for ${company_id}`);
+      // TODO: wire to billing subscription activation when this legacy route is used
     }
 
     return NextResponse.json({ received: true });

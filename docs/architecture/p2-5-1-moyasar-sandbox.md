@@ -1,15 +1,18 @@
-# P2.5.1 — Moyasar Sandbox Checkout
+# P2.5.1 — Moyasar Checkout (sandbox & live)
 
 **Status:** Implemented.  
 **Depends on:** [P2.2 checkout](./p2-billing-checkout.md), [P2.3 webhook](./p2-billing-webhook.md).
 
-Replaces the **manual checkout gateway** for `gateway: "moyasar"` with real Moyasar sandbox invoice sessions. Subscription activation still flows through the existing webhook layer (manual test route until Moyasar webhooks ship in a later phase).
+Replaces the **manual checkout gateway** for `gateway: "moyasar"` with real Moyasar invoice sessions. Subscription activation still flows through the existing webhook layer at `/api/billing/webhook/moyasar`.
 
 ---
 
-## Environment (test keys only)
+## Environment
+
+### Sandbox (default)
 
 ```env
+PAYMENTS_MODE=sandbox
 MOYASAR_SECRET_KEY=sk_test_...
 MOYASAR_PUBLIC_KEY=pk_test_...
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -18,11 +21,31 @@ SUPABASE_SERVICE_ROLE_KEY=...
 
 | Variable | Required | Notes |
 |----------|----------|-------|
-| `MOYASAR_SECRET_KEY` | ✅ | Must start with `sk_test_`. Live keys rejected. |
-| `MOYASAR_PUBLIC_KEY` | ✅ | Must start with `pk_test_`. Validated at checkout. |
+| `PAYMENTS_MODE` | Optional | Defaults to `sandbox` when unset |
+| `MOYASAR_SECRET_KEY` | ✅ | Must start with `sk_test_` |
+| `MOYASAR_PUBLIC_KEY` | ✅ | Must start with `pk_test_` |
 | `NEXT_PUBLIC_APP_URL` | ✅ | Used for Moyasar `success_url` / `back_url` |
 
-Validation: `validateMoyasarSandboxEnv()` in `src/lib/env.ts`.
+### Live (production payments)
+
+Set `PAYMENTS_MODE=live` **explicitly** before using production Moyasar keys:
+
+```env
+PAYMENTS_MODE=live
+MOYASAR_SECRET_KEY=sk_live_...
+MOYASAR_PUBLIC_KEY=pk_live_...
+MOYASAR_WEBHOOK_SECRET=...
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+| Rule | Behavior |
+|------|----------|
+| `PAYMENTS_MODE=sandbox` | Only `sk_test_` / `pk_test_` allowed |
+| `PAYMENTS_MODE=live` | Only `sk_live_` / `pk_live_` allowed |
+| Mixed keys | Always rejected (`sk_live_` + `pk_test_`, or `sk_test_` + `pk_live_`) |
+
+Validation: `validateMoyasarPaymentsEnv()` in `src/lib/env.ts`. Server startup logs a clear error when keys are present but invalid (`src/instrumentation.ts`). Checkout returns `NOT_IMPLEMENTED` with the same message at runtime.
 
 ---
 
@@ -122,7 +145,7 @@ For local simulation without Moyasar delivery, use `POST /api/billing/webhook/mo
 
 | Code | HTTP | When |
 |------|------|------|
-| `NOT_IMPLEMENTED` | 501 | Missing/invalid Moyasar test keys |
+| `NOT_IMPLEMENTED` | 501 | Missing/invalid Moyasar keys for current `PAYMENTS_MODE` |
 | `GATEWAY_ERROR` | 502 | Moyasar API failure |
 | `VALIDATION` | 400 | Bad checkout input |
 

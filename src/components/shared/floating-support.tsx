@@ -3,10 +3,11 @@
 import { MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { generateWhatsAppLink } from "@/lib/utils";
+import { SUPPORT_WHATSAPP_E164 } from "@/lib/constants";
 
 export function FloatingSupport() {
   const t = useTranslations("support");
-  const link = generateWhatsAppLink("966500000000", t("message"));
+  const link = generateWhatsAppLink(SUPPORT_WHATSAPP_E164, t("message"));
 
   return (
     <a

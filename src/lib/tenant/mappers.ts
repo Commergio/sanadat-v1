@@ -30,6 +30,7 @@ export function mapSubscriptionRow(row: Record<string, unknown>): Subscription {
     id: row.id as string,
     company_id: row.company_id as string,
     status: row.status as Subscription["status"],
+    subscription_source: row.subscription_source as Subscription["subscription_source"],
     amount: Number(row.amount),
     starts_at: row.starts_at as string,
     expires_at: row.expires_at as string,

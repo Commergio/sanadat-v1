@@ -8,11 +8,13 @@ import type { PaymentVoucherRepositoryPort } from "./repository-ports";
 import { assertCanCreateOrCancel, assertCanRead } from "./authorization";
 import { paymentVoucherInputSchema } from "./schemas";
 import { UseCaseError } from "@/application/shared/use-case-error";
+import type { TrialDocumentGuard } from "@/application/billing/trial-document-guard";
 import type { ActivityLogPort } from "./activity-log.port";
 
 interface PaymentVoucherUseCaseDeps {
   repository: PaymentVoucherRepositoryPort;
   activityLog: ActivityLogPort;
+  trialGuard: TrialDocumentGuard;
 }
 
 export function buildPaymentVoucherUseCases(deps: PaymentVoucherUseCaseDeps) {
@@ -22,6 +24,7 @@ export function buildPaymentVoucherUseCases(deps: PaymentVoucherUseCaseDeps) {
       input: CreatePaymentInput
     ): Promise<PaymentVoucher> {
       assertCanCreateOrCancel(ctx);
+      await deps.trialGuard.assertCanCreate(ctx);
       const parsed = paymentVoucherInputSchema.safeParse(input);
       if (!parsed.success) {
         throw new UseCaseError("VALIDATION", "Invalid payment voucher input", parsed.error.flatten());

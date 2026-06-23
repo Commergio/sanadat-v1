@@ -8,7 +8,9 @@ export { DocumentNumberRepository } from "./documents/document-number.repository
 export { ActivityLogRepository } from "./documents/activity-log.repository";
 export { TeamRepository } from "./team/team.repository";
 export { BillingRepository } from "./billing/billing.repository";
+export { ManualPaymentRepository } from "./billing/manual-payment.repository";
 export { CouponRepository } from "./coupons/coupon.repository";
+export { InvitationCodeRepository } from "./invitation-codes/invitation-code.repository";
 export { PlatformRepository } from "./platform/platform.repository";
 export { CustomerRepository } from "./customers/customer.repository";
 export { CustomerVerificationRepository } from "./customers/customer-verification.repository";
