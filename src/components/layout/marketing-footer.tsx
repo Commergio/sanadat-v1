@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
-import { SUPPORT_WHATSAPP_E164 } from "@/lib/constants";
+import { SUPPORT_EMAIL, SUPPORT_PHONE_DISPLAY, SUPPORT_WHATSAPP_E164 } from "@/lib/constants";
 export async function MarketingFooter() {
   const t = await getTranslations("footer");
   const tApp = await getTranslations("app");
@@ -104,11 +104,11 @@ export async function MarketingFooter() {
             <ul className="space-y-4">
               <li>
                 <a
-                  href={`mailto:${t("contactEmail")}`}
+                  href={`mailto:${SUPPORT_EMAIL}`}
                   className="flex items-start gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span dir="ltr" className="text-start">{t("contactEmail")}</span>
+                  <span dir="ltr" className="text-start">{SUPPORT_EMAIL}</span>
                 </a>
               </li>
               <li>
@@ -119,7 +119,7 @@ export async function MarketingFooter() {
                   className="flex items-start gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span dir="ltr">{t("contactPhone")}</span>
+                  <span dir="ltr">{SUPPORT_PHONE_DISPLAY}</span>
                 </a>
               </li>
               <li className="flex items-start gap-3 text-sm text-muted-foreground">

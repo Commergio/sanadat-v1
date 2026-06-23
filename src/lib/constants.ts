@@ -7,7 +7,7 @@ export const SUBSCRIPTION_PERIOD = "yearly";
 /** Official support email and WhatsApp (Commergio / Sanadat). */
 export const SUPPORT_EMAIL = "tech@commergio.com";
 export const SUPPORT_WHATSAPP_E164 = "966567395986";
-export const SUPPORT_PHONE_DISPLAY = "+966 56 739 5986";
+export const SUPPORT_PHONE_DISPLAY = "+966 567395986";
 
 /** Max combined receipt + payment + invoice documents during trial. */
 export const TRIAL_DOCUMENT_LIMIT = 5;

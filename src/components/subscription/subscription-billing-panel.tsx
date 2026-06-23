@@ -280,12 +280,6 @@ export function SubscriptionBillingPanel() {
         </CardContent>
       </Card>
 
-      <ManualBankTransferSection
-        canManage={canManage}
-        pendingRequest={pendingManualRequest}
-        onSubmitted={refresh}
-      />
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t("renew")}</CardTitle>
@@ -408,6 +402,13 @@ export function SubscriptionBillingPanel() {
               />
             </div>
           )}
+
+          <ManualBankTransferSection
+            canManage={canManage}
+            pendingRequest={pendingManualRequest}
+            onSubmitted={refresh}
+            embedded
+          />
         </CardContent>
       </Card>
     </div>

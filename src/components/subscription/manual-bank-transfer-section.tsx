@@ -14,12 +14,15 @@ interface ManualBankTransferSectionProps {
   canManage: boolean;
   pendingRequest: ManualPaymentRequestApi | null;
   onSubmitted: () => Promise<void>;
+  /** When true, render inside the renew card without an outer Card wrapper. */
+  embedded?: boolean;
 }
 
 export function ManualBankTransferSection({
   canManage,
   pendingRequest,
   onSubmitted,
+  embedded = false,
 }: ManualBankTransferSectionProps) {
   const t = useTranslations("subscription");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -77,6 +80,86 @@ export function ManualBankTransferSection({
     }
   }, [file, onSubmitted, t]);
 
+  const body = (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-dashed border-border/80 bg-muted/20 p-4 text-sm text-muted-foreground">
+        <p className="font-medium text-foreground">{t("manualTransferInstructionsTitle")}</p>
+        <p className="mt-2 whitespace-pre-line">{t("manualTransferInstructions")}</p>
+      </div>
+
+      {showPending && (
+        <div className="rounded-lg border border-amber-200/80 bg-amber-50/90 p-4 text-sm dark:border-amber-900/60 dark:bg-amber-950/40">
+          <p className="font-medium text-amber-800 dark:text-amber-200">
+            {t("manualTransferPendingTitle")}
+          </p>
+          <p className="mt-1 text-amber-700/90 dark:text-amber-400">
+            {t("manualTransferPendingMessage")}
+          </p>
+        </div>
+      )}
+
+      {!canManage && (
+        <p className="text-sm text-muted-foreground">{t("readOnlyHint")}</p>
+      )}
+
+      {canManage && !showPending && (
+        <>
+          <div className="space-y-2">
+            <label htmlFor="manual-transfer-proof" className="text-sm font-medium">
+              {t("manualTransferProofLabel")}
+            </label>
+            <input
+              ref={fileInputRef}
+              id="manual-transfer-proof"
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
+              disabled={submitting}
+              className="block w-full text-sm text-muted-foreground file:me-4 file:rounded-md file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary"
+              onChange={(e) => {
+                setFile(e.target.files?.[0] ?? null);
+                setError(null);
+              }}
+            />
+            <p className="text-xs text-muted-foreground">{t("manualTransferFileHint")}</p>
+          </div>
+
+          {error && <p className="text-sm text-destructive">{error}</p>}
+
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={submitting || !file}
+            onClick={() => void handleSubmit()}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                {t("manualTransferSubmitting")}
+              </>
+            ) : (
+              <>
+                <Upload className="me-2 h-4 w-4" />
+                {t("manualTransferSubmit")}
+              </>
+            )}
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <div className="space-y-4 border-t border-border/80 pt-6">
+        <div className="flex items-center gap-2">
+          <Building2 className="h-5 w-5 text-primary" />
+          <p className="text-sm font-semibold text-foreground">{t("manualTransferTitle")}</p>
+        </div>
+        {body}
+      </div>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -85,71 +168,7 @@ export function ManualBankTransferSection({
           {t("manualTransferTitle")}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="rounded-lg border border-dashed border-border/80 bg-muted/20 p-4 text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">{t("manualTransferInstructionsTitle")}</p>
-          <p className="mt-2 whitespace-pre-line">{t("manualTransferInstructions")}</p>
-        </div>
-
-        {showPending && (
-          <div className="rounded-lg border border-amber-200/80 bg-amber-50/90 p-4 text-sm dark:border-amber-900/60 dark:bg-amber-950/40">
-            <p className="font-medium text-amber-800 dark:text-amber-200">
-              {t("manualTransferPendingTitle")}
-            </p>
-            <p className="mt-1 text-amber-700/90 dark:text-amber-400">
-              {t("manualTransferPendingMessage")}
-            </p>
-          </div>
-        )}
-
-        {!canManage && (
-          <p className="text-sm text-muted-foreground">{t("readOnlyHint")}</p>
-        )}
-
-        {canManage && !showPending && (
-          <>
-            <div className="space-y-2">
-              <label htmlFor="manual-transfer-proof" className="text-sm font-medium">
-                {t("manualTransferProofLabel")}
-              </label>
-              <input
-                ref={fileInputRef}
-                id="manual-transfer-proof"
-                type="file"
-                accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg"
-                disabled={submitting}
-                className="block w-full text-sm text-muted-foreground file:me-4 file:rounded-md file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary"
-                onChange={(e) => {
-                  setFile(e.target.files?.[0] ?? null);
-                  setError(null);
-                }}
-              />
-              <p className="text-xs text-muted-foreground">{t("manualTransferFileHint")}</p>
-            </div>
-
-            {error && <p className="text-sm text-destructive">{error}</p>}
-
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={submitting || !file}
-              onClick={() => void handleSubmit()}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                  {t("manualTransferSubmitting")}
-                </>
-              ) : (
-                <>
-                  <Upload className="me-2 h-4 w-4" />
-                  {t("manualTransferSubmit")}
-                </>
-              )}
-            </Button>
-          </>
-        )}
-      </CardContent>
+      <CardContent>{body}</CardContent>
     </Card>
   );
 }
