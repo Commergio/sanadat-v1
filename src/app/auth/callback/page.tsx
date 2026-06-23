@@ -22,7 +22,12 @@ function parseHashParams(): URLSearchParams {
 }
 
 async function finalizeSession(nextPath: string): Promise<boolean> {
-  const res = await fetch("/api/auth/post-callback", { method: "POST", cache: "no-store" });
+  const res = await fetch("/api/auth/post-callback", {
+    method: "POST",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ next: nextPath }),
+  });
   if (!res.ok) return false;
 
   const supabase = getSupabaseBrowserClient();

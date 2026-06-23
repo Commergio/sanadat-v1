@@ -88,7 +88,7 @@ Short code template — rarely used if magic link preferred.
 | Setting | Recommendation |
 |---------|----------------|
 | Production | Custom SMTP (Resend, SendGrid, AWS SES) or Supabase Pro custom SMTP |
-| From address | `noreply@sanadat.sa` or verified domain |
+| From address | `tech@commergio.com` via Resend (`RESEND_API_KEY` on Vercel) for activation emails; Supabase templates for confirm/reset |
 | SPF/DKIM | Configure on sending domain |
 | Rate limits | Supabase free tier has limits — monitor `over_email_send_rate_limit` error in app |
 

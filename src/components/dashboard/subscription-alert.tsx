@@ -15,6 +15,27 @@ export function SubscriptionAlert() {
   if (loading || !subscription) return null;
 
   const daysUntilExpiry = daysUntil(subscription.expiresAt);
+  const periodEnded =
+    daysUntilExpiry <= 0 &&
+    (subscription.status === "active" || subscription.status === "trialing");
+
+  if (periodEnded) {
+    return (
+      <div className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 shadow-sm sm:flex-row sm:items-center">
+        <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
+        <div className="flex-1">
+          <p className="text-sm font-medium text-destructive">{t("expiredTitle")}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("expiredHint")}</p>
+        </div>
+        <Link href="/dashboard/subscription">
+          <Button size="sm" variant="outline" className="shrink-0">
+            {t("renew")}
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
   const shouldAlert = EXPIRY_NOTIFICATION_DAYS.some((d) => daysUntilExpiry <= d);
 
   if (!shouldAlert || subscription.status !== "active") return null;

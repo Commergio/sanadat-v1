@@ -5,5 +5,6 @@ export function mapDocumentStatus(code: string): number {
   if (code === "CONFLICT") return 409;
   if (code === "TRIAL_LIMIT_REACHED") return 403;
   if (code === "SUBSCRIPTION_INACTIVE") return 403;
+  if (code === "SUBSCRIPTION_EXPIRED") return 403;
   return 500;
 }

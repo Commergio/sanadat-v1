@@ -12,7 +12,8 @@ export type UseCaseErrorCode =
   | "GATEWAY_ERROR"
   | "RPC_ERROR"
   | "TRIAL_LIMIT_REACHED"
-  | "SUBSCRIPTION_INACTIVE";
+  | "SUBSCRIPTION_INACTIVE"
+  | "SUBSCRIPTION_EXPIRED";
 
 export class UseCaseError extends Error {
   constructor(

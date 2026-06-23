@@ -1,4 +1,5 @@
 import type { ActivityLogPort } from "@/application/documents";
+import { notifyAccountActivated } from "@/application/notifications/account-activated";
 import { RepositoryError } from "@/application/shared/errors";
 import { UseCaseError } from "@/application/shared/use-case-error";
 import type { PlatformContext } from "@/lib/platform";
@@ -229,6 +230,11 @@ export function buildManualPaymentUseCases(deps: {
             // non-blocking
           }
         }
+
+        void notifyAccountActivated({
+          companyId: request.companyId,
+          expiresAt: period.periodEnd,
+        });
 
         return {
           requestId: request.id,

@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
+import { buildSiteMetadata } from "@/lib/metadata/site-branding";
 
-export const metadata: Metadata = {
-  title: "Sanadat",
-  description: "Receipt and invoice management platform",
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
-};
+export const metadata: Metadata = buildSiteMetadata();
 
 export default function RootLayout({
   children,

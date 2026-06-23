@@ -33,14 +33,16 @@ export function SubscriptionWidget() {
   const status: SubscriptionStatus = subscription?.status ?? "trialing";
   const expiresAtValue = subscription?.expiresAt ?? new Date().toISOString();
   const days = daysUntil(expiresAtValue);
-  const progress = Math.max(0, Math.min(100, ((365 - days) / 365) * 100));
-  const isActive = status === "active";
+  const periodEnded = days <= 0 && (status === "active" || status === "trialing");
+  const effectiveStatus: SubscriptionStatus = periodEnded ? "expired" : status;
+  const progress = Math.max(0, Math.min(100, ((365 - Math.max(days, 0)) / 365) * 100));
+  const isActive = effectiveStatus === "active";
   const isPromo = subscription?.subscriptionSource === "promo" && isActive;
   const price = subscription && subscription.amount > 0 ? subscription.amount : SUBSCRIPTION_PRICE;
   const statusLabel =
-    status === "active"
+    effectiveStatus === "active"
       ? ts("active")
-      : status === "suspended"
+      : effectiveStatus === "suspended"
         ? ts("suspended")
         : ts("expired");
 

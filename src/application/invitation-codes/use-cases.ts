@@ -1,5 +1,6 @@
 import type { ActivityLogPort } from "@/application/documents";
 import type { BillingRepositoryPort } from "@/application/billing/repository-ports";
+import { notifyAccountActivated } from "@/application/notifications/account-activated";
 import { SUBSCRIPTION_PRICE } from "@/lib/constants";
 import { assertPlatformAdmin, assertPlatformStaff } from "@/application/platform/authorization";
 import { RepositoryError } from "@/application/shared/errors";
@@ -210,6 +211,11 @@ export function buildInvitationCodeUseCases(deps: Deps) {
             // non-blocking
           }
         }
+
+        void notifyAccountActivated({
+          companyId: ctx.companyId,
+          expiresAt: period.expiresAt,
+        });
 
         return {
           success: true,

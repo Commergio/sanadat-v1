@@ -209,3 +209,14 @@ export function getMoyasarWebhookSecret(): string | null {
 export function isMoyasarWebhookConfigured(): boolean {
   return getMoyasarWebhookSecret() !== null;
 }
+
+/** Resend API key for transactional email (server only). */
+export function getResendApiKey(): string | null {
+  const key = readEnv(process.env.RESEND_API_KEY);
+  if (!key || PLACEHOLDER_VALUES.has(key)) return null;
+  return key;
+}
+
+export function isTransactionalEmailConfigured(): boolean {
+  return getResendApiKey() !== null;
+}

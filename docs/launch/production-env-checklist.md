@@ -14,6 +14,7 @@ Use this before pointing a custom domain at Sanadat production. Replace `https:/
 | `MOYASAR_SECRET_KEY` | Billing | Production | `sk_test_...` when `PAYMENTS_MODE=sandbox`; `sk_live_...` when `PAYMENTS_MODE=live` |
 | `MOYASAR_PUBLIC_KEY` | Billing | Production | `pk_test_...` when sandbox; `pk_live_...` when live — must match secret key type |
 | `MOYASAR_WEBHOOK_SECRET` | Billing | Production | Must match Moyasar Dashboard webhook endpoint secret |
+| `RESEND_API_KEY` | Email | Production | Transactional email from `tech@commergio.com` (account activation, subscription) — verify `commergio.com` in Resend |
 | `BILLING_MANUAL_WEBHOOK_SECRET` | Optional | Preview only | Internal QA — do **not** set in production unless needed |
 
 Vercel auto-provides `VERCEL_URL` and `VERCEL_PROJECT_PRODUCTION_URL`; `getAppUrl()` uses them as fallback, but always set `NEXT_PUBLIC_APP_URL` for custom domains.

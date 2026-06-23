@@ -3,8 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import type { SubscriptionStatus } from "@/lib/types";
 
+export type DocumentCreateBlockReason =
+  | "trial_limit"
+  | "trial_expired"
+  | "subscription_expired"
+  | "subscription_inactive"
+  | null;
+
 export interface TrialUsageApi {
   subscriptionStatus: SubscriptionStatus | null;
+  subscriptionExpiresAt: string | null;
+  subscriptionPeriodActive: boolean;
+  blockReason: DocumentCreateBlockReason;
   receiptsCount: number;
   paymentsCount: number;
   invoicesCount: number;

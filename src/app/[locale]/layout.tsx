@@ -4,6 +4,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing, isRtlLocale, type Locale } from "@/i18n/routing";
+import { buildSiteMetadata } from "@/lib/metadata/site-branding";
+import { OrganizationJsonLd } from "@/components/seo/organization-json-ld";
 import { ThemeProvider } from "@wrksz/themes/next";
 import { Providers } from "@/components/providers";
 import "../globals.css";
@@ -35,18 +37,11 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
 
-  return {
+  return buildSiteMetadata({
     title: t("title"),
     description: t("description"),
-    icons: {
-      icon: "/logo.png",
-      apple: "/logo.png",
-    },
-    openGraph: {
-      locale: locale === "ar" ? "ar_SA" : "en_US",
-      images: [{ url: "/logo.png", alt: t("title") }],
-    },
-  };
+    locale: locale === "en" ? "en" : "ar",
+  });
 }
 
 export default async function LocaleLayout({
@@ -74,6 +69,7 @@ export default async function LocaleLayout({
       <body
         className={`${fontClass} min-h-screen min-w-0 bg-background font-sans antialiased`}
       >
+        <OrganizationJsonLd />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

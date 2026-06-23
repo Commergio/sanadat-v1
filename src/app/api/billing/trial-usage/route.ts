@@ -12,6 +12,9 @@ export async function GET() {
 
     return NextResponse.json({
       subscriptionStatus: usage.subscriptionStatus,
+      subscriptionExpiresAt: usage.subscriptionExpiresAt,
+      subscriptionPeriodActive: usage.subscriptionPeriodActive,
+      blockReason: usage.blockReason,
       receiptsCount: usage.receiptsCount,
       paymentsCount: usage.paymentsCount,
       invoicesCount: usage.invoicesCount,

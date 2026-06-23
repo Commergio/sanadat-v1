@@ -333,7 +333,9 @@
       "day": "day",
       "days": "days",
       "hint": "Renew to avoid account suspension",
-      "renew": "Renew"
+      "renew": "Renew",
+      "expiredTitle": "Your subscription has expired",
+      "expiredHint": "Subscriptions last one year from activation. Renew now to create vouchers and invoices."
     },
     "announcements": {
       "dismiss": "Dismiss",
@@ -531,6 +533,7 @@
     "createFailed": "Failed to create document",
     "trialLimitReached": "Trial limit reached. You can create up to 5 documents during the trial. Please subscribe to continue.",
     "subscriptionInactiveCreate": "An active subscription is required to create documents. Please renew your subscription.",
+    "subscriptionExpiredCreate": "Your one-year subscription has ended. Renew to create receipt vouchers, payment vouchers, and invoices.",
     "createForbidden": "You do not have permission to create documents.",
     "createValidationFailed": "Please check required fields and try again.",
     "createTenantNotFound": "Session expired. Please refresh and try again.",
@@ -539,6 +542,12 @@
     "trialUsedOfLimit": "{used} of {limit} trial documents used",
     "trialLimitBannerTitle": "Trial document limit reached",
     "trialLimitBannerHint": "Subscribe to create more receipt vouchers, payment vouchers, and invoices.",
+    "trialExpiredBannerTitle": "Trial period ended",
+    "trialExpiredBannerHint": "Subscribe to continue creating receipt vouchers, payment vouchers, and invoices.",
+    "subscriptionExpiredBannerTitle": "Subscription expired",
+    "subscriptionExpiredBannerHint": "Your subscription lasts one year from activation. Renew to create receipt vouchers, payment vouchers, and invoices.",
+    "subscriptionInactiveBannerTitle": "Subscription inactive",
+    "subscriptionInactiveBannerHint": "Renew your subscription to continue creating documents.",
     "trialSubscribeCta": "Subscribe now to continue",
     "cancelDoc": "Cancel document",
     "print": "Print",
@@ -1322,8 +1331,8 @@
     "description": "Nothing to show yet"
   },
   "metadata": {
-    "title": "Sanadat | Receipt & invoice management",
-    "description": "Saudi platform to digitize receipt vouchers, payment vouchers, and non-tax invoices."
+    "title": "Sanadat",
+    "description": "Saudi platform for receipt vouchers, payment vouchers, and non-tax invoices"
   },
   "validation": {
     "emailInvalid": "Invalid email address",

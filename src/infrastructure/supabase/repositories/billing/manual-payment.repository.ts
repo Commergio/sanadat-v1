@@ -158,7 +158,8 @@ export class ManualPaymentRepository implements ManualPaymentRepositoryPort {
     paymentId: string,
     adminNote?: string | null
   ): Promise<void> {
-    const { error } = await this.writeClient.rpc("platform_approve_manual_payment", {
+    // RPC checks auth.uid() via is_platform_admin() — must use the signed-in admin session, not service role.
+    const { error } = await this.readClient.rpc("platform_approve_manual_payment", {
       p_request_id: requestId,
       p_payment_id: paymentId,
       p_admin_note: adminNote ?? null,
@@ -170,7 +171,7 @@ export class ManualPaymentRepository implements ManualPaymentRepositoryPort {
   }
 
   async markRejectedViaRpc(requestId: string, adminNote: string): Promise<void> {
-    const { error } = await this.writeClient.rpc("platform_reject_manual_payment", {
+    const { error } = await this.readClient.rpc("platform_reject_manual_payment", {
       p_request_id: requestId,
       p_admin_note: adminNote,
     });

@@ -2,6 +2,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { TRIAL_DOCUMENT_LIMIT } from "@/lib/constants";
 import type { SubscriptionStatus } from "@/lib/types";
 
+export type DocumentCreateBlockReason =
+  | "trial_limit"
+  | "trial_expired"
+  | "subscription_expired"
+  | "subscription_inactive"
+  | null;
+
 export interface TenantDocumentUsage {
   receiptsCount: number;
   paymentsCount: number;
@@ -10,7 +17,18 @@ export interface TenantDocumentUsage {
   trialLimit: number;
   remainingDocuments: number;
   subscriptionStatus: SubscriptionStatus | null;
+  subscriptionExpiresAt: string | null;
+  subscriptionPeriodActive: boolean;
+  blockReason: DocumentCreateBlockReason;
   canCreateDocument: boolean;
+}
+
+export function isSubscriptionPeriodActive(
+  expiresAt: string | null | undefined,
+  now = new Date()
+): boolean {
+  if (!expiresAt) return false;
+  return new Date(expiresAt) > now;
 }
 
 export interface TrialUsageContext {
@@ -47,34 +65,79 @@ export async function countCompanyDocuments(
   };
 }
 
-async function resolveSubscriptionStatus(
+interface ResolvedSubscription {
+  status: SubscriptionStatus | null;
+  expiresAt: string | null;
+}
+
+async function resolveSubscription(
   supabase: SupabaseClient,
   companyId: string
-): Promise<SubscriptionStatus | null> {
+): Promise<ResolvedSubscription> {
   const { data, error } = await supabase
     .from("subscriptions")
-    .select("status")
+    .select("status, expires_at")
     .eq("company_id", companyId)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (error) throw error;
-  return (data?.status as SubscriptionStatus | undefined) ?? null;
+  return {
+    status: (data?.status as SubscriptionStatus | undefined) ?? null,
+    expiresAt: data?.expires_at ? String(data.expires_at) : null,
+  };
+}
+
+function resolveBlockReason(
+  subscriptionStatus: SubscriptionStatus | null,
+  subscriptionPeriodActive: boolean,
+  totalDocuments: number,
+  trialLimit: number
+): DocumentCreateBlockReason {
+  if (subscriptionStatus === "trialing") {
+    if (!subscriptionPeriodActive) return "trial_expired";
+    if (totalDocuments >= trialLimit) return "trial_limit";
+    return null;
+  }
+
+  if (subscriptionStatus === "active") {
+    if (!subscriptionPeriodActive) return "subscription_expired";
+    return null;
+  }
+
+  if (subscriptionStatus != null) return "subscription_inactive";
+  return "subscription_inactive";
 }
 
 function buildUsage(
   counts: { receiptsCount: number; paymentsCount: number; invoicesCount: number },
-  subscriptionStatus: SubscriptionStatus | null
+  subscription: ResolvedSubscription
 ): TenantDocumentUsage {
+  const subscriptionStatus = subscription.status;
+  const subscriptionExpiresAt = subscription.expiresAt;
+  const subscriptionPeriodActive = isSubscriptionPeriodActive(subscriptionExpiresAt);
   const totalDocuments = counts.receiptsCount + counts.paymentsCount + counts.invoicesCount;
   const trialLimit = TRIAL_DOCUMENT_LIMIT;
   const remainingDocuments =
-    subscriptionStatus === "trialing" ? Math.max(0, trialLimit - totalDocuments) : 0;
+    subscriptionStatus === "trialing" && subscriptionPeriodActive
+      ? Math.max(0, trialLimit - totalDocuments)
+      : 0;
 
   const canCreateDocument =
-    subscriptionStatus === "active" ||
-    (subscriptionStatus === "trialing" && totalDocuments < trialLimit);
+    (subscriptionStatus === "active" && subscriptionPeriodActive) ||
+    (subscriptionStatus === "trialing" &&
+      subscriptionPeriodActive &&
+      totalDocuments < trialLimit);
+
+  const blockReason = canCreateDocument
+    ? null
+    : resolveBlockReason(
+        subscriptionStatus,
+        subscriptionPeriodActive,
+        totalDocuments,
+        trialLimit
+      );
 
   return {
     ...counts,
@@ -82,6 +145,9 @@ function buildUsage(
     trialLimit,
     remainingDocuments,
     subscriptionStatus,
+    subscriptionExpiresAt,
+    subscriptionPeriodActive,
+    blockReason,
     canCreateDocument,
   };
 }
@@ -90,12 +156,12 @@ export async function getTenantDocumentUsage(
   supabase: SupabaseClient,
   ctx: TrialUsageContext
 ): Promise<TenantDocumentUsage> {
-  const [counts, subscriptionStatus] = await Promise.all([
+  const [counts, subscription] = await Promise.all([
     countCompanyDocuments(supabase, ctx.companyId),
-    resolveSubscriptionStatus(supabase, ctx.companyId),
+    resolveSubscription(supabase, ctx.companyId),
   ]);
 
-  return buildUsage(counts, subscriptionStatus);
+  return buildUsage(counts, subscription);
 }
 
 export const TRIAL_LIMIT_MESSAGE_EN =
@@ -109,3 +175,9 @@ export const SUBSCRIPTION_INACTIVE_MESSAGE_EN =
 
 export const SUBSCRIPTION_INACTIVE_MESSAGE_AR =
   "يتطلب إنشاء المستندات اشتراكاً نشطاً. يرجى تجديد اشتراكك.";
+
+export const SUBSCRIPTION_EXPIRED_MESSAGE_EN =
+  "Your one-year subscription has ended. Renew your subscription to create receipt vouchers, payment vouchers, and invoices.";
+
+export const SUBSCRIPTION_EXPIRED_MESSAGE_AR =
+  "انتهت صلاحية اشتراكك (مدة سنة واحدة). يرجى تجديد الاشتراك لإصدار سندات القبض والصرف والفواتير.";
