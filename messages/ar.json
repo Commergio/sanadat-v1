@@ -765,7 +765,7 @@
     "gatewayManual": "تحويل بنكي",
     "manualTransferTitle": "الدفع بالتحويل البنكي",
     "manualTransferInstructionsTitle": "تعليمات التحويل البنكي",
-    "manualTransferInstructions": "حوّل 399 ر.س إلى حساب سندات البنكي.\n\nالبنك: [اسم البنك]\nالآيبان: [IBAN]\nاسم الحساب: [اسم الحساب]\n\nاذكر اسم منشأتك في بيان التحويل.",
+    "manualTransferInstructions": "حوّل 399 ر.س إلى حساب سندات البنكي.\n\nاسم الشركة: شركة كوميرجيو\nالبنك: مصرف الراجحي\nرقم الحساب: 20300-001-0006089949549\nالآيبان: SA6680000203608019949549\n\nاذكر اسم منشأتك في بيان التحويل.",
     "manualTransferProofLabel": "رفع إيصال التحويل",
     "manualTransferFileHint": "PDF أو PNG أو JPG — بحد أقصى 5 ميجابايت",
     "manualTransferFileRequired": "يرجى إرفاق إيصال التحويل",
