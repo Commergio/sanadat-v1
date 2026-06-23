@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { AdminReadOnlyHint } from "@/components/admin/admin-read-only-hint";
+import { Input } from "@/components/ui/input";
 import { SUPPORT_EMAIL, SUPPORT_WHATSAPP_E164 } from "@/lib/constants";
 import { Label } from "@/components/ui/label";
 

@@ -12,7 +12,7 @@ export default function SubscriptionPage() {
   return (
     <>
       <DashboardHeader title={t("title")} />
-      <main className="min-w-0 max-w-3xl flex-1 space-y-6 p-4 lg:p-8">
+      <main className="min-w-0 max-w-3xl flex-1 space-y-6 overflow-x-hidden p-4 pb-24 lg:p-8 lg:pb-28">
         <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
           <SubscriptionBillingPanel />
         </Suspense>

@@ -248,6 +248,12 @@ export function SubscriptionBillingPanel() {
         />
       )}
 
+      <ManualBankTransferSection
+        canManage={canManage}
+        pendingRequest={pendingManualRequest}
+        onSubmitted={refresh}
+      />
+
       <InvitationCodeSection canManage={canManage} onApplied={refresh} />
 
       <Card>
@@ -402,13 +408,6 @@ export function SubscriptionBillingPanel() {
               />
             </div>
           )}
-
-          <ManualBankTransferSection
-            canManage={canManage}
-            pendingRequest={pendingManualRequest}
-            onSubmitted={refresh}
-            embedded
-          />
         </CardContent>
       </Card>
     </div>
