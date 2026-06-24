@@ -60,8 +60,6 @@ export function ManualBankTransferSection({
 
   const transferAmountLabel = formatCurrency(transferAmount, locale);
 
-  const instructions = t("manualTransferInstructions", { amount: transferAmountLabel });
-
   const handleApplyCoupon = useCallback(async () => {
     await onApplyCoupon();
   }, [onApplyCoupon]);
@@ -149,7 +147,28 @@ export function ManualBankTransferSection({
 
       <div className="rounded-lg border border-dashed border-border/80 bg-muted/20 p-4 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">{t("manualTransferInstructionsTitle")}</p>
-        <p className="mt-2 whitespace-pre-line">{instructions}</p>
+        <div className="mt-2 space-y-1">
+          <p>{t("manualTransferIntro", { amount: transferAmountLabel })}</p>
+          <p>
+            {t("manualTransferCompanyLabel")} {t("manualTransferCompanyName")}
+          </p>
+          <p>
+            {t("manualTransferBankLabel")} {t("manualTransferBankName")}
+          </p>
+          <p>
+            {t("manualTransferAccountLabel")}{" "}
+            <span dir="ltr" className="inline-block">
+              {t("manualTransferAccountNumber")}
+            </span>
+          </p>
+          <p>
+            {t("manualTransferIbanLabel")}{" "}
+            <span dir="ltr" className="inline-block">
+              {t("manualTransferIban")}
+            </span>
+          </p>
+          <p className="pt-1">{t("manualTransferReferenceNote")}</p>
+        </div>
         {appliedCoupon?.valid && (
           <p className="mt-3 rounded-md border border-emerald-200/70 bg-emerald-50/80 px-3 py-2 text-sm font-medium text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
             {t("manualTransferDiscountApplied", { amount: transferAmountLabel })}
