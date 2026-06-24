@@ -4,7 +4,8 @@
     "tagline": "Professional receipt, payment & invoice management",
     "description": "Saudi platform to digitize receipt vouchers, payment vouchers, and non-tax invoices for small businesses.",
     "madeIn": "Made in Saudi Arabia 🇸🇦",
-    "copyright": "All rights reserved."
+    "copyright": "All rights reserved.",
+    "commergioAttribution": "A system by Commergio for Technology and Business Development"
   },
   "common": {
     "close": "Close"

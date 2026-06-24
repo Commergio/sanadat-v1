@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
-import { SUPPORT_EMAIL, SUPPORT_PHONE_DISPLAY, SUPPORT_WHATSAPP_E164 } from "@/lib/constants";
+import { SUPPORT_EMAIL, SUPPORT_CONTACT_PHONES } from "@/lib/constants";
 export async function MarketingFooter() {
   const t = await getTranslations("footer");
   const tApp = await getTranslations("app");
@@ -111,17 +111,23 @@ export async function MarketingFooter() {
                   <span dir="ltr" className="text-start">{SUPPORT_EMAIL}</span>
                 </a>
               </li>
-              <li>
-                <a
-                  href={`https://wa.me/${SUPPORT_WHATSAPP_E164}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span dir="ltr">{SUPPORT_PHONE_DISPLAY}</span>
-                </a>
-              </li>
+              {SUPPORT_CONTACT_PHONES.map((phone) => (
+                <li key={phone.e164}>
+                  <a
+                    href={
+                      phone.whatsapp
+                        ? `https://wa.me/${phone.e164}`
+                        : `tel:+${phone.e164}`
+                    }
+                    target={phone.whatsapp ? "_blank" : undefined}
+                    rel={phone.whatsapp ? "noopener noreferrer" : undefined}
+                    className="flex items-start gap-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span dir="ltr">{phone.display}</span>
+                  </a>
+                </li>
+              ))}
               <li className="flex items-start gap-3 text-sm text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <span>{t("contactHours")}</span>
@@ -132,8 +138,9 @@ export async function MarketingFooter() {
 
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
           <div className="flex flex-col items-center gap-2 sm:items-start">
-            <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} {tApp("name")}. {tApp("copyright")}
+            <p className="text-xs text-muted-foreground text-center sm:text-start">
+              © {new Date().getFullYear()} {tApp("name")} · {tApp("commergioAttribution")}.{" "}
+              {tApp("copyright")}
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-xs text-muted-foreground">

@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { StaticPageShell } from "@/components/marketing/static-page-shell";
 import { Card, CardContent } from "@/components/ui/card";
-import { SUPPORT_WHATSAPP_E164 } from "@/lib/constants";
+import { SUPPORT_CONTACT_PHONES } from "@/lib/constants";
 
 export default async function ContactPage() {
   const t = await getTranslations("staticPages.contact");
@@ -28,17 +28,24 @@ export default async function ContactPage() {
           </div>
           <div className="flex items-start gap-3">
             <Phone className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            <div>
+            <div className="space-y-1">
               <p className="font-medium">{t("phoneLabel")}</p>
-              <a
-                href={`https://wa.me/${SUPPORT_WHATSAPP_E164}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
-                dir="ltr"
-              >
-                {t("phoneValue")}
-              </a>
+              {SUPPORT_CONTACT_PHONES.map((phone) => (
+                <a
+                  key={phone.e164}
+                  href={
+                    phone.whatsapp
+                      ? `https://wa.me/${phone.e164}`
+                      : `tel:+${phone.e164}`
+                  }
+                  target={phone.whatsapp ? "_blank" : undefined}
+                  rel={phone.whatsapp ? "noopener noreferrer" : undefined}
+                  className="block text-sm text-primary hover:underline"
+                  dir="ltr"
+                >
+                  {phone.display}
+                </a>
+              ))}
             </div>
           </div>
           <div className="flex items-start gap-3">
