@@ -6,8 +6,8 @@ export const SUBSCRIPTION_PERIOD = "yearly";
 
 /** Official support email and phone numbers (Commergio / Sanadat). */
 export const SUPPORT_EMAIL = "tech@commergio.com";
-export const SUPPORT_WHATSAPP_E164 = "966567395986";
-export const SUPPORT_PHONE_DISPLAY = "+966 567395986";
+export const SUPPORT_WHATSAPP_E164 = "966561370827";
+export const SUPPORT_PHONE_DISPLAY = "+966 561370827";
 export const SUPPORT_PHONE_2_E164 = "966562270319";
 export const SUPPORT_PHONE_2_DISPLAY = "+966 562270319";
 
