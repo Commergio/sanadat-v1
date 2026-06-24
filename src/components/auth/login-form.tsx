@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,14 @@ import {
   useAuthRedirectUrl,
 } from "@/lib/auth/client";
 import { isSupabaseConfigured } from "@/lib/env";
+import {
+  handleAutofillAnimation,
+  mergeInputRefs,
+  syncFormFieldsFromDom,
+} from "@/lib/forms/autofill-sync";
+
+const LOGIN_EMAIL_ID = "login-email";
+const LOGIN_PASSWORD_ID = "login-password";
 
 export function LoginForm() {
   const t = useTranslations("auth");
@@ -42,10 +50,15 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(createLoginSchema(tVal)),
+    shouldUseNativeValidation: false,
   });
+
+  const emailField = register("email");
+  const passwordField = register("password");
 
   const onSubmit = async (data: LoginInput) => {
     setLoading(true);
@@ -73,19 +86,34 @@ export function LoginForm() {
     }
   };
 
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    syncFormFieldsFromDom(setValue, [
+      { name: "email", elementId: LOGIN_EMAIL_ID },
+      { name: "password", elementId: LOGIN_PASSWORD_ID },
+    ]);
+    void handleSubmit(onSubmit)(event);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form noValidate onSubmit={handleFormSubmit} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="email">{t("email")}</Label>
+        <Label htmlFor={LOGIN_EMAIL_ID}>{t("email")}</Label>
         <Input
-          id="email"
+          id={LOGIN_EMAIL_ID}
+          name="email"
           type="email"
           autoComplete="email"
+          inputMode="email"
           placeholder="name@company.com"
           dir="ltr"
           className="text-start"
           disabled={loading}
-          {...register("email")}
+          onAnimationStart={handleAutofillAnimation(setValue, "email")}
+          onInput={(event) => {
+            setValue("email", event.currentTarget.value, { shouldDirty: true, shouldValidate: false });
+          }}
+          {...emailField}
+          ref={mergeInputRefs(emailField.ref)}
         />
         {errors.email && (
           <p className="text-xs text-destructive">{errors.email.message}</p>
@@ -94,19 +122,25 @@ export function LoginForm() {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password">{t("password")}</Label>
+          <Label htmlFor={LOGIN_PASSWORD_ID}>{t("password")}</Label>
           <Link href="/forgot-password" className="text-xs text-primary hover:underline">
             {t("forgotPassword")}
           </Link>
         </div>
         <Input
-          id="password"
+          id={LOGIN_PASSWORD_ID}
+          name="password"
           type="password"
           autoComplete="current-password"
           dir="ltr"
           className="text-start"
           disabled={loading}
-          {...register("password")}
+          onAnimationStart={handleAutofillAnimation(setValue, "password")}
+          onInput={(event) => {
+            setValue("password", event.currentTarget.value, { shouldDirty: true, shouldValidate: false });
+          }}
+          {...passwordField}
+          ref={mergeInputRefs(passwordField.ref)}
         />
         {errors.password && (
           <p className="text-xs text-destructive">{errors.password.message}</p>

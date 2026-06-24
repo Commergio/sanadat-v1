@@ -972,3 +972,16 @@ body.pdf-exporting .a4-document[dir="ltr"] {
     print-color-adjust: exact;
   }
 }
+
+/* Detect WebKit autofill so React Hook Form can sync the displayed value. */
+@keyframes sanadat-autofill-start {
+  from {
+  }
+  to {
+  }
+}
+
+input:-webkit-autofill {
+  animation-name: sanadat-autofill-start;
+  animation-duration: 0.01s;
+}

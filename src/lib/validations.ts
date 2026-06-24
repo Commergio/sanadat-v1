@@ -4,7 +4,7 @@ type T = (key: string) => string;
 
 export const createLoginSchema = (t: T) =>
   z.object({
-    email: z.string().email(t("emailInvalid")),
+    email: z.string().trim().email(t("emailInvalid")),
     password: z.string().min(6, t("passwordMin6")),
   });
 
