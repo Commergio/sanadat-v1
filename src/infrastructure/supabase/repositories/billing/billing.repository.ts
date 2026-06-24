@@ -533,9 +533,34 @@ export class BillingRepository implements BillingRepositoryPort {
     initiatedBy: string;
     manualPaymentRequestId: string;
     proofFilePath: string;
+    couponCode?: string | null;
+    couponId?: string | null;
+    originalAmount?: number | null;
+    discountAmount?: number | null;
   }): Promise<string> {
     const providerEventId = `manual_payment:${input.manualPaymentRequestId}`;
     const gatewayReference = `manual:${input.manualPaymentRequestId}`;
+
+    const metadata: Record<string, unknown> = {
+      plan_code: input.planCode,
+      billing_cycle: input.billingCycle,
+      initiated_by: input.initiatedBy,
+      manual_payment_request_id: input.manualPaymentRequestId,
+      proof_file_path: input.proofFilePath,
+    };
+
+    if (input.couponCode) {
+      metadata.coupon_code = input.couponCode;
+    }
+    if (input.couponId) {
+      metadata.coupon_id = input.couponId;
+    }
+    if (input.originalAmount != null) {
+      metadata.original_amount = input.originalAmount;
+    }
+    if (input.discountAmount != null) {
+      metadata.discount_amount = input.discountAmount;
+    }
 
     const { data, error } = await this.writeClient
       .from("payments")
@@ -551,13 +576,7 @@ export class BillingRepository implements BillingRepositoryPort {
         paid_at: input.paidAt,
         period_start: input.periodStart,
         period_end: input.periodEnd,
-        metadata: {
-          plan_code: input.planCode,
-          billing_cycle: input.billingCycle,
-          initiated_by: input.initiatedBy,
-          manual_payment_request_id: input.manualPaymentRequestId,
-          proof_file_path: input.proofFilePath,
-        },
+        metadata,
       })
       .select("id")
       .single();

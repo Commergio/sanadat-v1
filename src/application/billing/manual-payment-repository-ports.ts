@@ -13,6 +13,10 @@ export interface ManualPaymentRepositoryPort {
       planCode: string;
       billingCycle: "yearly";
       proofFilePath: string;
+      couponCode?: string | null;
+      couponId?: string | null;
+      originalAmount?: number | null;
+      discountAmount?: number | null;
     }
   ): Promise<ManualPaymentRequestModel>;
   listForPlatform(input: {

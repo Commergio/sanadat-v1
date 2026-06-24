@@ -1,19 +1,29 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Building2, Loader2, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SUBSCRIPTION_PRICE } from "@/lib/constants";
+import { formatCurrency } from "@/lib/format";
 import { mapBillingError } from "@/lib/billing/client";
 import type { ManualPaymentRequestApi } from "@/hooks/use-billing";
+import type { CouponValidateResponse } from "@/hooks/use-coupons";
+import { SubscriptionCouponFields } from "@/components/subscription/subscription-coupon-fields";
 
 interface ManualBankTransferSectionProps {
   canManage: boolean;
   pendingRequest: ManualPaymentRequestApi | null;
   onSubmitted: () => Promise<void>;
+  couponInput: string;
+  setCouponInput: (value: string) => void;
+  appliedCoupon: CouponValidateResponse | null;
+  couponLoading: boolean;
+  couponError: string | null;
+  onApplyCoupon: () => void | Promise<void>;
+  onClearCoupon: () => void;
   /** When true, render inside the renew card without an outer Card wrapper. */
   embedded?: boolean;
 }
@@ -22,9 +32,17 @@ export function ManualBankTransferSection({
   canManage,
   pendingRequest,
   onSubmitted,
+  couponInput,
+  setCouponInput,
+  appliedCoupon,
+  couponLoading,
+  couponError,
+  onApplyCoupon,
+  onClearCoupon,
   embedded = false,
 }: ManualBankTransferSectionProps) {
   const t = useTranslations("subscription");
+  const locale = useLocale();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -33,9 +51,29 @@ export function ManualBankTransferSection({
 
   const showPending = Boolean(pendingRequest) || submitted;
 
+  const transferAmount = useMemo(() => {
+    if (appliedCoupon?.valid && appliedCoupon.final_amount != null) {
+      return appliedCoupon.final_amount;
+    }
+    return SUBSCRIPTION_PRICE;
+  }, [appliedCoupon]);
+
+  const transferAmountLabel = formatCurrency(transferAmount, locale);
+
+  const instructions = t("manualTransferInstructions", { amount: transferAmountLabel });
+
+  const handleApplyCoupon = useCallback(async () => {
+    await onApplyCoupon();
+  }, [onApplyCoupon]);
+
   const handleSubmit = useCallback(async () => {
     if (!file) {
       setError(t("manualTransferFileRequired"));
+      return;
+    }
+
+    if (couponInput.trim() && !appliedCoupon?.valid) {
+      setError(t("manualTransferCouponApplyRequired"));
       return;
     }
 
@@ -46,8 +84,11 @@ export function ManualBankTransferSection({
       form.append("proof", file);
       form.append("plan_code", "sanadat_annual");
       form.append("billing_cycle", "yearly");
-      form.append("amount", String(SUBSCRIPTION_PRICE));
+      form.append("amount", String(transferAmount));
       form.append("currency", "SAR");
+      if (appliedCoupon?.valid && appliedCoupon.coupon_code) {
+        form.append("coupon_code", appliedCoupon.coupon_code);
+      }
 
       const res = await fetch("/api/billing/manual-payment", {
         method: "POST",
@@ -68,6 +109,7 @@ export function ManualBankTransferSection({
 
       setSubmitted(true);
       setFile(null);
+      onClearCoupon();
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -78,13 +120,41 @@ export function ManualBankTransferSection({
     } finally {
       setSubmitting(false);
     }
-  }, [file, onSubmitted, t]);
+  }, [
+    appliedCoupon,
+    couponInput,
+    file,
+    onClearCoupon,
+    onSubmitted,
+    t,
+    transferAmount,
+  ]);
 
   const body = (
     <div className="space-y-4">
+      {canManage && !showPending && (
+        <SubscriptionCouponFields
+          locale={locale}
+          couponInput={couponInput}
+          setCouponInput={setCouponInput}
+          appliedCoupon={appliedCoupon}
+          couponLoading={couponLoading}
+          couponError={couponError}
+          onApply={handleApplyCoupon}
+          onClear={onClearCoupon}
+          disabled={submitting}
+          inputId="manual-transfer-coupon-code"
+        />
+      )}
+
       <div className="rounded-lg border border-dashed border-border/80 bg-muted/20 p-4 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">{t("manualTransferInstructionsTitle")}</p>
-        <p className="mt-2 whitespace-pre-line">{t("manualTransferInstructions")}</p>
+        <p className="mt-2 whitespace-pre-line">{instructions}</p>
+        {appliedCoupon?.valid && (
+          <p className="mt-3 rounded-md border border-emerald-200/70 bg-emerald-50/80 px-3 py-2 text-sm font-medium text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
+            {t("manualTransferDiscountApplied", { amount: transferAmountLabel })}
+          </p>
+        )}
       </div>
 
       {showPending && (

@@ -1,8 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isServiceRoleConfigured } from "@/lib/env";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
-import { ActivityLogRepository, BillingRepository, ManualPaymentRepository } from "@/infrastructure/supabase/repositories";
+import { ActivityLogRepository, BillingRepository, CouponRepository, ManualPaymentRepository } from "@/infrastructure/supabase/repositories";
+import { buildCouponUseCases } from "@/application/coupons/use-cases";
 import { buildManualPaymentUseCases } from "./manual-payment-use-cases";
+
+function buildCoupons(readClient: SupabaseClient, writeClient: SupabaseClient) {
+  const couponRepository = new CouponRepository(readClient, writeClient);
+  return buildCouponUseCases({ repository: couponRepository });
+}
 
 function buildApp(readClient: SupabaseClient, writeClient: SupabaseClient) {
   const billingRepository = new BillingRepository(readClient, writeClient);
@@ -10,12 +16,14 @@ function buildApp(readClient: SupabaseClient, writeClient: SupabaseClient) {
   const activityLog = isServiceRoleConfigured()
     ? new ActivityLogRepository(writeClient)
     : undefined;
+  const coupons = isServiceRoleConfigured() ? buildCoupons(readClient, writeClient) : undefined;
 
   return buildManualPaymentUseCases({
     manualPaymentRepository,
     billingRepository,
     activityLog,
     serviceRoleClient: writeClient,
+    coupons,
   });
 }
 

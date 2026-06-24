@@ -1,4 +1,6 @@
 import type { ActivityLogPort } from "@/application/documents";
+import type { CouponDiscountBreakdown } from "@/application/coupons/types";
+import type { buildCouponUseCases } from "@/application/coupons/use-cases";
 import { notifyAccountActivated } from "@/application/notifications/account-activated";
 import { RepositoryError } from "@/application/shared/errors";
 import { UseCaseError } from "@/application/shared/use-case-error";
@@ -39,11 +41,14 @@ function assertCanSubmitManualPayment(ctx: TenantContext): void {
   }
 }
 
+type CouponCheckoutService = ReturnType<typeof buildCouponUseCases>;
+
 export function buildManualPaymentUseCases(deps: {
   manualPaymentRepository: ManualPaymentRepositoryPort;
   billingRepository: BillingRepositoryPort;
   activityLog?: ActivityLogPort;
   serviceRoleClient: SupabaseClient;
+  coupons?: CouponCheckoutService;
 }) {
   return {
     async getTenantPendingRequest(ctx: TenantContext): Promise<ManualPaymentRequestModel | null> {
@@ -63,6 +68,7 @@ export function buildManualPaymentUseCases(deps: {
         currency: string;
         proofBuffer: Buffer;
         proofContentType: string;
+        couponCode?: string | null;
       }
     ): Promise<SubmitManualPaymentResult> {
       assertCanSubmitManualPayment(ctx);
@@ -74,8 +80,24 @@ export function buildManualPaymentUseCases(deps: {
       if (input.billingCycle !== plan.billingCycle) {
         throw new UseCaseError("VALIDATION", "Only yearly billing_cycle is supported");
       }
-      if (Math.abs(input.amount - plan.amount) > 0.01) {
-        throw new UseCaseError("VALIDATION", "Amount does not match plan price");
+
+      let couponBreakdown: CouponDiscountBreakdown | null = null;
+      const normalizedCoupon = input.couponCode?.trim().toUpperCase() ?? "";
+
+      if (normalizedCoupon) {
+        if (!deps.coupons) {
+          throw new UseCaseError("NOT_IMPLEMENTED", "Coupon validation is not configured");
+        }
+        couponBreakdown = await deps.coupons.validateForCheckoutByCode(ctx, {
+          code: normalizedCoupon,
+          planCode: input.planCode,
+          billingCycle: input.billingCycle,
+        });
+      }
+
+      const expectedAmount = couponBreakdown?.finalAmount ?? plan.amount;
+      if (Math.abs(input.amount - expectedAmount) > 0.01) {
+        throw new UseCaseError("VALIDATION", "Amount does not match the expected subscription price");
       }
 
       try {
@@ -118,6 +140,10 @@ export function buildManualPaymentUseCases(deps: {
           planCode: input.planCode,
           billingCycle: input.billingCycle,
           proofFilePath,
+          couponCode: couponBreakdown?.couponCode ?? null,
+          couponId: couponBreakdown?.couponId ?? null,
+          originalAmount: couponBreakdown?.originalAmount ?? null,
+          discountAmount: couponBreakdown?.discountAmount ?? null,
         });
 
         return { requestId: created.id, status: created.status };
@@ -194,7 +220,39 @@ export function buildManualPaymentUseCases(deps: {
           initiatedBy: initiatedBy ?? ctx.userId,
           manualPaymentRequestId: request.id,
           proofFilePath: request.proofFilePath,
+          couponCode: request.couponCode,
+          couponId: request.couponId,
+          originalAmount: request.originalAmount,
+          discountAmount: request.discountAmount,
         });
+
+        if (
+          request.couponId &&
+          request.couponCode &&
+          request.originalAmount != null &&
+          request.discountAmount != null &&
+          deps.coupons
+        ) {
+          const breakdown: CouponDiscountBreakdown = {
+            valid: true,
+            couponId: request.couponId,
+            couponCode: request.couponCode,
+            discountType: "fixed_amount",
+            discountValue: request.discountAmount,
+            originalAmount: request.originalAmount,
+            discountAmount: request.discountAmount,
+            finalAmount: request.amount,
+            currency: request.currency,
+            message: "Coupon applied",
+          };
+          await deps.coupons.recordRedemptionForPayment({
+            companyId: request.companyId,
+            redeemedBy: initiatedBy ?? ctx.userId,
+            breakdown,
+            paymentId,
+            subscriptionId: subscription.id,
+          });
+        }
 
         await deps.billingRepository.activateOrExtendSubscription({
           subscriptionId: subscription.id,

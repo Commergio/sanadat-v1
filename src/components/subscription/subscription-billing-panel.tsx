@@ -16,6 +16,7 @@ import { SUBSCRIPTION_PRICE } from "@/lib/constants";
 import { daysUntil } from "@/lib/utils";
 import { ManualBankTransferSection } from "@/components/subscription/manual-bank-transfer-section";
 import { InvitationCodeSection } from "@/components/subscription/invitation-code-section";
+import { SubscriptionCouponFields } from "@/components/subscription/subscription-coupon-fields";
 import type { BillingPaymentApi, BillingSubscriptionApi } from "@/lib/billing/client";
 import { cn } from "@/lib/utils";
 import type { PaymentStatus, SubscriptionStatus } from "@/lib/types";
@@ -252,6 +253,13 @@ export function SubscriptionBillingPanel() {
         canManage={canManage}
         pendingRequest={pendingManualRequest}
         onSubmitted={refresh}
+        couponInput={couponInput}
+        setCouponInput={setCouponInput}
+        appliedCoupon={appliedCoupon}
+        couponLoading={couponLoading}
+        couponError={couponError}
+        onApplyCoupon={handleApplyCoupon}
+        onClearCoupon={clearCoupon}
       />
 
       <InvitationCodeSection canManage={canManage} onApplied={refresh} />
@@ -302,73 +310,17 @@ export function SubscriptionBillingPanel() {
             <>
               <p className="text-sm text-muted-foreground">{t("checkoutHintMoyasar")}</p>
 
-              <div className="rounded-lg border border-border/80 bg-muted/20 p-4 space-y-3">
-                <p className="font-medium text-foreground">{t("couponSectionTitle")}</p>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-                  <div className="flex-1 space-y-1">
-                    <label htmlFor="coupon-code" className="text-xs text-muted-foreground">
-                      {t("couponCodeLabel")}
-                    </label>
-                    <input
-                      id="coupon-code"
-                      dir="ltr"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 font-mono text-sm uppercase"
-                      value={couponInput}
-                      disabled={couponLoading || checkoutLoading}
-                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                      placeholder={t("couponCodePlaceholder")}
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      disabled={couponLoading || checkoutLoading || !couponInput.trim()}
-                      onClick={() => void handleApplyCoupon()}
-                    >
-                      {couponLoading ? (
-                        <>
-                          <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                          {t("couponApplying")}
-                        </>
-                      ) : (
-                        t("couponApply")
-                      )}
-                    </Button>
-                    {appliedCoupon?.valid && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={couponLoading || checkoutLoading}
-                        onClick={clearCoupon}
-                      >
-                        {t("couponClear")}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {couponError && (
-                  <p className="text-sm text-destructive">{couponError}</p>
-                )}
-
-                {appliedCoupon?.valid && (
-                  <div className="grid gap-2 rounded-md border border-emerald-200/70 bg-emerald-50/80 p-3 text-sm dark:border-emerald-900/50 dark:bg-emerald-950/30 sm:grid-cols-3">
-                    <DetailRow
-                      label={t("couponOriginalAmount")}
-                      value={formatCurrency(appliedCoupon.original_amount ?? 0, locale)}
-                    />
-                    <DetailRow
-                      label={t("couponDiscountAmount")}
-                      value={formatCurrency(appliedCoupon.discount_amount ?? 0, locale)}
-                    />
-                    <DetailRow
-                      label={t("couponFinalAmount")}
-                      value={formatCurrency(appliedCoupon.final_amount ?? 0, locale)}
-                    />
-                  </div>
-                )}
-              </div>
+              <SubscriptionCouponFields
+                locale={locale}
+                couponInput={couponInput}
+                setCouponInput={setCouponInput}
+                appliedCoupon={appliedCoupon}
+                couponLoading={couponLoading}
+                couponError={couponError}
+                onApply={handleApplyCoupon}
+                onClear={clearCoupon}
+                disabled={checkoutLoading}
+              />
 
               <Button
                 onClick={() => void handleStartCheckout()}

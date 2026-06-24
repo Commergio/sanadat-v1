@@ -78,6 +78,7 @@ export async function POST(request: Request) {
     const billingCycle = String(form.get("billing_cycle") ?? "").trim();
     const amountRaw = form.get("amount");
     const currency = String(form.get("currency") ?? "SAR").trim() || "SAR";
+    const couponCode = String(form.get("coupon_code") ?? "").trim() || undefined;
 
     if (!(proof instanceof File) || proof.size === 0) {
       return NextResponse.json(
@@ -113,6 +114,7 @@ export async function POST(request: Request) {
       currency,
       proofBuffer: buffer,
       proofContentType: contentType,
+      couponCode,
     });
 
     return NextResponse.json(result, { status: 201 });

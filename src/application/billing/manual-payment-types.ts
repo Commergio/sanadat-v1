@@ -10,6 +10,10 @@ export interface ManualPaymentRequestModel {
   currency: string;
   planCode: string;
   billingCycle: "yearly";
+  couponCode?: string | null;
+  couponId?: string | null;
+  originalAmount?: number | null;
+  discountAmount?: number | null;
   status: ManualPaymentStatus;
   adminNote: string | null;
   reviewedBy: string | null;

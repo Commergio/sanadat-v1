@@ -105,5 +105,9 @@ export interface BillingRepositoryPort {
     initiatedBy: string;
     manualPaymentRequestId: string;
     proofFilePath: string;
+    couponCode?: string | null;
+    couponId?: string | null;
+    originalAmount?: number | null;
+    discountAmount?: number | null;
   }): Promise<string>;
 }

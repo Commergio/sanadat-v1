@@ -211,15 +211,31 @@ export function buildCouponUseCases(deps: Deps) {
       paymentId: string,
       subscriptionId: string | null
     ): Promise<void> {
-      await deps.repository.createRedemption({
-        couponId: breakdown.couponId,
+      await this.recordRedemptionForPayment({
         companyId: ctx.companyId,
+        redeemedBy: ctx.userId,
+        breakdown,
         paymentId,
         subscriptionId,
-        redeemedBy: ctx.userId,
-        originalAmount: breakdown.originalAmount,
-        discountAmount: breakdown.discountAmount,
-        finalAmount: breakdown.finalAmount,
+      });
+    },
+
+    async recordRedemptionForPayment(input: {
+      companyId: string;
+      redeemedBy: string;
+      breakdown: CouponDiscountBreakdown;
+      paymentId: string;
+      subscriptionId: string | null;
+    }): Promise<void> {
+      await deps.repository.createRedemption({
+        couponId: input.breakdown.couponId,
+        companyId: input.companyId,
+        paymentId: input.paymentId,
+        subscriptionId: input.subscriptionId,
+        redeemedBy: input.redeemedBy,
+        originalAmount: input.breakdown.originalAmount,
+        discountAmount: input.breakdown.discountAmount,
+        finalAmount: input.breakdown.finalAmount,
       });
     },
   };

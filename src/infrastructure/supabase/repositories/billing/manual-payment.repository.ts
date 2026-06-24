@@ -21,6 +21,16 @@ function mapRequest(row: Row, companyName?: string | null): ManualPaymentRequest
     currency: String(row.currency ?? "SAR"),
     planCode: String(row.plan_code),
     billingCycle: (row.billing_cycle as "yearly") ?? "yearly",
+    couponCode: (row.coupon_code as string | null) ?? null,
+    couponId: (row.coupon_id as string | null) ?? null,
+    originalAmount:
+      row.original_amount != null && row.original_amount !== ""
+        ? Number(row.original_amount)
+        : null,
+    discountAmount:
+      row.discount_amount != null && row.discount_amount !== ""
+        ? Number(row.discount_amount)
+        : null,
     status: row.status as ManualPaymentStatus,
     adminNote: (row.admin_note as string | null) ?? null,
     reviewedBy: (row.reviewed_by as string | null) ?? null,
@@ -61,6 +71,10 @@ export class ManualPaymentRepository implements ManualPaymentRepositoryPort {
       planCode: string;
       billingCycle: "yearly";
       proofFilePath: string;
+      couponCode?: string | null;
+      couponId?: string | null;
+      originalAmount?: number | null;
+      discountAmount?: number | null;
     }
   ): Promise<ManualPaymentRequestModel> {
     const { data, error } = await this.writeClient
@@ -75,6 +89,10 @@ export class ManualPaymentRepository implements ManualPaymentRepositoryPort {
         plan_code: input.planCode,
         billing_cycle: input.billingCycle,
         proof_file_path: input.proofFilePath,
+        coupon_code: input.couponCode ?? null,
+        coupon_id: input.couponId ?? null,
+        original_amount: input.originalAmount ?? null,
+        discount_amount: input.discountAmount ?? null,
         status: "pending",
       })
       .select("*")
