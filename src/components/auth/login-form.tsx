@@ -100,7 +100,6 @@ export function LoginForm() {
         <Label htmlFor={LOGIN_EMAIL_ID}>{t("email")}</Label>
         <Input
           id={LOGIN_EMAIL_ID}
-          name="email"
           type="email"
           autoComplete="email"
           inputMode="email"
@@ -129,7 +128,6 @@ export function LoginForm() {
         </div>
         <Input
           id={LOGIN_PASSWORD_ID}
-          name="password"
           type="password"
           autoComplete="current-password"
           dir="ltr"
