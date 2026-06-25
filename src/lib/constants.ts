@@ -10,10 +10,13 @@ export const SUPPORT_WHATSAPP_E164 = "966561370827";
 export const SUPPORT_PHONE_DISPLAY = "+966 561370827";
 export const SUPPORT_PHONE_2_E164 = "966562270319";
 export const SUPPORT_PHONE_2_DISPLAY = "+966 562270319";
+export const SUPPORT_PHONE_3_E164 = "966567395986";
+export const SUPPORT_PHONE_3_DISPLAY = "+966 567395986";
 
 export const SUPPORT_CONTACT_PHONES = [
   { e164: SUPPORT_WHATSAPP_E164, display: SUPPORT_PHONE_DISPLAY, whatsapp: true },
   { e164: SUPPORT_PHONE_2_E164, display: SUPPORT_PHONE_2_DISPLAY, whatsapp: false },
+  { e164: SUPPORT_PHONE_3_E164, display: SUPPORT_PHONE_3_DISPLAY, whatsapp: false },
 ] as const;
 
 /** Max combined receipt + payment + invoice documents during trial. */
