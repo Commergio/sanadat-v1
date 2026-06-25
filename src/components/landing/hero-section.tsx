@@ -61,7 +61,13 @@ export function HeroSection() {
 
             <FadeUp delay={0.12}>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+                {t("title2")}
+              </p>
+              <p className="mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
                 {t("subtitle")}
+              </p>
+              <p className="mt-4 text-lg font-semibold text-foreground sm:text-xl">
+                {t("priceLine")}
               </p>
             </FadeUp>
 
